@@ -1,2 +1,2 @@
-# JaCoP-Release-Planner
+# Release-Planner
 Release planner project
