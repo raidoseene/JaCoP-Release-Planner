@@ -4,8 +4,8 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
@@ -15,20 +15,12 @@ public class Release {
 
     private String name;
     private int importance;
-    private List<Pair> capacity; // resource, capacity
+    private Map<Resource, Integer> capacity;
 
     Release(Resources resources) {
-        capacity = new ArrayList<Pair>();
+        capacity = new HashMap<>();
         for (Resource r : resources.getResourceList()) {
-            addCapacity(r, 0);
-        }
-    }
-    
-    Release(String name, Resources resources) {
-        this.name = name;
-        capacity = new ArrayList<Pair>();
-        for (Resource r : resources.getResourceList()) {
-            addCapacity(r, 0);
+            this.addResource(r);
         }
     }
     
@@ -37,7 +29,7 @@ public class Release {
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
     
     public void setImportance(int importance) {
@@ -48,11 +40,19 @@ public class Release {
         return this.importance;
     }
     
-    public void addCapacity(Resource r, int capacity) {
-        this.capacity.add(new Pair(r, capacity));
+    public void setCapacity(Resource r, int capacity) {
+        this.capacity.put(r, capacity);
     }
     
-    public void changeCapacity(Resource r, int capacity) {
-        this.capacity.get(this.capacity.indexOf(r)).setRight(capacity);
+    public int getCapacity(Resource r) {
+        return capacity.get(r);
+    }
+    
+    public void addResource(Resource r) {
+        capacity.put(r, 0);
+    }
+    
+    public void removeResource(Resource r) {
+        capacity.remove(r);
     }
 }

@@ -6,22 +6,29 @@
 package ee.raidoseene.releaseplanner.datamodel;
 
 /**
- * Made this class to fix errors and to make the project able to compile.
  * 
- * @author risto
+ * @author Raido Seene
  */
 public class Stakeholder {
     
-    Stakeholder() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+    private String name;
+    private int importance;
+    
+    Stakeholder() {};
 
-    Stakeholder(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void setName(String name) {
+        this.name = name;
     }
-
-    void setName(String name) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    
+    public String getName() {
+        return name;
     }
-
+    
+    public void setImportance(int importance) {
+        this.importance = importance;
+    }
+    
+    public int getImportance() {
+        return importance;
+    }
 }

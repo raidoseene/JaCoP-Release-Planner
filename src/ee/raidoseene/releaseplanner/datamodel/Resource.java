@@ -13,16 +13,12 @@ public class Resource {
     private String name;
     
     Resource() {}
-    
-    Resource(String name) {
-        this.name = name;
-    }
 
     public void setName(String name) {
         this.name = name;
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 }

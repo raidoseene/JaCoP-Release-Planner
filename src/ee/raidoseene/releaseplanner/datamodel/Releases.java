@@ -17,51 +17,34 @@ public class Releases {
     private List<Release> releaseContainer;
     private Resources resources;
 
-    Releases(List<String> defaultReleases, Resources resources) {
-        releaseContainer = new ArrayList<Release>();
+    Releases(Resources resources) {
+        releaseContainer = new ArrayList<>();
         this.resources = resources;
-        for (String r : defaultReleases) {
-            addRelease(r, resources);
-        }
     }
 
-    public void addRelease(Resources resources) {
-        releaseContainer.add(new Release(resources));
-    }
-    
-    public void addRelease(String name, Resources resources) {
-        releaseContainer.add(new Release(name, resources));
+    public Release addRelease() {
+        Release r = new Release(resources);
+        releaseContainer.add(r);
+        return r;
     }
 
-    public void removeRelease(int id) {
-        try {
-            releaseContainer.remove(this.getRelease(id));
-        } catch (Exception ex) {
-            Messenger.showWarning(ex, "Impossible to remove release");
-        }
-    }
-
-    public void setReleaseName(int id, String name) {
-        this.getRelease(id).setName(name);
-    }
-    
-    public void setReleaseImportance(int id, int importance) {
-        this.getRelease(id).setImportance(importance);
-    }
-    
-    public void setReleaseCapacity(int id, Resource res, int capacity) {
-        this.getRelease(id).changeCapacity(res, capacity);
+    public void removeRelease(Release r) {
+            releaseContainer.remove(r);
     }
 
     public List<Release> getReleaseList() {
-        List<Release> list = new ArrayList<Release>();
-        for (Release r : releaseContainer) {
-            list.add(r);
-        }
-        return list;
+        return releaseContainer;
     }
-
-    private Release getRelease(int id) {
-        return releaseContainer.get(id);
+    
+    public void removeResource(Resource r) {
+        for (Release rel : releaseContainer) {
+            rel.removeResource(r);
+        }
+    }
+    
+    public void addResource(Resource r) {
+        for (Release rel : releaseContainer) {
+            rel.addResource(r);
+        }
     }
 }
