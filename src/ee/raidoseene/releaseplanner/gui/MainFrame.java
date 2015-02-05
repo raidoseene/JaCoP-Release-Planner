@@ -1,60 +1,74 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package ee.raidoseene.releaseplanner.gui;
 
-import java.awt.Button;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.Toolkit;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
+import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 
 /**
  *
- * @author Raido Seene
+ * @author risto
  */
-public class MainFrame extends JFrame {
-
+public final class MainFrame extends JFrame {
+    
     private MainFrame() {
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        Dimension winSize = new Dimension((int) (screen.getWidth() * 0.7), (int) (screen.getHeight() * 0.8));
-        Dimension winMinSize = new Dimension(800, 600);
-
-        this.setLocation((int) ((screen.getWidth() - winSize.getWidth()) * 0.5), (int) ((screen.getHeight() - winSize.getHeight()) * 0.5));
-        this.setMinimumSize(winMinSize);
-        this.setSize(winSize);
-
+        Dimension size = new Dimension((int) (screen.width * 0.75f), (int) (screen.height * 0.8f));
+        this.setLocation((screen.width - size.width) >> 1, (screen.height - size.height) >> 1);
+        this.setMinimumSize(new Dimension(800, 600));
+        this.setSize(size);
+        
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        // Menu bar
-        this.setJMenuBar(null);
-
-        // Buttons
-        this.add(new Button("Vajuta!"));
+        this.setTitle("Release Planner");
+        
+        this.initContent();
+    }
+    
+    private void initContent() {
+        Container c = this.getContentPane();
+        c.setLayout(new GridLayout(1, 1));
+        
+        JTabbedPane tb = new JTabbedPane();
+        c.add(tb);
+        
+        FeaturesPanel featp = new FeaturesPanel();
+        tb.add(FeaturesPanel.TITLE_STRING, featp);
+        
+        ResourcesPanel resp = new ResourcesPanel();
+        tb.add(ResourcesPanel.TITLE_STRING, resp);
+        
+        ReleasesPanel relp = new ReleasesPanel();
+        tb.add(ReleasesPanel.TITLE_STRING, relp);
+        
+        StakeholdersPanel stakp = new StakeholdersPanel();
+        tb.add(StakeholdersPanel.TITLE_STRING, stakp);
+        
+        UrgValPanel urgvp = new UrgValPanel();
+        tb.add(UrgValPanel.TITLE_STRING, urgvp);
+        
+        SettingsPanel setp = new SettingsPanel();
+        tb.add(SettingsPanel.TITLE_STRING, setp);
     }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                } catch (Exception ex) {
-                    Messenger.showWarning(ex, null);
-                }
-
-                try {
-                    MainFrame window = new MainFrame();
-                    window.setVisible(true);
-                } catch (Exception ex) {
-                    Messenger.showError(ex, "Failed to initialize application:");
-                }
-            }
-        });
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception ex) {
+            Messenger.showWarning(ex, null);
+        }
+        
+        try {
+            MainFrame win = new MainFrame();
+            win.setVisible(true);
+        } catch (Exception ex) {
+            Messenger.showError(ex, "Failed to lauch application!");
+        }
     }
+    
 }

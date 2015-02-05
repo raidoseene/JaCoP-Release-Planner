@@ -13,9 +13,9 @@ import javax.swing.SwingUtilities;
  */
 public class Messenger implements Runnable {
 
-    private int type;
-    private Object object;
-    private String string;
+    private final int type;
+    private final Object object;
+    private final String string;
 
     private Messenger(int type, Object object, String string) {
         this.object = object;
@@ -26,7 +26,7 @@ public class Messenger implements Runnable {
     @Override
     public void run() {
         if (this.type == JOptionPane.ERROR_MESSAGE || this.type == JOptionPane.WARNING_MESSAGE) {
-            String message = null;
+            String message = new String();
 
             if (this.string != null) {
                 message = this.string;
