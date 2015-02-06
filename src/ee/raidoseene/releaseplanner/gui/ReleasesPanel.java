@@ -5,6 +5,10 @@
  */
 package ee.raidoseene.releaseplanner.gui;
 
+import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.datamodel.Release;
+import ee.raidoseene.releaseplanner.datamodel.Resource;
+import ee.raidoseene.releaseplanner.datamodel.Resources;
 import ee.raidoseene.releaseplanner.gui.utils.ContentListLayout;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanel;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanelListener;
@@ -15,6 +19,9 @@ import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.util.ArrayList;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -27,6 +34,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  *
@@ -62,7 +71,8 @@ public final class ReleasesPanel extends ScrollablePanel {
     }
 
     private void processAddEvent() {
-        ReleasesPanel.RPContent content = new ReleasesPanel.RPContent();
+        Release r = ProjectManager.getCurrentProject().getReleases().addRelease();
+        ReleasesPanel.RPContent content = new ReleasesPanel.RPContent(r);
         ContentPanel panel = new ContentPanel(content, true);
 
         this.scrollable.add(panel, this.scrollable.getComponentCount() - 1);
@@ -74,30 +84,61 @@ public final class ReleasesPanel extends ScrollablePanel {
 
     private final class RPContent extends JPanel implements ContentPanelListener {
 
+        private final Release release;
         private final JPanel cont1;
         private final JTextField name;
         private final JSpinner importance;
         private final JPanel cont2;
-        private final JTextField architecture, analysis, development, testing;
+        private final RPContent.RPCPanel panel;
         private final JRadioButton hours, days;
 
-        public RPContent() {
+        private RPContent(Release r) {
             this.setLayout(new ExtendableLayout(ExtendableLayout.VERTICAL, 10));
             this.setBorder(new EmptyBorder(10, 10, 10, 10));
 
+            this.release = r;
             this.cont1 = new JPanel();
             this.cont1.setBorder(new EmptyBorder(0, 0, 0, 110));
             this.cont1.setLayout(new BorderLayout(25, 25));
             this.add(this.cont1);
 
-            this.name = new JTextField();
+            this.name = new JTextField(r.getName());
+            this.name.addFocusListener(new FocusListener() {
+
+                @Override
+                public void focusGained(FocusEvent fe) {
+                }
+
+                @Override
+                public void focusLost(FocusEvent fe) {
+                    try {
+                        RPContent.this.release.setName(RPContent.this.name.getText());
+                    } catch (Exception ex) {
+                        Messenger.showError(ex, null);
+                    }
+                    RPContent.this.name.setText(RPContent.this.release.getName());
+                }
+            });
             this.cont1.add(BorderLayout.CENTER, this.name);
 
             Container c = new Container();
             c.setLayout(new BorderLayout(5, 5));
             this.cont1.add(BorderLayout.LINE_END, c);
 
-            this.importance = new JSpinner(new SpinnerNumberModel(0, 0, 10, 1));
+            this.importance = new JSpinner(new SpinnerNumberModel(r.getImportance(), 1, 9, 1));
+            this.importance.addChangeListener(new ChangeListener() {
+
+                @Override
+                public void stateChanged(ChangeEvent ce) {
+                    try {
+                        Object o = RPContent.this.importance.getValue();
+                        RPContent.this.release.setImportance((Integer) o);
+                    } catch (Exception ex) {
+                        Messenger.showError(ex, null);
+                    }
+                    RPContent.this.importance.setValue(RPContent.this.release.getImportance());
+                }
+            });
             c.add(BorderLayout.CENTER, this.importance);
             c.add(BorderLayout.LINE_END, new JLabel("Importance"));
 
@@ -105,27 +146,10 @@ public final class ReleasesPanel extends ScrollablePanel {
             this.cont2.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), "Resource capacity"));
             this.cont2.setLayout(new BorderLayout());
 
-            JPanel p = new JPanel(new GridLayout(4, 2, 10, 2));
-            p.setBorder(new EmptyBorder(5, 5, 5, 5));
-            this.cont2.add(BorderLayout.LINE_START, p);
+            this.panel = new RPContent.RPCPanel();
+            this.cont2.add(BorderLayout.LINE_START, this.panel);
 
-            this.architecture = new JTextField();
-            p.add(this.architecture);
-            p.add(new JLabel("Architecture (h)"));
-
-            this.analysis = new JTextField();
-            p.add(this.analysis);
-            p.add(new JLabel("Analysis (h)"));
-
-            this.development = new JTextField();
-            p.add(this.development);
-            p.add(new JLabel("Development (h)"));
-
-            this.testing = new JTextField();
-            p.add(this.testing);
-            p.add(new JLabel("Testing (h)"));
-
-            p = new JPanel(new BorderLayout());
+            JPanel p = new JPanel(new BorderLayout());
             p.setBorder(new EmptyBorder(5, 5, 5, 5));
             this.cont2.add(BorderLayout.LINE_END, p);
 
@@ -169,6 +193,56 @@ public final class ReleasesPanel extends ScrollablePanel {
                 this.remove(this.cont2);
 
                 ReleasesPanel.this.scrollable.contentUpdated();
+            }
+        }
+        
+        private final class RPCPanel extends JPanel {
+            
+            private final ArrayList<JTextField> values;
+            
+            private RPCPanel() {
+                Resources resources = ProjectManager.getCurrentProject().getResources();
+                int count = resources.getResourceCount();
+                
+                this.values = new ArrayList<>(count);
+                this.setLayout(new GridLayout(count, 2, 10, 2));
+                this.setBorder(new EmptyBorder(5, 5, 5, 5));
+                
+                FocusListener listener = new FocusListener() {
+
+                    @Override
+                    public void focusGained(FocusEvent fe) {
+                    }
+
+                    @Override
+                    public void focusLost(FocusEvent fe) {
+                        try {
+                            Object source = fe.getSource();
+                            int index = RPCPanel.this.values.indexOf(source);
+                            Resource r = ProjectManager.getCurrentProject().getResources().getResource(index);
+                            JTextField tf = RPCPanel.this.values.get(index);
+                            try {
+                                RPContent.this.release.setCapacity(r, Integer.parseInt(tf.getText()));
+                            } catch (Exception e2) {
+                                Messenger.showError(e2, null);
+                            }
+                            tf.setText(Integer.toString(RPContent.this.release.getCapacity(r)));
+                        } catch (Exception ex) {
+                            Messenger.showError(ex, null);
+                        }
+                    }
+                };
+                
+                for (int i = 0; i < count; i++) {
+                    Resource r = resources.getResource(i);
+                    int value = RPContent.this.release.getCapacity(r);
+                    JTextField text = new JTextField(Integer.toString(value));
+                    text.addFocusListener(listener);
+                    this.values.add(text);
+                    this.add(text);
+                    
+                    this.add(new JLabel(r.getName() + " (h)"));
+                }
             }
         }
 

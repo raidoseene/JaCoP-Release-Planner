@@ -5,6 +5,7 @@
  */
 package ee.raidoseene.releaseplanner.gui.utils;
 
+import java.awt.Component;
 import java.awt.Container;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
@@ -17,6 +18,15 @@ import javax.swing.SwingUtilities;
  * @author risto
  */
 public class ScrollablePanel extends JPanel {
+    
+    @Override
+    public void setEnabled(boolean enable) {
+        super.setEnabled(enable);
+        
+        for (Component c : this.getComponents()) {
+            c.setEnabled(enable);
+        }
+    }
 
     public void contentUpdated() {
         Container parent = this.getParent();

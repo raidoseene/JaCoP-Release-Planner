@@ -83,7 +83,7 @@ public final class StakeholdersPanel extends ScrollablePanel {
             c.setLayout(new BorderLayout(5, 5));
             this.add(BorderLayout.LINE_END, c);
             
-            this.importance = new JSpinner(new SpinnerNumberModel(0, 0, 10, 1));
+            this.importance = new JSpinner(new SpinnerNumberModel(1, 1, 9, 1));
             c.add(BorderLayout.CENTER, this.importance);
             c.add(BorderLayout.LINE_END, new JLabel("Importance"));
         }

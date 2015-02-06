@@ -72,6 +72,16 @@ public final class ContentPanel extends JPanel {
         this.add(this.content);
     }
     
+    @Override
+    public void setEnabled(boolean enable) {
+        super.setEnabled(enable);
+        this.content.setEnabled(enable);
+        this.close.setEnabled(enable);
+        if (this.expand != null) {
+            this.expand.setEnabled(enable);
+        }
+    }
+    
     public Component getContent() {
         return this.content;
     }
@@ -180,4 +190,5 @@ public final class ContentPanel extends JPanel {
         }
 
     }
+    
 }

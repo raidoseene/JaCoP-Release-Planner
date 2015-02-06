@@ -11,48 +11,66 @@ import java.util.Map;
  *
  * @author Raido Seene
  */
-public class Release {
+public class Release extends NamedObject {
 
-    private String name;
+    private final Map<Resource, Integer> capacities;
     private int importance;
-    private Map<Resource, Integer> capacity;
 
-    Release(Resources resources) {
-        capacity = new HashMap<>();
-        for (Resource r : resources.getResourceList()) {
-            this.addResource(r);
+    Release() {
+        this.capacities = new HashMap<>();
+        this.importance = 1;
+    }
+
+    /*Release(Resources resources) {
+     capacity = new HashMap<>();
+     for (Resource r : resources.getResourceList()) {
+     this.addResource(r);
+     }
+     }*/
+
+    public void setImportance(int importance) {
+        if (importance > 0 && importance < 10) {
+            this.importance = importance;
+        } else {
+            throw new ArrayIndexOutOfBoundsException(importance);
         }
     }
-    
-    public void setName(String name) {
-        this.name = name;
-    }
 
-    public String getName() {
-        return name;
-    }
-    
-    public void setImportance(int importance) {
-        this.importance = importance;
-    }
-    
     public int getImportance() {
         return this.importance;
     }
-    
+
     public void setCapacity(Resource r, int capacity) {
-        this.capacity.put(r, capacity);
+        if (capacity > 0) {
+            this.capacities.put(r, capacity);
+        } else {
+            this.capacities.remove(r);
+        }
     }
-    
+
     public int getCapacity(Resource r) {
-        return capacity.get(r);
+        Integer value = this.capacities.get(r);
+        if (value != null) {
+            return value;
+        }
+        
+        return 0;
     }
     
-    public void addResource(Resource r) {
+    boolean removeCapacity(Resource r) {
+        return (this.capacities.remove(r) != null);
+    }
+    
+    boolean hasCapacity(Resource r) {
+        return this.capacities.containsKey(r);
+    }
+
+    /*public void addResource(Resource r) {
         capacity.put(r, 0);
     }
-    
+
     public void removeResource(Resource r) {
         capacity.remove(r);
-    }
+    }*/
+    
 }

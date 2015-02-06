@@ -4,7 +4,6 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
-import ee.raidoseene.releaseplanner.gui.Messenger;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,32 +13,44 @@ import java.util.List;
  */
 public class Resources {
 
-    private List<Resource> resourceContainer;
-    private Releases releases;
+    private final List<Resource> resourceContainer;
+    //private Releases releases;
 
-    Resources(List<String> defaultResources, Releases releases) {
-        resourceContainer = new ArrayList<>();
-        this.releases = releases;
-        for (String r : defaultResources) {
-            Resource res = new Resource();
-            resourceContainer.add(res);
-            res.setName(r);
-        }
+    Resources() {
+        this.resourceContainer = new ArrayList<>();
     }
 
+    /*Resources(List<String> defaultResources, Releases releases) {
+     resourceContainer = new ArrayList<>();
+     this.releases = releases;
+     for (String r : defaultResources) {
+     Resource res = new Resource();
+     resourceContainer.add(res);
+     res.setName(r);
+     }
+     }*/
     public Resource addResource() {
         Resource r = new Resource();
-        resourceContainer.add(r);
-        releases.addResource(r);
+        this.resourceContainer.add(r);
+        //releases.addResource(r);
         return r;
     }
 
     public void removeResource(Resource r) {
-            resourceContainer.remove(r);
-            releases.removeResource(r);
+        // TODO: make sure it's not in use
+        resourceContainer.remove(r);
+        //releases.removeResource(r);
     }
 
-    public List<Resource> getResourceList() {
-        return resourceContainer;
+    /*public List<Resource> getResourceList() {
+     return resourceContainer;
+     }*/
+    public Resource getResource(int index) {
+        return this.resourceContainer.get(index);
     }
+
+    public int getResourceCount() {
+        return this.resourceContainer.size();
+    }
+
 }

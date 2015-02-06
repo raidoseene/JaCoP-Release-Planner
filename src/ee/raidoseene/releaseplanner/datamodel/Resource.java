@@ -8,17 +8,9 @@ package ee.raidoseene.releaseplanner.datamodel;
  *
  * @author Raido Seene
  */
-public class Resource {
+public class Resource extends NamedObject {
 
-    private String name;
-    
-    Resource() {}
-
-    public void setName(String name) {
-        this.name = name;
+    Resource() {
     }
 
-    public String getName() {
-        return name;
-    }
 }

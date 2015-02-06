@@ -5,6 +5,8 @@
  */
 package ee.raidoseene.releaseplanner.gui;
 
+import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.datamodel.Resource;
 import ee.raidoseene.releaseplanner.gui.utils.ContentListLayout;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanel;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanelListener;
@@ -12,6 +14,8 @@ import ee.raidoseene.releaseplanner.gui.utils.ScrollablePanel;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -38,7 +42,7 @@ public final class ResourcesPanel extends JPanel {
         
         this.addButton = new JButton("Add new resource");
         this.addButton.addActionListener(new ActionListener() {
-
+            
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -52,7 +56,8 @@ public final class ResourcesPanel extends JPanel {
     }
     
     private void processAddEvent() {
-        ResourcesPanel.RPContent content = new ResourcesPanel.RPContent();
+        Resource r = ProjectManager.getCurrentProject().getResources().addResource();
+        ResourcesPanel.RPContent content = new ResourcesPanel.RPContent(r);
         ContentPanel panel = new ContentPanel(content, false);
         
         this.scrollable.add(panel, this.scrollable.getComponentCount() - 1);
@@ -61,31 +66,50 @@ public final class ResourcesPanel extends JPanel {
         
         panel.addContentPanelListener(content);
     }
-
+    
     private final class RPContent extends JPanel implements ContentPanelListener {
         
+        private final Resource resource;
         private final JTextField name;
         
-        private RPContent() {
+        private RPContent(Resource r) {
             this.setBorder(new EmptyBorder(10, 10, 10, 80));
             this.setLayout(new GridLayout(1, 1));
             
-            this.name = new JTextField();
+            this.resource = r;
+            this.name = new JTextField(r.getName());
+            this.name.addFocusListener(new FocusListener() {
+
+                @Override
+                public void focusGained(FocusEvent fe) {
+                }
+
+                @Override
+                public void focusLost(FocusEvent fe) {
+                    try {
+                        RPContent.this.resource.setName(RPContent.this.name.getText());
+                    } catch (Exception ex) {
+                        Messenger.showError(ex, null);
+                    }
+                    RPContent.this.name.setText(RPContent.this.resource.getName());
+                }
+            });
             this.add(this.name);
         }
-
+        
         @Override
         public void contentPanelClosed(ContentPanel source) {
             ResourcesPanel.this.scrollable.remove(source);
             ResourcesPanel.this.scrollable.contentUpdated();
         }
-
+        
         @Override
         public void contentPanelExpanded(ContentPanel source) {
         }
-
+        
         @Override
         public void contentPanelCompressed(ContentPanel source) {
         }
+        
     }
 }
