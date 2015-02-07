@@ -4,20 +4,20 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
-import java.util.List;
+import java.io.Serializable;
 
 /**
  *
  * @author Raido Seene
  */
-public class Project extends NamedObject {
+public class Project extends NamedObject implements Serializable {
 
     private final Resources resources;
     private final Releases releases;
     //private Stakeholders stakeholders;
 
-    public Project() {
-        //super(name);
+    public Project(String name) {
+        super(name);
         
         this.resources = new Resources(this);
         this.releases = new Releases(this);

@@ -5,11 +5,13 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
+
 /**
  *
  * @author risto
  */
-public abstract class NamedObject {
+public abstract class NamedObject implements Serializable {
 
     private String name;
 

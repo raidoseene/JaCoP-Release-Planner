@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  *
  * @author Raido Seene
  */
-public class Releases extends ProjectElement {
+public class Releases extends ProjectElement implements Serializable {
 
     private final List<Release> releaseContainer;
     //private Resources resources;

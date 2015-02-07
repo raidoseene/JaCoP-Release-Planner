@@ -29,12 +29,12 @@ import javax.swing.border.EmptyBorder;
  *
  * @author risto
  */
-public final class ResourcesPanel extends JPanel implements Frontend {
-    
+public final class ResourcesPanel extends JPanel {
+
     public static final String TITLE_STRING = "Resources";
     private final ScrollablePanel scrollable;
     private final JButton addButton;
-    
+
     public ResourcesPanel() {
         this.setLayout(new GridLayout(1, 1));
         this.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -42,10 +42,24 @@ public final class ResourcesPanel extends JPanel implements Frontend {
         this.add(new JScrollPane(this.scrollable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
         this.scrollable.setBorder(new EmptyBorder(10, 10, 10, 10));
         this.scrollable.setLayout(new ContentListLayout());
-        
+
+        Project project = ProjectManager.getCurrentProject();
+        if (project != null) {
+            Resources resources = project.getResources();
+            int count = resources.getResourceCount();
+
+            for (int i = 0; i < count; i++) {
+                Resource r = resources.getResource(i);
+                ResourcesPanel.RPContent content = new ResourcesPanel.RPContent(r);
+                ContentPanel panel = new ContentPanel(content, false);
+                panel.addContentPanelListener(content);
+                this.scrollable.add(panel);
+            }
+        }
+
         this.addButton = new JButton("Add new resource");
         this.addButton.addActionListener(new ActionListener() {
-            
+
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -57,56 +71,36 @@ public final class ResourcesPanel extends JPanel implements Frontend {
         });
         this.scrollable.add(this.addButton);
     }
-    
+
     private void processAddEvent() {
         Resource r = ProjectManager.getCurrentProject().getResources().addResource();
         ResourcesPanel.RPContent content = new ResourcesPanel.RPContent(r);
         ContentPanel panel = new ContentPanel(content, false);
-        
+
         this.scrollable.add(panel, this.scrollable.getComponentCount() - 1);
         this.scrollable.contentUpdated();
         this.scrollable.scrollDown();
-        
+
         panel.addContentPanelListener(content);
     }
 
-    @Override
-    public void backendChanged(Object initializer) {
-        Project project = ProjectManager.getCurrentProject();
-        
-        if (project != null) {
-            Resources resources = project.getResources();
-            Component[] components = this.scrollable.getComponents();
-            int count = Math.min(resources.getResourceCount(), components.length - 1);
-        } else {
-            Component[] components = this.scrollable.getComponents();
-            for (Component c : components) {
-                if (c instanceof ContentPanel) {
-                    this.scrollable.remove(c);
-                }
-            }
-        }
-        
-        this.addButton.setEnabled(project != null);
-    }
-    
     private final class RPContent extends JPanel implements ContentPanelListener {
-        
+
         private final Resource resource;
         private final JTextField name;
-        
+
         private RPContent(Resource r) {
             this.setBorder(new EmptyBorder(10, 10, 10, 80));
             this.setLayout(new GridLayout(1, 1));
-            
+
             this.resource = r;
             this.name = new JTextField(r.getName());
             this.name.addFocusListener(new FocusListener() {
-                
+
                 @Override
                 public void focusGained(FocusEvent fe) {
                 }
-                
+
                 @Override
                 public void focusLost(FocusEvent fe) {
                     try {
@@ -119,27 +113,27 @@ public final class ResourcesPanel extends JPanel implements Frontend {
             });
             this.add(this.name);
         }
-        
+
         @Override
         public void contentPanelClosed(ContentPanel source) {
             try {
                 Resources resources = ProjectManager.getCurrentProject().getResources();
                 resources.removeResource(this.resource);
-                
+
                 ResourcesPanel.this.scrollable.remove(source);
                 ResourcesPanel.this.scrollable.contentUpdated();
             } catch (Exception ex) {
                 Messenger.showError(ex, null);
             }
         }
-        
+
         @Override
         public void contentPanelExpanded(ContentPanel source) {
         }
-        
+
         @Override
         public void contentPanelCompressed(ContentPanel source) {
         }
-        
+
     }
 }
