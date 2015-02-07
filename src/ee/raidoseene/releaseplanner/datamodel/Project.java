@@ -17,8 +17,8 @@ public class Project extends NamedObject {
     //private Stakeholders stakeholders;
 
     public Project() {
-        this.resources = new Resources();
-        this.releases = new Releases();
+        this.resources = new Resources(this);
+        this.releases = new Releases(this);
         //this.stakeholders = new Stakeholders();
     }
 
@@ -35,6 +35,14 @@ public class Project extends NamedObject {
 
     public Releases getReleases() {
         return this.releases;
+    }
+    
+    void resourceRemoved(Resource r) {
+        // TODO
+    }
+    
+    void releaseRemoved(Release r) {
+        // TODO
     }
 
 }

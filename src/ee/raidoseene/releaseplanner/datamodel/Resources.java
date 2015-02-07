@@ -11,12 +11,14 @@ import java.util.List;
  *
  * @author Raido Seene
  */
-public class Resources {
+public class Resources extends ProjectElement {
 
     private final List<Resource> resourceContainer;
     //private Releases releases;
 
-    Resources() {
+    Resources(Project project) {
+        super(project);
+
         this.resourceContainer = new ArrayList<>();
     }
 
@@ -37,14 +39,15 @@ public class Resources {
     }
 
     public void removeResource(Resource r) {
-        // TODO: make sure it's not in use
-        resourceContainer.remove(r);
-        //releases.removeResource(r);
+        if (this.resourceContainer.remove(r) && super.parent != null) {
+            super.parent.resourceRemoved(r);
+        }
     }
 
     /*public List<Resource> getResourceList() {
      return resourceContainer;
      }*/
+    
     public Resource getResource(int index) {
         return this.resourceContainer.get(index);
     }

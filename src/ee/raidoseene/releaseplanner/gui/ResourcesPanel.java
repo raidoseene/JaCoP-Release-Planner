@@ -6,11 +6,14 @@
 package ee.raidoseene.releaseplanner.gui;
 
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Resource;
+import ee.raidoseene.releaseplanner.datamodel.Resources;
 import ee.raidoseene.releaseplanner.gui.utils.ContentListLayout;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanel;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanelListener;
 import ee.raidoseene.releaseplanner.gui.utils.ScrollablePanel;
+import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -26,7 +29,7 @@ import javax.swing.border.EmptyBorder;
  *
  * @author risto
  */
-public final class ResourcesPanel extends JPanel {
+public final class ResourcesPanel extends JPanel implements Frontend {
     
     public static final String TITLE_STRING = "Resources";
     private final ScrollablePanel scrollable;
@@ -66,6 +69,26 @@ public final class ResourcesPanel extends JPanel {
         
         panel.addContentPanelListener(content);
     }
+
+    @Override
+    public void backendChanged(Object initializer) {
+        Project project = ProjectManager.getCurrentProject();
+        
+        if (project != null) {
+            Resources resources = project.getResources();
+            Component[] components = this.scrollable.getComponents();
+            int count = Math.min(resources.getResourceCount(), components.length - 1);
+        } else {
+            Component[] components = this.scrollable.getComponents();
+            for (Component c : components) {
+                if (c instanceof ContentPanel) {
+                    this.scrollable.remove(c);
+                }
+            }
+        }
+        
+        this.addButton.setEnabled(project != null);
+    }
     
     private final class RPContent extends JPanel implements ContentPanelListener {
         
@@ -79,11 +102,11 @@ public final class ResourcesPanel extends JPanel {
             this.resource = r;
             this.name = new JTextField(r.getName());
             this.name.addFocusListener(new FocusListener() {
-
+                
                 @Override
                 public void focusGained(FocusEvent fe) {
                 }
-
+                
                 @Override
                 public void focusLost(FocusEvent fe) {
                     try {
@@ -99,8 +122,15 @@ public final class ResourcesPanel extends JPanel {
         
         @Override
         public void contentPanelClosed(ContentPanel source) {
-            ResourcesPanel.this.scrollable.remove(source);
-            ResourcesPanel.this.scrollable.contentUpdated();
+            try {
+                Resources resources = ProjectManager.getCurrentProject().getResources();
+                resources.removeResource(this.resource);
+                
+                ResourcesPanel.this.scrollable.remove(source);
+                ResourcesPanel.this.scrollable.contentUpdated();
+            } catch (Exception ex) {
+                Messenger.showError(ex, null);
+            }
         }
         
         @Override

@@ -11,12 +11,14 @@ import java.util.List;
  *
  * @author Raido Seene
  */
-public class Releases {
+public class Releases extends ProjectElement {
 
     private final List<Release> releaseContainer;
     //private Resources resources;
 
-    Releases() {
+    Releases(Project project) {
+        super(project);
+        
         this.releaseContainer = new ArrayList<>();
     }
 
@@ -24,6 +26,7 @@ public class Releases {
      releaseContainer = new ArrayList<>();
      this.resources = resources;
      }*/
+    
     public Release addRelease() {
         Release r = new Release();
         this.releaseContainer.add(r);
@@ -31,8 +34,9 @@ public class Releases {
     }
 
     public void removeRelease(Release r) {
-        // TODO: make sure it's not in use
-        releaseContainer.remove(r);
+        if (this.releaseContainer.remove(r) && super.parent != null) {
+            super.parent.releaseRemoved(r);
+        }
     }
 
     /*public List<Release> getReleaseList() {
