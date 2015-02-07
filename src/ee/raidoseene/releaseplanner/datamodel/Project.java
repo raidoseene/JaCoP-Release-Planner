@@ -12,6 +12,7 @@ import java.io.Serializable;
  */
 public class Project extends NamedObject implements Serializable {
 
+    private final Features features;
     private final Resources resources;
     private final Releases releases;
     //private Stakeholders stakeholders;
@@ -19,6 +20,7 @@ public class Project extends NamedObject implements Serializable {
     public Project(String name) {
         super(name);
         
+        this.features = new Features(this);
         this.resources = new Resources(this);
         this.releases = new Releases(this);
         //this.stakeholders = new Stakeholders();
@@ -37,6 +39,14 @@ public class Project extends NamedObject implements Serializable {
 
     public Releases getReleases() {
         return this.releases;
+    }
+    
+    public Features getFeatures() {
+        return this.features;
+    }
+    
+    void featureRemoved(Feature f) {
+        // TODO
     }
     
     void resourceRemoved(Resource r) {
