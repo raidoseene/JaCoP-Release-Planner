@@ -6,6 +6,7 @@
 package ee.raidoseene.releaseplanner.gui;
 
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Release;
 import ee.raidoseene.releaseplanner.datamodel.Releases;
 import ee.raidoseene.releaseplanner.datamodel.Resource;
@@ -55,6 +56,20 @@ public final class ReleasesPanel extends ScrollablePanel {
         this.add(new JScrollPane(this.scrollable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
         this.scrollable.setBorder(new EmptyBorder(10, 10, 10, 10));
         this.scrollable.setLayout(new ContentListLayout());
+        
+        Project project = ProjectManager.getCurrentProject();
+        if (project != null) {
+            Releases releases = project.getReleases();
+            int count = releases.getReleaseCount();
+
+            for (int i = 0; i < count; i++) {
+                Release r = releases.getRelease(i);
+                ReleasesPanel.RPContent content = new ReleasesPanel.RPContent(r);
+                ContentPanel panel = new ContentPanel(content, true);
+                panel.addContentPanelListener(content);
+                this.scrollable.add(panel);
+            }
+        }
         
         this.addButton = new JButton("Add new release");
         this.addButton.addActionListener(new ActionListener() {

@@ -4,11 +4,13 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Raido Seene
  */
-public class Resource extends NamedObject {
+public class Resource extends NamedObject implements Serializable {
 
     Resource() {
     }

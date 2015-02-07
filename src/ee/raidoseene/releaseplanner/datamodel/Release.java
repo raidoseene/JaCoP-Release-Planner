@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ import java.util.Map;
  *
  * @author Raido Seene
  */
-public class Release extends NamedObject {
+public class Release extends NamedObject implements Serializable {
 
     private final Map<Resource, Integer> capacities;
     private int importance;

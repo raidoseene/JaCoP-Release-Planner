@@ -5,11 +5,13 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
+
 /**
  *
  * @author risto
  */
-abstract class ProjectElement {
+abstract class ProjectElement implements Serializable {
     
     protected Project parent;
     

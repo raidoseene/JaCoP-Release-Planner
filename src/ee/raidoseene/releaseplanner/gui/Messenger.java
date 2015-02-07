@@ -38,6 +38,9 @@ public class Messenger implements Runnable {
                 } else {
                     message = ((Throwable) this.object).getMessage();
                 }
+                
+                // Temporary:
+                ((Throwable) this.object).printStackTrace();
             }
 
             String title = (this.type == JOptionPane.ERROR_MESSAGE) ? "Error" : "Warning";
