@@ -143,11 +143,20 @@ public final class MainFrame extends JFrame {
             String name = JOptionPane.showInputDialog(this, "Project name:", title, JOptionPane.QUESTION_MESSAGE);
             
             if (name != null) {
-                ProjectManager.createNewProject(name);
-                this.setContentPane(new TabbedView());
+                if (def) {
+                    ProjectManager.loadDefaultProject(name);
+                } else {
+                    ProjectManager.createNewProject(name);
+                }
             }
         } catch (Exception ex) {
             Messenger.showError(ex, null);
+        } finally {
+            if (ProjectManager.getCurrentProject() != null) {
+                this.setContentPane(new TabbedView());
+            } else {
+                this.setContentPane(new JPanel());
+            }
         }
         
         this.updateEnablity();
@@ -165,10 +174,15 @@ public final class MainFrame extends JFrame {
             if (dir != null && fil != null) {
                 File file = new File(dir, fil);
                 ProjectManager.loadSavedProject(file);
-                this.setContentPane(new TabbedView());
             }
         } catch (Exception ex) {
             Messenger.showError(ex, null);
+        } finally {
+            if (ProjectManager.getCurrentProject() != null) {
+                this.setContentPane(new TabbedView());
+            } else {
+                this.setContentPane(new JPanel());
+            }
         }
         
         this.updateEnablity();
@@ -176,12 +190,9 @@ public final class MainFrame extends JFrame {
 
     private void saveCurrentProject(boolean as) {
         try {
-            if (!as) { // Overwrite
-                try {
-                    ProjectManager.saveCurrentProject(null);
-                    return;
-                } catch (NullPointerException nex) {
-                }
+            if (!as && ProjectManager.hasStorage()) { // Overwrite
+                ProjectManager.saveCurrentProject(null);
+                return;
             }
             
             String name = ProjectManager.getCurrentProject().getName();
@@ -205,9 +216,14 @@ public final class MainFrame extends JFrame {
     private void closeCurrentProject() {
         try {
             ProjectManager.closeCurrentProject();
-            this.setContentPane(new JPanel());
         } catch (Exception ex) {
             Messenger.showError(ex, null);
+        } finally {
+            if (ProjectManager.getCurrentProject() != null) {
+                this.setContentPane(new TabbedView());
+            } else {
+                this.setContentPane(new JPanel());
+            }
         }
         
         this.updateEnablity();

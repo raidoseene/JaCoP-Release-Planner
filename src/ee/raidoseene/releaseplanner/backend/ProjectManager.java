@@ -6,6 +6,8 @@
 package ee.raidoseene.releaseplanner.backend;
 
 import ee.raidoseene.releaseplanner.datamodel.Project;
+import ee.raidoseene.releaseplanner.gui.Messenger;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,26 +22,53 @@ import java.io.OutputStream;
  */
 public final class ProjectManager {
 
-    private static final long HEADER = 0;
+    private static final long FILE_HEADER = 0x4a52505f70726f6aL; // JRP_proj
     private static Project currentProject = null;
     private static File currentLocation = null;
 
     public static void createNewProject(String name) throws Exception {
         if (ProjectManager.currentProject != null) {
-            // TODO: ...
+            ProjectManager.closeCurrentProject();
         }
 
         ProjectManager.currentProject = new Project(name);
         ProjectManager.currentLocation = null;
     }
+    
+    public static void loadDefaultProject(String name) throws Exception {
+        if (ProjectManager.currentProject != null) {
+            ProjectManager.closeCurrentProject();
+        }
+        
+        File file = ResourceManager.getResourceFile("default.proj");
+        if (file.exists()) {
+            ProjectManager.loadSavedProject(file);
+            ProjectManager.currentLocation = null;
+            if (ProjectManager.currentProject != null) {
+                ProjectManager.currentProject.setName(name);
+            }
+        } else {
+            Messenger.showWarning(null, "Default project not set!\nCreating empty project.");
+            ProjectManager.createNewProject(name);
+        }
+    }
 
     public static void loadSavedProject(File file) throws Exception {
+        if (ProjectManager.currentProject != null) {
+            ProjectManager.closeCurrentProject();
+        }
+        
         try (InputStream in = new FileInputStream(file)) {
-            try (ObjectInputStream oin = new ObjectInputStream(in)) {
-                if (oin.readLong() != ProjectManager.HEADER) {
-                    // TODO: error
+            for (int i = 56; i >= 0; i -= 8) {
+                int value = in.read();
+                if (value < 0) {
+                    throw new EOFException("EOF reached prematurely!");
+                } else if (value != ((int) (ProjectManager.FILE_HEADER >> i) & 0xff)) {
+                    throw new Exception("Unrecognized file format!");
                 }
-                
+            }
+            
+            try (ObjectInputStream oin = new ObjectInputStream(in)) {
                 ProjectManager.currentProject = (Project) oin.readObject();
                 ProjectManager.currentLocation = file;
             }
@@ -55,8 +84,11 @@ public final class ProjectManager {
         }
         
         try (OutputStream out = new FileOutputStream(file)) {
+            for (int i = 56; i >= 0; i -= 8) {
+                out.write((int) (ProjectManager.FILE_HEADER >> i) & 0xff);
+            }
+            
             try (ObjectOutputStream oout = new ObjectOutputStream(out)) {
-                oout.writeLong(ProjectManager.HEADER);
                 oout.writeObject(ProjectManager.currentProject);
                 ProjectManager.currentLocation = file;
             }
@@ -74,6 +106,10 @@ public final class ProjectManager {
 
     public static Project getCurrentProject() {
         return ProjectManager.currentProject;
+    }
+    
+    public static boolean hasStorage() {
+        return (ProjectManager.currentLocation != null);
     }
 
 }
