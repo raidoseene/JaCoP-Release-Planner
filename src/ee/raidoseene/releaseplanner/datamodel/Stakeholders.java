@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,31 +12,34 @@ import java.util.List;
  *
  * @author Raido Seene
  */
-public final class Stakeholders {
+public class Stakeholders extends ProjectElement implements Serializable {
 
     private List<Stakeholder> stakeholderContainer;
     private int importance;
 
-    Stakeholders(List<String> defaultStakeholders) {
+    Stakeholders(Project project) {
+        super(project);
+
         stakeholderContainer = new ArrayList<>();
-        for (String s : defaultStakeholders) {
-            Stakeholder stk = new Stakeholder();
-            stakeholderContainer.add(stk);
-            stk.setName(s);
-        }
     }
 
     public Stakeholder addStakeholder() {
-        Stakeholder s = new Stakeholder();
-        stakeholderContainer.add(s);
-        return s;
+        Stakeholder stakeholder = new Stakeholder();
+        stakeholderContainer.add(stakeholder);
+        return stakeholder;
     }
 
-    public void removeStakeholder(Stakeholder s) {
-        stakeholderContainer.remove(s);
+    public void removeStakeholder(Stakeholder stakeholder) {
+        if (this.stakeholderContainer.remove(stakeholder) && super.parent != null) {
+            super.parent.stakeholderRemoved(stakeholder);
+        }
     }
 
-    public List<Stakeholder> getStakeholderList() {
-        return stakeholderContainer;
+    public Stakeholder getStakeholder(int index) {
+        return this.stakeholderContainer.get(index);
+    }
+
+    public int getStakeholderCount() {
+        return this.stakeholderContainer.size();
     }
 }

@@ -42,4 +42,5 @@ public class Features extends ProjectElement implements Serializable {
     public int getFeatureCount() {
         return this.featureContainer.size();
     }
+    
 }

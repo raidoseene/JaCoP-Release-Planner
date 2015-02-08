@@ -14,18 +14,22 @@ public class Project extends NamedObject implements Serializable {
 
     private final Features features;
     private final Interdependencies interdependencies;
+    private final Urgencies urgencies;
+    private final Values values;
     private final Resources resources;
     private final Releases releases;
-    //private Stakeholders stakeholders;
+    private final Stakeholders stakeholders;
 
     public Project(String name) {
         super(name);
 
         this.features = new Features(this);
         this.interdependencies = new Interdependencies(this);
+        this.urgencies = new Urgencies();
+        this.values = new Values();
         this.resources = new Resources(this);
         this.releases = new Releases(this);
-        //this.stakeholders = new Stakeholders();
+        this.stakeholders = new Stakeholders(this);
     }
 
     /*public Project(String name, List<String> defaultResources, List<String> defaultReleases, List<String> defaultStakeholders) {
@@ -34,6 +38,18 @@ public class Project extends NamedObject implements Serializable {
      releases = new Releases(resources);
      stakeholders = new Stakeholders(defaultStakeholders);
      }*/
+    public Features getFeatures() {
+        return this.features;
+    }
+
+    public Urgencies getUrgencies() {
+        return this.urgencies;
+    }
+
+    public Values getValues() {
+        return this.values;
+    }
+
     public Resources getResources() {
         return this.resources;
     }
@@ -42,20 +58,24 @@ public class Project extends NamedObject implements Serializable {
         return this.releases;
     }
 
-    public Features getFeatures() {
-        return this.features;
-    }
-
-    void featureRemoved(Feature f) {
+    void featureRemoved(Feature feature) {
         // TODO
     }
 
-    void resourceRemoved(Resource r) {
+    void dependencyRemoved(Dependency dependency) {
+        // TODO
+    }
+
+    void resourceRemoved(Resource resource) {
         // TODO
         // Remove resource from releases
     }
 
-    void releaseRemoved(Release r) {
+    void releaseRemoved(Release release) {
+        // TODO
+    }
+
+    void stakeholderRemoved(Stakeholder stakeohlder) {
         // TODO
     }
 }

@@ -14,31 +14,55 @@ import java.util.List;
  */
 public class Interdependencies extends ProjectElement implements Serializable {
 
-    private final List<Interdependence> interdependenciesContainer;
+    private final List<Dependency> interdependenciesContainer;
 
     Interdependencies(Project project) {
         super(project);
 
         this.interdependenciesContainer = new ArrayList<>();
     }
-
-    public Interependence addInterdependence(Feature f1, Feature f2, Dependence d) {
-        Interdependence dep = new Interdependence(f1, f2, d);
-        this.interdependenciesContainer.add(dep);
-        return dep;
+    
+    public Dependency addFixedDependency(Feature feature, Release release) {
+        Dependency dependency = new FixedDependency(feature, release);
+        this.interdependenciesContainer.add(dependency);
+        return dependency;
+    }
+    
+    public Dependency addInterdependency(Feature feature1, Feature feature2, int type) {
+        Dependency dependency = new Interdependency(feature1, feature2, type);
+        this.interdependenciesContainer.add(dependency);
+        return dependency;
+    }
+    
+    public Dependency addModifyingInterdependency(Feature feature1, Feature feature2, Feature feature) {
+        Dependency dependency = new ModifyingInterdependency(feature1, feature2, feature);
+        this.interdependenciesContainer.add(dependency);
+        return dependency;
+    }
+    
+    public Dependency addModifyingInterdependency(Feature feature1, Feature feature2, Value value) {
+        Dependency dependency = new ModifyingInterdependency(feature1, feature2, value);
+        this.interdependenciesContainer.add(dependency);
+        return dependency;
+    }
+    
+    public Dependency addModifyingInterdependency(Feature feature1, Feature feature2, Urgency urgency) {
+        Dependency dependency = new ModifyingInterdependency(feature1, feature2, urgency);
+        this.interdependenciesContainer.add(dependency);
+        return dependency;
     }
 
-    public void removeInterdependence(Interdependence d) {
-        if (this.interdependenciesContainer.remove(d) && super.parent != null) {
-            super.parent.interdependenceRemoved(d);
+    public void removeInterdependency(Dependency dependency) {
+        if (this.interdependenciesContainer.remove(dependency) && super.parent != null) {
+            super.parent.dependencyRemoved(dependency);
         }
     }
 
-    public Feature getInterdependence(int index) {
+    public Dependency getInterdependency(int index) {
         return this.interdependenciesContainer.get(index);
     }
 
-    public int getInterdependenceCount() {
+    public int getInterdependencyCount() {
         return this.interdependenciesContainer.size();
     }
 }
