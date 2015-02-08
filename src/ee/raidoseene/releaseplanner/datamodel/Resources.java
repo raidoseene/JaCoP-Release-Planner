@@ -48,7 +48,6 @@ public class Resources extends ProjectElement implements Serializable {
     /*public List<Resource> getResourceList() {
      return resourceContainer;
      }*/
-    
     public Resource getResource(int index) {
         return this.resourceContainer.get(index);
     }
@@ -56,5 +55,4 @@ public class Resources extends ProjectElement implements Serializable {
     public int getResourceCount() {
         return this.resourceContainer.size();
     }
-
 }

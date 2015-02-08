@@ -13,9 +13,9 @@ import java.util.Map;
  * @author Raido Seene
  */
 public class Feature extends NamedObject implements Serializable {
-    
+
     private final Map<Resource, Integer> consumptions;
-    
+
     Feature() {
         this.consumptions = new HashMap<>();
     }
@@ -33,14 +33,14 @@ public class Feature extends NamedObject implements Serializable {
         if (value != null) {
             return value;
         }
-        
+
         return 0;
     }
-    
+
     boolean removeConsumption(Resource r) {
         return (this.consumptions.remove(r) != null);
     }
-    
+
     boolean hasConsumption(Resource r) {
         return this.consumptions.containsKey(r);
     }

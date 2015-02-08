@@ -50,7 +50,6 @@ public final class MainFrame extends JFrame {
 
         item = new JMenuItem("New Empty Project");
         item.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -64,7 +63,6 @@ public final class MainFrame extends JFrame {
 
         item = new JMenuItem("New Default Project");
         item.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -78,7 +76,6 @@ public final class MainFrame extends JFrame {
 
         item = new JMenuItem("Open Project...");
         item.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -94,7 +91,6 @@ public final class MainFrame extends JFrame {
 
         this.save = new JMenuItem("Save Project");
         this.save.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -108,7 +104,6 @@ public final class MainFrame extends JFrame {
 
         this.saveas = new JMenuItem("Save Project As...");
         this.saveas.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -124,7 +119,6 @@ public final class MainFrame extends JFrame {
 
         this.close = new JMenuItem("Close Project");
         this.close.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -141,7 +135,7 @@ public final class MainFrame extends JFrame {
         try {
             String title = def ? "New Default Project" : "New Empty Project";
             String name = JOptionPane.showInputDialog(this, "Project name:", title, JOptionPane.QUESTION_MESSAGE);
-            
+
             if (name != null) {
                 ProjectManager.createNewProject(name);
                 this.setContentPane(new TabbedView());
@@ -149,7 +143,7 @@ public final class MainFrame extends JFrame {
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
-        
+
         this.updateEnablity();
     }
 
@@ -158,10 +152,10 @@ public final class MainFrame extends JFrame {
             FileDialog fd = new FileDialog(this, "Load Project", FileDialog.LOAD);
             fd.setFilenameFilter(new ProjectFileFilter());
             fd.setVisible(true);
-            
+
             String dir = fd.getDirectory();
             String fil = fd.getFile();
-            
+
             if (dir != null && fil != null) {
                 File file = new File(dir, fil);
                 ProjectManager.loadSavedProject(file);
@@ -170,7 +164,7 @@ public final class MainFrame extends JFrame {
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
-        
+
         this.updateEnablity();
     }
 
@@ -183,16 +177,16 @@ public final class MainFrame extends JFrame {
                 } catch (NullPointerException nex) {
                 }
             }
-            
+
             String name = ProjectManager.getCurrentProject().getName();
             FileDialog fd = new FileDialog(this, "Save Project", FileDialog.SAVE);
             fd.setFilenameFilter(new ProjectFileFilter());
             fd.setFile(name + ".proj");
             fd.setVisible(true);
-            
+
             String dir = fd.getDirectory();
             String fil = fd.getFile();
-            
+
             if (dir != null && fil != null) {
                 File file = new File(dir, fil);
                 ProjectManager.saveCurrentProject(file);
@@ -209,17 +203,17 @@ public final class MainFrame extends JFrame {
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
-        
+
         this.updateEnablity();
     }
 
     private void updateEnablity() {
         boolean has = (ProjectManager.getCurrentProject() != null);
-        
+
         this.save.setEnabled(has);
         this.saveas.setEnabled(has);
         this.close.setEnabled(has);
-        
+
         this.revalidate();
     }
 
@@ -228,7 +222,6 @@ public final class MainFrame extends JFrame {
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
-
             @Override
             public void run() {
                 try {
@@ -245,8 +238,6 @@ public final class MainFrame extends JFrame {
                     Messenger.showError(ex, "Failed to lauch application!");
                 }
             }
-
         });
     }
-
 }

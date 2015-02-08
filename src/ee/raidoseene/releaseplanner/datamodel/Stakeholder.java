@@ -6,28 +6,31 @@
 package ee.raidoseene.releaseplanner.datamodel;
 
 /**
- * 
+ *
  * @author Raido Seene
  */
 public class Stakeholder {
-    
+
     private String name;
     private int importance;
-    
-    Stakeholder() {};
+
+    Stakeholder() {
+    }
+
+    ;
 
     public void setName(String name) {
         this.name = name;
     }
-    
+
     public String getName() {
         return name;
     }
-    
+
     public void setImportance(int importance) {
         this.importance = importance;
     }
-    
+
     public int getImportance() {
         return importance;
     }

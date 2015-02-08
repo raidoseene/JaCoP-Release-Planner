@@ -19,7 +19,7 @@ public class Releases extends ProjectElement implements Serializable {
 
     Releases(Project project) {
         super(project);
-        
+
         this.releaseContainer = new ArrayList<>();
     }
 
@@ -27,7 +27,6 @@ public class Releases extends ProjectElement implements Serializable {
      releaseContainer = new ArrayList<>();
      this.resources = resources;
      }*/
-    
     public Release addRelease() {
         Release r = new Release();
         this.releaseContainer.add(r);
@@ -41,27 +40,25 @@ public class Releases extends ProjectElement implements Serializable {
     }
 
     /*public List<Release> getReleaseList() {
-        return releaseContainer;
-    }
+     return releaseContainer;
+     }
 
-    public void removeResource(Resource r) {
-        for (Release rel : releaseContainer) {
-            rel.removeResource(r);
-        }
-    }
+     public void removeResource(Resource r) {
+     for (Release rel : releaseContainer) {
+     rel.removeResource(r);
+     }
+     }
 
-    public void addResource(Resource r) {
-        for (Release rel : releaseContainer) {
-            rel.addResource(r);
-        }
-    }*/
-    
+     public void addResource(Resource r) {
+     for (Release rel : releaseContainer) {
+     rel.addResource(r);
+     }
+     }*/
     public Release getRelease(int index) {
         return this.releaseContainer.get(index);
     }
-    
+
     public int getReleaseCount() {
         return this.releaseContainer.size();
     }
-    
 }

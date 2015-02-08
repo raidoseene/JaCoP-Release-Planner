@@ -34,5 +34,4 @@ public abstract class NamedObject implements Serializable {
     public final String getName() {
         return this.name;
     }
-
 }

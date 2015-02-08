@@ -22,7 +22,7 @@ public class Features extends ProjectElement implements Serializable {
 
         this.featureContainer = new ArrayList<>();
     }
-    
+
     public Feature addFeature() {
         Feature f = new Feature();
         this.featureContainer.add(f);
@@ -34,7 +34,7 @@ public class Features extends ProjectElement implements Serializable {
             super.parent.featureRemoved(f);
         }
     }
-    
+
     public Feature getFeature(int index) {
         return this.featureContainer.get(index);
     }
@@ -42,5 +42,4 @@ public class Features extends ProjectElement implements Serializable {
     public int getFeatureCount() {
         return this.featureContainer.size();
     }
-
 }

@@ -28,7 +28,6 @@ public class Release extends NamedObject implements Serializable {
      this.addResource(r);
      }
      }*/
-
     public void setImportance(int importance) {
         if (importance > 0 && importance < 10) {
             this.importance = importance;
@@ -54,24 +53,23 @@ public class Release extends NamedObject implements Serializable {
         if (value != null) {
             return value;
         }
-        
+
         return 0;
     }
-    
+
     boolean removeCapacity(Resource r) {
         return (this.capacities.remove(r) != null);
     }
-    
+
     boolean hasCapacity(Resource r) {
         return this.capacities.containsKey(r);
     }
 
     /*public void addResource(Resource r) {
-        capacity.put(r, 0);
-    }
+     capacity.put(r, 0);
+     }
 
-    public void removeResource(Resource r) {
-        capacity.remove(r);
-    }*/
-    
+     public void removeResource(Resource r) {
+     capacity.remove(r);
+     }*/
 }

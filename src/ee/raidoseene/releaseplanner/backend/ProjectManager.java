@@ -39,7 +39,7 @@ public final class ProjectManager {
                 if (oin.readLong() != ProjectManager.HEADER) {
                     // TODO: error
                 }
-                
+
                 ProjectManager.currentProject = (Project) oin.readObject();
                 ProjectManager.currentLocation = file;
             }
@@ -53,7 +53,7 @@ public final class ProjectManager {
             }
             file = ProjectManager.currentLocation;
         }
-        
+
         try (OutputStream out = new FileOutputStream(file)) {
             try (ObjectOutputStream oout = new ObjectOutputStream(out)) {
                 oout.writeLong(ProjectManager.HEADER);
@@ -62,7 +62,7 @@ public final class ProjectManager {
             }
         }
     }
-    
+
     public static void closeCurrentProject() throws Exception {
         if (ProjectManager.currentProject != null) {
             // TODO: ...
@@ -75,5 +75,4 @@ public final class ProjectManager {
     public static Project getCurrentProject() {
         return ProjectManager.currentProject;
     }
-
 }
