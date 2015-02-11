@@ -2,7 +2,6 @@ package ee.raidoseene.releaseplanner.gui;
 
 import ee.raidoseene.releaseplanner.backend.ProjectFileFilter;
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
-import ee.raidoseene.releaseplanner.datamodel.Project;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Toolkit;
@@ -54,6 +53,7 @@ public final class MainFrame extends JFrame {
             public void actionPerformed(ActionEvent ae) {
                 try {
                     MainFrame.this.createNewProject(false);
+                    //DataManager.saveDataFile();
                 } catch (Throwable t) {
                     t.printStackTrace();
                 }

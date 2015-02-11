@@ -19,4 +19,22 @@ public class Values {
         this.valuesContainer = new ArrayList<>();
     }
     
+    public Value addValue(Feature feature, Stakeholder stakeholder) {
+        Value value = new Value(feature, stakeholder);
+        this.valuesContainer.add(value);
+        return value;
+    }
+    
+    public void removeValue(Value value) {
+        this.valuesContainer.remove(value);
+    }
+    
+    public Value getValue(int index) {
+        return this.valuesContainer.get(index);
+    }
+
+    public int getValueCount() {
+        return this.valuesContainer.size();
+    }
+    
 }

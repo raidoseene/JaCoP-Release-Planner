@@ -65,4 +65,14 @@ public class Interdependencies extends ProjectElement implements Serializable {
     public int getInterdependencyCount() {
         return this.interdependenciesContainer.size();
     }
+    
+    public int getInterdependencyCount(int type) {
+        int counter = 0;
+        for(int i = 0; i < getInterdependencyCount(); i++) {
+            /*if(getInterdependency(i).getInterdependencyType() == type) {
+                counter ++;
+            }*/
+        }
+        return 0;
+    }
 }

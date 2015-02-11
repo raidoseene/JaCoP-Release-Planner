@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import java.io.Serializable;
 
 /**
@@ -30,6 +31,9 @@ public class Project extends NamedObject implements Serializable {
         this.resources = new Resources(this);
         this.releases = new Releases(this);
         this.stakeholders = new Stakeholders(this);
+       
+        DataManager foo = new DataManager();
+        foo.saveDataFile(this);
     }
 
     /*public Project(String name, List<String> defaultResources, List<String> defaultReleases, List<String> defaultStakeholders) {
@@ -56,6 +60,14 @@ public class Project extends NamedObject implements Serializable {
 
     public Releases getReleases() {
         return this.releases;
+    }
+    
+    public Stakeholders getStakeholders() {
+        return this.stakeholders;
+    }
+    
+    public Interdependencies getInterdependencies() {
+        return this.interdependencies;
     }
 
     void featureRemoved(Feature feature) {

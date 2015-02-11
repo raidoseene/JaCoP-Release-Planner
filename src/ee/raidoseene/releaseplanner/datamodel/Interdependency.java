@@ -24,5 +24,9 @@ public class Interdependency implements Dependency, Serializable {
         this.second = f2;
         this.type = type;
     }
+    
+    public int getInterdependencyType() {
+        return this.type;
+    }
 
 }
