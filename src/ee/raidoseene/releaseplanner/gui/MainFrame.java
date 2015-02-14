@@ -53,7 +53,6 @@ public final class MainFrame extends JFrame {
             public void actionPerformed(ActionEvent ae) {
                 try {
                     MainFrame.this.createNewProject(false);
-                    //DataManager.saveDataFile();
                 } catch (Throwable t) {
                     t.printStackTrace();
                 }

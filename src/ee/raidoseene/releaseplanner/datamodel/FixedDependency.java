@@ -19,4 +19,18 @@ public class FixedDependency implements Dependency, Serializable {
         this.feature = feature;
         this.release = release;
     }
+    
+    public Feature getFeature() {
+        return this.feature;
+    }
+    
+    public Release getRelease() {
+        return this.release;
+    }
+
+    @Override
+    public DependencyType getType() {
+        return DependencyType.FIXED_DEPENDENCY;
+    }
+       
 }

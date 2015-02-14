@@ -8,8 +8,9 @@ package ee.raidoseene.releaseplanner.datamodel;
  *
  * @author Raido Seene
  */
-public interface Dependency {
+public enum DependencyType {
     
-    DependencyType getType();
-    
+    FIXED_DEPENDENCY,
+    INTERDEPENDENCY,
+    MODIFYINGDEPENDENCY
 }

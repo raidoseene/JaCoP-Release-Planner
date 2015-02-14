@@ -6,6 +6,7 @@
 package ee.raidoseene.releaseplanner.backend;
 
 import ee.raidoseene.releaseplanner.datamodel.Project;
+import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import ee.raidoseene.releaseplanner.gui.Messenger;
 import java.io.EOFException;
 import java.io.File;
@@ -75,7 +76,7 @@ public final class ProjectManager {
         }
     }
 
-    public static void saveCurrentProject(File file) throws Exception {
+    public static void saveCurrentProject(File file) throws Exception {        
         if (file == null) {
             if (ProjectManager.currentLocation == null) {
                 throw new NullPointerException("No destination file provided!");

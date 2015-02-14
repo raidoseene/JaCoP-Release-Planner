@@ -62,17 +62,42 @@ public class Interdependencies extends ProjectElement implements Serializable {
         return this.interdependenciesContainer.get(index);
     }
 
-    public int getInterdependencyCount() {
+    public int getDependencyCount() {
         return this.interdependenciesContainer.size();
     }
     
-    public int getInterdependencyCount(int type) {
+    public int getDependencyCount(DependencyType type) {
         int counter = 0;
-        for(int i = 0; i < getInterdependencyCount(); i++) {
-            /*if(getInterdependency(i).getInterdependencyType() == type) {
+        for(int i = 0; i < getDependencyCount(); i++) {
+            if(getInterdependency(i).getType() == type) {
                 counter ++;
-            }*/
+            }
         }
-        return 0;
+        return counter;
     }
+    
+    public List<Dependency> getDependencyList(DependencyType type) {
+        List<Dependency> list = new ArrayList<>();
+        
+        for(int i = 0; i < getDependencyCount(); i++) {
+            if(getInterdependency(i).getType() == type) {
+                list.add(getInterdependency(i));
+            }
+        }
+        return list;
+    }
+    
+    public List<Dependency> getInterdependencyList(DependencyType type, int subType) {
+        List<Dependency> dList = getDependencyList(type);
+        List<Dependency> list = new ArrayList<>();
+        
+        for(int i = 0; i < dList.size(); i++) {
+            Interdependency id = ((Interdependency)dList.get(i));
+            if(id.getDependencySubType() == subType) {
+                list.add(id);
+            }
+        }
+        return list;
+    }
+    
 }

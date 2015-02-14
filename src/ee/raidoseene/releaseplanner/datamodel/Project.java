@@ -32,8 +32,8 @@ public class Project extends NamedObject implements Serializable {
         this.releases = new Releases(this);
         this.stakeholders = new Stakeholders(this);
        
-        DataManager foo = new DataManager();
-        foo.saveDataFile(this);
+        //DataManager foo = new DataManager();
+        //foo.saveDataFile(this);
     }
 
     /*public Project(String name, List<String> defaultResources, List<String> defaultReleases, List<String> defaultStakeholders) {

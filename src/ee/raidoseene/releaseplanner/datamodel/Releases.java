@@ -61,4 +61,8 @@ public class Releases extends ProjectElement implements Serializable {
     public int getReleaseCount() {
         return this.releaseContainer.size();
     }
+    
+    public int getReleaseIndex(Release release) {
+        return this.releaseContainer.indexOf(release);
+    }
 }
