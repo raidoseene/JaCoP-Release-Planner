@@ -5,6 +5,7 @@
 package ee.raidoseene.releaseplanner.datamodel;
 
 import java.io.Serializable;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -98,6 +99,39 @@ public class Interdependencies extends ProjectElement implements Serializable {
             }
         }
         return list;
+    }
+    
+    /**
+     * Query only certain types of dependencies.
+     * For example, to get all instances of <code>FixedDependancy</code>:
+     * FixedDependency[] fds = dependencies.getTypedDependencies(FixedDependency.class);
+     * 
+     * @param <T> type of dependencies to query
+     * @param cls class that represents the type T
+     * @return Returns an array dependencies of type T
+     */
+    @SuppressWarnings("unchecked")
+    public <T extends Dependency> T[] getTypedDependencies(Class<T> cls) {
+        ArrayList<T> list = new ArrayList<>(this.interdependenciesContainer.size());
+        for (Dependency d: this.interdependenciesContainer) {
+            if (cls.isInstance(d)) {
+                list.add((T) d);
+            }
+        }
+        
+        return list.toArray((T[]) Array.newInstance(cls, list.size()));
+    }
+    
+    public int getTypedDependancyCount(Class<? extends Dependency> cls) {
+        int count = 0;
+        
+        for (Dependency d: this.interdependenciesContainer) {
+            if (cls.isInstance(d)) {
+                count++;
+            }
+        }
+        
+        return count;
     }
     
 }
