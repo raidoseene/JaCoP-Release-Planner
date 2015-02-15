@@ -6,6 +6,7 @@
 package ee.raidoseene.releaseplanner.backend;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  *
@@ -19,7 +20,7 @@ public final class ResourceManager {
         return new File(new File(getDirectory(), RESOURCES_PATH), name);
     }
     
-    private static File getDirectory() throws Exception {
+    public static File getDirectory() throws Exception {
         File jar = new File(ResourceManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         File dir = jar.getParentFile();
         
@@ -30,6 +31,25 @@ public final class ResourceManager {
         }
         
         throw new Exception("Parent file is not a directory!");
+    }
+    
+    public static boolean isOfType(String path, Type type) throws Exception {
+        File file = new File(path);
+        if (!file.exists()) {
+            throw new FileNotFoundException("File " + file.getPath() + " does not exist!");
+        }
+        
+        if (type == Type.DIRECTORY) {
+            return file.isDirectory();
+        } else if (type == Type.FILE) {
+            return file.isFile();
+        }
+        
+        return false;
+    }
+    
+    public enum Type {
+        DIRECTORY, FILE;
     }
     
 }

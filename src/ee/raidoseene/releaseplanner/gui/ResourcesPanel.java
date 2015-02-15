@@ -13,7 +13,6 @@ import ee.raidoseene.releaseplanner.gui.utils.ContentListLayout;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanel;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanelListener;
 import ee.raidoseene.releaseplanner.gui.utils.ScrollablePanel;
-import java.awt.Component;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -40,8 +39,8 @@ public final class ResourcesPanel extends JPanel {
         this.setBorder(new EmptyBorder(10, 10, 10, 10));
         this.scrollable = new ScrollablePanel();
         this.add(new JScrollPane(this.scrollable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+        this.scrollable.setLayout(new ContentListLayout(ContentPanel.class));
         this.scrollable.setBorder(new EmptyBorder(10, 10, 10, 10));
-        this.scrollable.setLayout(new ContentListLayout());
 
         Project project = ProjectManager.getCurrentProject();
         if (project != null) {

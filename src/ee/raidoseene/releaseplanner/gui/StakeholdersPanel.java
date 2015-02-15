@@ -38,8 +38,8 @@ public final class StakeholdersPanel extends ScrollablePanel {
         this.setBorder(new EmptyBorder(10, 10, 10, 10));
         this.scrollable = new ScrollablePanel();
         this.add(new JScrollPane(this.scrollable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+        this.scrollable.setLayout(new ContentListLayout(ContentPanel.class));
         this.scrollable.setBorder(new EmptyBorder(10, 10, 10, 10));
-        this.scrollable.setLayout(new ContentListLayout());
         
         this.addButton = new JButton("Add new stakeholder");
         this.addButton.addActionListener(new ActionListener() {

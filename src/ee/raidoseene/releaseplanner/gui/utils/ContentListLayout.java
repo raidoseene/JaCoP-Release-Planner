@@ -18,6 +18,11 @@ import java.awt.LayoutManager;
 public class ContentListLayout implements LayoutManager {
     
     private static final int VERTICAL_GAP = 10;
+    private final Class<? extends Component> type;
+    
+    public ContentListLayout(Class<? extends Component> fullWidthComponent) {
+        this.type = fullWidthComponent;
+    }
 
     @Override
     public void addLayoutComponent(String string, Component cmpnt) {
@@ -62,7 +67,7 @@ public class ContentListLayout implements LayoutManager {
         for (Component c : cntnr.getComponents()) {
             int h = c.getPreferredSize().height;
             
-            if (c instanceof ContentPanel) {
+            if (this.type.isInstance(c)) {
                 c.setBounds(insets.left, y, w, h);
             } else {
                 int lw = Math.min(c.getPreferredSize().width, w);

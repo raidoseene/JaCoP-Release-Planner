@@ -49,8 +49,8 @@ public final class GroupManagerDialog extends JDialog {
         
         this.scrollable = new ScrollablePanel();
         cont.add(BorderLayout.CENTER, new JScrollPane(this.scrollable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+        this.scrollable.setLayout(new ContentListLayout(ContentPanel.class));
         this.scrollable.setBorder(new EmptyBorder(10, 10, 10, 10));
-        this.scrollable.setLayout(new ContentListLayout());
         
         Container c = new Container();
         c.setLayout(new GridLayout(2, 1, 10, 10));

@@ -25,7 +25,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 /**
@@ -150,7 +149,7 @@ public final class FeaturesPanel extends JPanel {
 
         private FPScrollable() {
             this.setBorder(new EmptyBorder(10, 260, 10, 10));
-            this.setLayout(new ContentListLayout());
+            this.setLayout(new ContentListLayout(ContentPanel.class));
         }
 
         @Override
@@ -182,7 +181,7 @@ public final class FeaturesPanel extends JPanel {
             this.cont2.setLayout(new BorderLayout(10, 10));
 
             JPanel p = new JPanel();
-            p.setBorder(new TitledBorder(new EtchedBorder(EtchedBorder.LOWERED), "Resource consumption"));
+            p.setBorder(new TitledBorder("Resource consumption"));
             p.setLayout(new BorderLayout(10, 10));
             this.cont2.add(BorderLayout.LINE_START, p);
 
