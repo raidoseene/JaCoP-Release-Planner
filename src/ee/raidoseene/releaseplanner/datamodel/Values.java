@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  *
  * @author Raido Seene
  */
-public class Values {
+public class Values implements Serializable {
     
     private final List<Value> valuesContainer;
     

@@ -4,17 +4,14 @@
  */
 package ee.raidoseene.releaseplanner.dataoutput;
 
+import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.DependencyType;
-import ee.raidoseene.releaseplanner.datamodel.Feature;
 import ee.raidoseene.releaseplanner.datamodel.FixedDependency;
 import ee.raidoseene.releaseplanner.datamodel.Interdependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,27 +20,31 @@ import java.util.List;
  */
 public final class DataManager {
 
-    private File file;
-    private PrintWriter printWriter;
-    private Project project;
+    private final Project project;
+    private final PrintWriter printWriter;
 
-    public void saveDataFile(Project project) {
-        try {
-            this.project = project;
-            file = new File(DataManager.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-            printWriter = new PrintWriter(file.getParent() + "\\data.dzn");
+    public static void saveDataFile() throws Exception {
+        Project project = ProjectManager.getCurrentProject();
+        File dir = ProjectManager.getCurrentProjectFolder(true);
+        File file = new File(dir, "data.dzn");
+        
+        try (PrintWriter pw = new PrintWriter(file)) { // try with resource: printwriter closes automatically!
+            DataManager dm = new DataManager(project, pw);
             
-            printFailHeader();
-            printProjectParameters();
-            printParamImportance();
-            printDependencies();
-            printResources();
-            printFeatures();
-            printModifyingInterdependencies();
-            printStakeholders();
-            printWriter.close();
-        } catch (URISyntaxException | IOException e) {
+            dm.printFailHeader();
+            dm.printProjectParameters();
+            dm.printParamImportance();
+            dm.printDependencies();
+            dm.printResources();
+            dm.printFeatures();
+            dm.printModifyingInterdependencies();
+            dm.printStakeholders();
         }
+    }
+    
+    private DataManager(Project project, PrintWriter pw) {
+        this.project = project;
+        this.printWriter = pw;
     }
     
     private void printFailHeader() {

@@ -6,11 +6,10 @@
 package ee.raidoseene.releaseplanner.backend;
 
 import ee.raidoseene.releaseplanner.datamodel.Project;
-import ee.raidoseene.releaseplanner.dataoutput.DataManager;
-import ee.raidoseene.releaseplanner.gui.Messenger;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -25,7 +24,6 @@ public final class ProjectManager {
 
     private static final long FILE_HEADER = 0x4a52505f70726f6aL; // JRP_proj
     private static Project currentProject = null;
-    private static File currentLocation = null;
 
     public static void createNewProject(String name) throws Exception {
         if (ProjectManager.currentProject != null) {
@@ -33,25 +31,7 @@ public final class ProjectManager {
         }
 
         ProjectManager.currentProject = new Project(name);
-        ProjectManager.currentLocation = null;
-    }
-    
-    public static void loadDefaultProject(String name) throws Exception {
-        if (ProjectManager.currentProject != null) {
-            ProjectManager.closeCurrentProject();
-        }
-        
-        File file = ResourceManager.getResourceFile("default.proj");
-        if (file.exists()) {
-            ProjectManager.loadSavedProject(file);
-            ProjectManager.currentLocation = null;
-            if (ProjectManager.currentProject != null) {
-                ProjectManager.currentProject.setName(name);
-            }
-        } else {
-            Messenger.showWarning(null, "Default project not set!\nCreating empty project.");
-            ProjectManager.createNewProject(name);
-        }
+        ProjectManager.currentProject.setStorage(null);
     }
 
     public static void loadSavedProject(File file) throws Exception {
@@ -71,17 +51,18 @@ public final class ProjectManager {
             
             try (ObjectInputStream oin = new ObjectInputStream(in)) {
                 ProjectManager.currentProject = (Project) oin.readObject();
-                ProjectManager.currentLocation = file;
+                ProjectManager.currentProject.setStorage(file.getPath());
             }
         }
     }
 
     public static void saveCurrentProject(File file) throws Exception {        
         if (file == null) {
-            if (ProjectManager.currentLocation == null) {
+            Project proj = ProjectManager.currentProject;
+            if (proj == null || proj.getStorage() == null) {
                 throw new NullPointerException("No destination file provided!");
             }
-            file = ProjectManager.currentLocation;
+            file = new File(proj.getStorage());
         }
 
         try (OutputStream out = new FileOutputStream(file)) {
@@ -90,8 +71,8 @@ public final class ProjectManager {
             }
             
             try (ObjectOutputStream oout = new ObjectOutputStream(out)) {
+                ProjectManager.currentProject.setStorage(file.getPath());
                 oout.writeObject(ProjectManager.currentProject);
-                ProjectManager.currentLocation = file;
             }
         }
     }
@@ -102,15 +83,29 @@ public final class ProjectManager {
         }
 
         ProjectManager.currentProject = null;
-        ProjectManager.currentLocation = null;
     }
 
     public static Project getCurrentProject() {
         return ProjectManager.currentProject;
     }
     
-    public static boolean hasStorage() {
-        return (ProjectManager.currentLocation != null);
+    public static File getCurrentProjectFolder(boolean createIfNeeded) throws Exception {
+        String path = ProjectManager.currentProject.getStorage();
+        if (path == null) {
+            throw new FileNotFoundException("Project is not saved!");
+        }
+        
+        int index = path.lastIndexOf(".");
+        if (index >= 0) {
+            path = path.substring(0, index);
+        }
+        
+        File dir = new File(path);
+        if (createIfNeeded && (!dir.exists() || !dir.isDirectory())) {
+            dir.mkdir();
+        }
+        
+        return dir;
     }
 
 }

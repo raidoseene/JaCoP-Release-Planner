@@ -4,7 +4,6 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
-import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import java.io.Serializable;
 
 /**
@@ -13,6 +12,7 @@ import java.io.Serializable;
  */
 public class Project extends NamedObject implements Serializable {
 
+    private transient String storage;
     private final Features features;
     private final Interdependencies interdependencies;
     private final Urgencies urgencies;
@@ -24,6 +24,7 @@ public class Project extends NamedObject implements Serializable {
     public Project(String name) {
         super(name);
 
+        this.storage = null;
         this.features = new Features(this);
         this.interdependencies = new Interdependencies(this);
         this.urgencies = new Urgencies();
@@ -34,6 +35,14 @@ public class Project extends NamedObject implements Serializable {
        
         //DataManager foo = new DataManager();
         //foo.saveDataFile(this);
+    }
+    
+    public void setStorage(String storage) {
+        this.storage = storage;
+    }
+    
+    public String getStorage() {
+        return this.storage;
     }
 
     /*public Project(String name, List<String> defaultResources, List<String> defaultReleases, List<String> defaultStakeholders) {

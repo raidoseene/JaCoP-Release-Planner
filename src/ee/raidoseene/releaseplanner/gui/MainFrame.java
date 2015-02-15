@@ -2,6 +2,8 @@ package ee.raidoseene.releaseplanner.gui;
 
 import ee.raidoseene.releaseplanner.backend.ProjectFileFilter;
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.backend.ResourceManager;
+import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Toolkit;
@@ -24,6 +26,7 @@ import javax.swing.UIManager;
 public final class MainFrame extends JFrame {
 
     private final JMenuItem save, saveas, close;
+    private final JMenuItem solver;
 
     private MainFrame() {
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -128,6 +131,23 @@ public final class MainFrame extends JFrame {
             }
         });
         menu.add(this.close);
+        
+        // Temporary menu
+        menu = new JMenu("Temporary");
+        menubar.add(menu);
+
+        this.solver = new JMenuItem("Dump Data");
+        this.solver.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    MainFrame.this.dumpData();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        menu.add(this.solver);
     }
 
     private void createNewProject(boolean def) {
@@ -137,7 +157,14 @@ public final class MainFrame extends JFrame {
 
             if (name != null) {
                 if (def) {
-                    ProjectManager.loadDefaultProject(name);
+                    File file = ResourceManager.getResourceFile("default.proj");
+                    if (file != null && file.exists()) {
+                        ProjectManager.loadSavedProject(file);
+                        ProjectManager.getCurrentProject().setStorage(null);
+                    } else {
+                        Messenger.showWarning(null, "Default project not set!\nCreating empty project.");
+                        ProjectManager.createNewProject(name);
+                    }
                 } else {
                     ProjectManager.createNewProject(name);
                 }
@@ -183,7 +210,7 @@ public final class MainFrame extends JFrame {
 
     private void saveCurrentProject(boolean as) {
         try {
-            if (!as && ProjectManager.hasStorage()) { // Overwrite
+            if (!as && ProjectManager.getCurrentProject().getStorage() != null) { // Overwrite
                 ProjectManager.saveCurrentProject(null);
                 return;
             }
@@ -221,6 +248,16 @@ public final class MainFrame extends JFrame {
 
         this.updateEnablity();
     }
+    
+    private void dumpData() {
+        this.saveCurrentProject(false);
+        
+        try {
+            DataManager.saveDataFile();
+        } catch (Exception ex) {
+            Messenger.showError(ex, null);
+        }
+    }
 
     private void updateEnablity() {
         boolean has = (ProjectManager.getCurrentProject() != null);
@@ -228,6 +265,7 @@ public final class MainFrame extends JFrame {
         this.save.setEnabled(has);
         this.saveas.setEnabled(has);
         this.close.setEnabled(has);
+        this.solver.setEnabled(has);
 
         this.revalidate();
     }
