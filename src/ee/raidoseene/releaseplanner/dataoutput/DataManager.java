@@ -63,7 +63,7 @@ public final class DataManager {
         printWriter.println("% Stakeholder/release importance");
         printWriter.print("lambda = [ ");
         for(int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
-            printWriter.print(project.getStakeholders().getStakeholder(s).getImportance() + ", ");
+            printWriter.print(project.getStakeholders().getStakeholder(s).getImportance());
             if(s < project.getStakeholders().getStakeholderCount() - 1) {
                 printWriter.print(", ");
             } else {
@@ -74,7 +74,7 @@ public final class DataManager {
         
         printWriter.print("ksi = [ ");
         for(int rel = 0; rel < project.getReleases().getReleaseCount(); rel++) {
-            printWriter.print(project.getReleases().getRelease(rel).getImportance() + ", ");
+            printWriter.print(project.getReleases().getRelease(rel).getImportance());
             if(rel < project.getReleases().getReleaseCount() - 1) {
                 printWriter.print(", ");
             } else {
@@ -168,9 +168,9 @@ public final class DataManager {
         
         printWriter.print("resource_id = [");
         for(int i = 0; i < project.getResources().getResourceCount(); i++) {
-            printWriter.print("\"" + project.getResources().getResource(i) + "\",");
+            printWriter.print("\"" + project.getResources().getResource(i).getName() + "\"");
             if(i < project.getResources().getResourceCount() - 1) {
-                printWriter.print("\n");
+                printWriter.print(",\n");
             }
         }
         printWriter.println("];");
@@ -193,9 +193,9 @@ public final class DataManager {
         printWriter.println("% Features (id/consumtion per resource)");
         printWriter.print("feature_id = [");
         for(int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
-            printWriter.print("\"" + project.getFeatures().getFeature(f) + "\",");
+            printWriter.print("\"" + project.getFeatures().getFeature(f).getName() + "\"");
             if(f < project.getFeatures().getFeatureCount() - 1) {
-                printWriter.print("\n");
+                printWriter.print(",\n");
             }
         }
         printWriter.println("];");
@@ -279,10 +279,19 @@ public final class DataManager {
 
     private void printStakeholders() {
         printWriter.println("% Stakeholders value(1..9), urgency (x + y + z = 9)");
-        printWriter.print("value = [");
+        printWriter.print("value = [|");
         for(int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
-            printWriter.print("|");
-            // TODO get value per stakeholder and per feature
+            for(int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
+                for(int v = 0; v < project.getValues().getValueCount(); v++) {
+                    if(project.getValues().getValue(v).getStakeholder() == project.getStakeholders().getStakeholder(s) &&
+                            project.getValues().getValue(v).getFeature() == project.getFeatures().getFeature(f)) {
+                        printWriter.print(project.getValues().getValue(v).getValue() + ", ");
+                    } else {
+                        printWriter.print("0, ");
+                    }
+                }
+            }
+            printWriter.print("| ");
             if(s < project.getStakeholders().getStakeholderCount() - 1) {
                 printWriter.print("\n");
             }

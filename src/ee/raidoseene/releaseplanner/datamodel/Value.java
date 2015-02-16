@@ -33,4 +33,12 @@ public class Value {
         return this.value;
     }
     
+    public Feature getFeature() {
+        return this.feature;
+    }
+    
+    public Stakeholder getStakeholder() {
+        return this.stakeholder;
+    }
+    
 }
