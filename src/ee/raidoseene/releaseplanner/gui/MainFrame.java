@@ -253,7 +253,12 @@ public final class MainFrame extends JFrame {
         this.saveCurrentProject(false);
         
         try {
-            DataManager.saveDataFile();
+            if (ProjectManager.getCurrentProject().getStorage() == null) {
+                String msg = "Project is not saved!\nUnable to determine dump location!";
+                throw new Exception(msg);
+            }
+            
+            DataManager.saveDataFile(ProjectManager.getCurrentProject());
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }

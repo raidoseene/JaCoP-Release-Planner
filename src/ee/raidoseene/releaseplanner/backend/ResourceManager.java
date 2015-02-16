@@ -13,43 +13,66 @@ import java.io.FileNotFoundException;
  * @author risto
  */
 public final class ResourceManager {
-    
+
     private static final String RESOURCES_PATH = "resources";
-    
+
     public static File getResourceFile(String name) throws Exception {
         return new File(new File(getDirectory(), RESOURCES_PATH), name);
     }
-    
+
     public static File getDirectory() throws Exception {
         File jar = new File(ResourceManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         File dir = jar.getParentFile();
-        
+
         if (dir == null) {
             throw new NullPointerException("Unable to reach parent directory!");
         } else if (dir.isDirectory()) {
             return dir;
         }
-        
+
         throw new Exception("Parent file is not a directory!");
     }
-    
+
     public static boolean isOfType(String path, Type type) throws Exception {
         File file = new File(path);
         if (!file.exists()) {
             throw new FileNotFoundException("File " + file.getPath() + " does not exist!");
         }
-        
+
         if (type == Type.DIRECTORY) {
             return file.isDirectory();
         } else if (type == Type.FILE) {
             return file.isFile();
         }
-        
+
         return false;
     }
-    
+
     public enum Type {
+
         DIRECTORY, FILE;
     }
-    
+
+    public static File createDirectoryFromFile(File file) throws Exception {
+        String path = file.getPath();
+        if (!file.exists()) {
+            throw new FileNotFoundException(path + " does not exist!");
+        }
+        if (!file.isFile()) {
+            throw new Exception(path + " is not a file!");
+        }
+
+        int index = path.lastIndexOf(".");
+        if (index >= 0) {
+            path = path.substring(0, index);
+        }
+
+        File dir = new File(path);
+        if ((!dir.exists() || !dir.isDirectory()) && !dir.mkdir()) {
+            throw new Exception("Failed to create directory " + dir.getPath());
+        }
+
+        return dir;
+    }
+
 }

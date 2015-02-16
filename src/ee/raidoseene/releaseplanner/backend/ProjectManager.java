@@ -88,24 +88,5 @@ public final class ProjectManager {
     public static Project getCurrentProject() {
         return ProjectManager.currentProject;
     }
-    
-    public static File getCurrentProjectFolder(boolean createIfNeeded) throws Exception {
-        String path = ProjectManager.currentProject.getStorage();
-        if (path == null) {
-            throw new FileNotFoundException("Project is not saved!");
-        }
-        
-        int index = path.lastIndexOf(".");
-        if (index >= 0) {
-            path = path.substring(0, index);
-        }
-        
-        File dir = new File(path);
-        if (createIfNeeded && (!dir.exists() || !dir.isDirectory())) {
-            dir.mkdir();
-        }
-        
-        return dir;
-    }
 
 }

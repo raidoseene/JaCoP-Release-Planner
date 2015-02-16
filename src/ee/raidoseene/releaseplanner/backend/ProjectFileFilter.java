@@ -13,11 +13,13 @@ import java.io.FilenameFilter;
  * @author risto
  */
 public class ProjectFileFilter implements FilenameFilter {
+    
+    public static final String FILE_EXTENSION = ".proj";
 
     @Override
     public boolean accept(File file, String string) {
         if (string != null) {
-            return string.endsWith(".proj");
+            return string.endsWith(FILE_EXTENSION);
         }
         return false;
     }

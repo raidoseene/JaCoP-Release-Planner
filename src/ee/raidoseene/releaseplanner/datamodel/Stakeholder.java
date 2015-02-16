@@ -5,33 +5,30 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Raido Seene
  */
-public class Stakeholder {
+public class Stakeholder extends NamedObject implements Serializable {
 
-    private String name;
     private int importance;
 
     Stakeholder() {
-    }
-
-    ;
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getName() {
-        return name;
+        this.importance = 1;
     }
 
     public void setImportance(int importance) {
-        this.importance = importance;
+        if (importance > 0 && importance < 10) {
+            this.importance = importance;
+        } else {
+            throw new ArrayIndexOutOfBoundsException(importance);
+        }
     }
 
     public int getImportance() {
-        return importance;
+        return this.importance;
     }
+
 }

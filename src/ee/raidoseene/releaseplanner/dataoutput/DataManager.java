@@ -4,7 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.dataoutput;
 
-import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.DependencyType;
 import ee.raidoseene.releaseplanner.datamodel.FixedDependency;
@@ -23,9 +23,8 @@ public final class DataManager {
     private final Project project;
     private final PrintWriter printWriter;
 
-    public static void saveDataFile() throws Exception {
-        Project project = ProjectManager.getCurrentProject();
-        File dir = ProjectManager.getCurrentProjectFolder(true);
+    public static void saveDataFile(Project project) throws Exception {
+        File dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage()));
         File file = new File(dir, "data.dzn");
         
         try (PrintWriter pw = new PrintWriter(file)) { // try with resource: printwriter closes automatically!
