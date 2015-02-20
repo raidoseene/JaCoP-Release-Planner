@@ -64,7 +64,7 @@ public final class UrgValPanel extends JPanel {
             this.setLayout(new BorderLayout(10, 10));
             this.setBorder(new EmptyBorder(10, 10, 10, 10));
             this.type = type;
-            
+
             this.listener = new ActionListener() {
 
                 @Override
@@ -121,7 +121,7 @@ public final class UrgValPanel extends JPanel {
                         Stakeholder s = stakeholders.getStakeholder(i);
                         if (filter == null || s == filter) {
                             UVTab.UVSContent content = new UVTab.UVSContent(s);
-                            ContentPanel panel = new ContentPanel(content, false);
+                            ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_EXPANDABLE);
                             panel.addContentPanelListener(content);
                             this.scrollable.add(panel);
                         }
@@ -133,7 +133,7 @@ public final class UrgValPanel extends JPanel {
                     for (int i = 0; i < count; i++) {
                         Feature f = features.getFeature(i);
                         UVTab.UVFContent content = new UVTab.UVFContent(f, filter);
-                        ContentPanel panel = new ContentPanel(content, false);
+                        ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_EXPANDABLE);
                         panel.addContentPanelListener(content);
                         this.scrollable.add(panel);
                     }
@@ -178,10 +178,25 @@ public final class UrgValPanel extends JPanel {
             }
         }
 
-        private final class UVSContent extends JPanel implements ContentPanelListener {
+        private final class UVSContent extends JPanel implements ContentPanelListener, HierarchyListener {
+
+            private final Stakeholder stakeholder;
+            private final ScrollablePanel scrollable;
+            private final JScrollPane scroller;
 
             private UVSContent(Stakeholder s) {
+                this.setBorder(new EmptyBorder(10, 10, 10, 10));
+                this.setLayout(new BorderLayout(10, 10));
 
+                this.stakeholder = s;
+                this.add(BorderLayout.PAGE_START, new JLabel(s.getName()));
+
+                this.scrollable = new ScrollablePanel();
+                this.scroller = new JScrollPane(this.scrollable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                this.scrollable.setLayout(new ContentListLayout(ContentPanel.class));
+                this.scrollable.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+                this.scrollable.addHierarchyListener(this);
             }
 
             @Override
@@ -190,18 +205,88 @@ public final class UrgValPanel extends JPanel {
 
             @Override
             public void contentPanelExpanded(ContentPanel source) {
+                if (this.getComponentCount() == 1) {
+                    this.add(this.scroller);
+
+                    UVSContent.this.scrollable.contentUpdated();
+                }
             }
 
             @Override
             public void contentPanelCompressed(ContentPanel source) {
+                if (this.getComponentCount() > 1) {
+                    this.remove(this.scroller);
+
+                    UVSContent.this.scrollable.contentUpdated();
+                }
+            }
+
+            @Override
+            public void hierarchyChanged(HierarchyEvent he) {
+                int mask = HierarchyEvent.SHOWING_CHANGED;
+                if ((he.getChangeFlags() & mask) == mask && he.getChanged().isShowing()) {
+                    Features features = ProjectManager.getCurrentProject().getFeatures();
+                    int count = features.getFeatureCount();
+                    this.scrollable.removeAll();
+
+                    for (int i = 0; i < count; i++) {
+                        Feature f = features.getFeature(i);
+                        UVSContent.UVSFContent content = new UVSContent.UVSFContent(f);
+                        ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_EXPANDABLE);
+                        panel.addContentPanelListener(content);
+                        this.scrollable.add(panel);
+                    }
+                }
+            }
+
+            private final class UVSFContent extends JPanel implements ContentPanelListener {
+
+                private final Feature feature;
+
+                private UVSFContent(Feature f) {
+                    this.setBorder(new EmptyBorder(10, 10, 10, 10));
+                    this.setLayout(new BorderLayout(10, 10));
+
+                    this.feature = f;
+                }
+
+                @Override
+                public void contentPanelClosed(ContentPanel source) {
+                }
+
+                @Override
+                public void contentPanelExpanded(ContentPanel source) {
+                }
+
+                @Override
+                public void contentPanelCompressed(ContentPanel source) {
+                }
+
             }
 
         }
 
-        private final class UVFContent extends JPanel implements ContentPanelListener {
+        private final class UVFContent extends JPanel implements ContentPanelListener, HierarchyListener {
+
+            private final Feature feature;
+            private final Stakeholder filter;
+            private final ScrollablePanel scrollable;
+            private final JScrollPane scroller;
 
             private UVFContent(Feature f, Stakeholder filter) {
+                this.setBorder(new EmptyBorder(12, 10, 10, 10));
+                this.setLayout(new BorderLayout(10, 12));
 
+                this.feature = f;
+                this.filter = filter;
+                this.add(BorderLayout.PAGE_START, new JLabel(f.getName()));
+
+                this.scrollable = new ScrollablePanel();
+                this.scroller = new JScrollPane(this.scrollable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                this.scrollable.setLayout(new ContentListLayout(ContentPanel.class));
+                this.scrollable.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+                this.scrollable.addHierarchyListener(this);
             }
 
             @Override
@@ -210,10 +295,65 @@ public final class UrgValPanel extends JPanel {
 
             @Override
             public void contentPanelExpanded(ContentPanel source) {
+                if (this.getComponentCount() == 1) {
+                    this.add(this.scroller);
+
+                    UVFContent.this.scrollable.contentUpdated();
+                }
             }
 
             @Override
             public void contentPanelCompressed(ContentPanel source) {
+                if (this.getComponentCount() > 1) {
+                    this.remove(this.scroller);
+
+                    UVFContent.this.scrollable.contentUpdated();
+                }
+            }
+
+            @Override
+            public void hierarchyChanged(HierarchyEvent he) {
+                int mask = HierarchyEvent.SHOWING_CHANGED;
+                if ((he.getChangeFlags() & mask) == mask && he.getChanged().isShowing()) {
+                    Stakeholders stakeholders = ProjectManager.getCurrentProject().getStakeholders();
+                    int count = stakeholders.getStakeholderCount();
+                    this.scrollable.removeAll();
+
+                    for (int i = 0; i < count; i++) {
+                        Stakeholder s = stakeholders.getStakeholder(i);
+                        if (this.filter == null || s == this.filter) {
+                            UVFContent.UVFSContent content = new UVFContent.UVFSContent(s);
+                            ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_EXPANDABLE);
+                            panel.addContentPanelListener(content);
+                            this.scrollable.add(panel);
+                        }
+                    }
+                }
+            }
+            
+            private final class UVFSContent extends JPanel implements ContentPanelListener {
+
+                private final Stakeholder stakeholder;
+
+                private UVFSContent(Stakeholder s) {
+                    this.setBorder(new EmptyBorder(10, 10, 10, 10));
+                    this.setLayout(new BorderLayout(10, 10));
+
+                    this.stakeholder = s;
+                }
+
+                @Override
+                public void contentPanelClosed(ContentPanel source) {
+                }
+
+                @Override
+                public void contentPanelExpanded(ContentPanel source) {
+                }
+
+                @Override
+                public void contentPanelCompressed(ContentPanel source) {
+                }
+
             }
 
         }

@@ -146,7 +146,7 @@ public final class FeaturesPanel extends JPanel {
     private void processAddEvent() {
         Feature f = ProjectManager.getCurrentProject().getFeatures().addFeature();
         FeaturesPanel.FPContent content = new FeaturesPanel.FPContent(f);
-        ContentPanel panel = new ContentPanel(content, true);
+        ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE);
 
         this.scrollable.add(panel);
         this.scrollable.contentUpdated();
@@ -173,7 +173,7 @@ public final class FeaturesPanel extends JPanel {
                 for (int i = 0; i < count; i++) {
                     Feature f = features.getFeature(i);
                     FeaturesPanel.FPContent content = new FeaturesPanel.FPContent(f);
-                    ContentPanel panel = new ContentPanel(content, true);
+                    ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE);
                     panel.addContentPanelListener(content);
                     this.add(panel);
                 }

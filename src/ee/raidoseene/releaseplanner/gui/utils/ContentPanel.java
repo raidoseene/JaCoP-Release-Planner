@@ -22,36 +22,40 @@ import javax.swing.border.BevelBorder;
  */
 public final class ContentPanel extends JPanel {
 
-    private static final String CLOSE_BUTTON = "×";
+    public static final int TYPE_CLOSABLE = 1;
+    public static final int TYPE_EXPANDABLE = 2;
     private static final String[] EXPAND_BUTTON = new String[]{"▼", "▲"};
-    private final boolean expandable;
+    private static final String CLOSE_BUTTON = "×";
     private final JButton close, expand;
     private final Component content;
     private boolean expanded;
 
-    public ContentPanel(Component content, boolean expandable) {
-        this.expandable = expandable;
+    public ContentPanel(Component content, int type) {
         this.content = content;
         this.expanded = false;
 
         this.setBorder(new BevelBorder(BevelBorder.RAISED));
         this.setLayout(new ContentPanel.CPLayout());
 
-        this.close = new JButton(CLOSE_BUTTON);
-        this.close.addActionListener(new ActionListener() {
+        if ((type & TYPE_CLOSABLE) != 0) {
+            this.close = new JButton(CLOSE_BUTTON);
+            this.close.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                try {
-                    ContentPanel.this.processCloseEvent();
-                } catch (Throwable t) {
-                    t.printStackTrace();
+                @Override
+                public void actionPerformed(ActionEvent ae) {
+                    try {
+                        ContentPanel.this.processCloseEvent();
+                    } catch (Throwable t) {
+                        t.printStackTrace();
+                    }
                 }
-            }
-        });
-        this.add(this.close);
+            });
+            this.add(this.close);
+        } else {
+            this.close = null;
+        }
 
-        if (this.expandable) {
+        if ((type & TYPE_EXPANDABLE) != 0) {
             this.expand = new JButton(EXPAND_BUTTON[0]);
             this.expand.addActionListener(new ActionListener() {
 
@@ -71,17 +75,19 @@ public final class ContentPanel extends JPanel {
 
         this.add(this.content);
     }
-    
+
     @Override
     public void setEnabled(boolean enable) {
         super.setEnabled(enable);
         this.content.setEnabled(enable);
-        this.close.setEnabled(enable);
+        if (this.close != null) {
+            this.close.setEnabled(enable);
+        }
         if (this.expand != null) {
             this.expand.setEnabled(enable);
         }
     }
-    
+
     public Component getContent() {
         return this.content;
     }
@@ -135,17 +141,23 @@ public final class ContentPanel extends JPanel {
 
         @Override
         public Dimension preferredLayoutSize(Container cntnr) {
-            Dimension pref = ContentPanel.this.close.getPreferredSize();
             Insets is = ContentPanel.this.getInsets();
-            int height = pref.height + 12;
-            int width = pref.width + 12;
-
+            int height = 0;
+            int width = 0;
+            
+            if (ContentPanel.this.close != null) {
+                Dimension pref = ContentPanel.this.close.getPreferredSize();
+                height = pref.height + 12;
+                width = pref.width + 12;
+            }
+            
             if (ContentPanel.this.expand != null) {
-                pref = ContentPanel.this.expand.getPreferredSize();
-                width += (pref.width + 4);
+                Dimension pref = ContentPanel.this.expand.getPreferredSize();
+                width = (width > 0) ? (pref.width + 4) : (pref.width + 12);
+                height = Math.max(height, pref.height + 12);
             }
 
-            pref = ContentPanel.this.content.getPreferredSize();
+            Dimension pref = ContentPanel.this.content.getPreferredSize();
             height = Math.max(height, pref.height) + is.top + is.bottom;
             width = Math.max(width, pref.width) + is.left + is.right;
 
@@ -154,17 +166,23 @@ public final class ContentPanel extends JPanel {
 
         @Override
         public Dimension minimumLayoutSize(Container cntnr) {
-            Dimension pref = ContentPanel.this.close.getMinimumSize();
             Insets is = ContentPanel.this.getInsets();
-            int height = pref.height + 12;
-            int width = pref.width + 12;
-
+            int height = 0;
+            int width = 0;
+            
+            if (ContentPanel.this.close != null) {
+                Dimension pref = ContentPanel.this.close.getMinimumSize();
+                height = pref.height + 12;
+                width = pref.width + 12;
+            }
+            
             if (ContentPanel.this.expand != null) {
-                pref = ContentPanel.this.expand.getMinimumSize();
-                width += (pref.width + 4);
+                Dimension pref = ContentPanel.this.expand.getMinimumSize();
+                width = (width > 0) ? (pref.width + 4) : (pref.width + 12);
+                height = Math.max(height, pref.height + 12);
             }
 
-            pref = ContentPanel.this.content.getMinimumSize();
+            Dimension pref = ContentPanel.this.content.getMinimumSize();
             height = Math.max(height, pref.height) + is.top + is.bottom;
             width = Math.max(width, pref.width) + is.left + is.right;
 
@@ -176,19 +194,22 @@ public final class ContentPanel extends JPanel {
             Insets is = ContentPanel.this.getInsets();
             int width = ContentPanel.this.getWidth();
             int height = ContentPanel.this.getHeight();
+            int cw = 6;
 
-            Dimension pref = ContentPanel.this.close.getPreferredSize();
-            ContentPanel.this.close.setBounds(width - is.right - 6 - pref.width, is.top + 6, pref.width, pref.height);
-            int cw = pref.width;
+            if (ContentPanel.this.close != null) {
+                Dimension pref = ContentPanel.this.close.getPreferredSize();
+                ContentPanel.this.close.setBounds(width - is.right - cw - pref.width, is.top + 6, pref.width, pref.height);
+                cw = pref.width + 10;
+            }
 
             if (ContentPanel.this.expand != null) {
-                pref = ContentPanel.this.expand.getPreferredSize();
-                ContentPanel.this.expand.setBounds(width - is.right - 10 - cw - pref.width, is.top + 6, pref.width, pref.height);
+                Dimension pref = ContentPanel.this.expand.getPreferredSize();
+                ContentPanel.this.expand.setBounds(width - is.right - cw - pref.width, is.top + 6, pref.width, pref.height);
             }
 
             ContentPanel.this.content.setBounds(is.left, is.top, width - is.right - is.left, height - is.bottom - is.top);
         }
 
     }
-    
+
 }
