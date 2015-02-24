@@ -14,12 +14,6 @@ import java.io.FileNotFoundException;
  */
 public final class ResourceManager {
 
-    private static final String RESOURCES_PATH = "resources";
-
-    public static File getResourceFile(String name) throws Exception {
-        return new File(new File(getDirectory(), RESOURCES_PATH), name);
-    }
-
     public static File getDirectory() throws Exception {
         File jar = new File(ResourceManager.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         File dir = jar.getParentFile();

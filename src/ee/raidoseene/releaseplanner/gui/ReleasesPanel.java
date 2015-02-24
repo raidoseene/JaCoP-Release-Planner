@@ -66,7 +66,7 @@ public final class ReleasesPanel extends ScrollablePanel {
             for (int i = 0; i < count; i++) {
                 Release r = releases.getRelease(i);
                 ReleasesPanel.RPContent content = new ReleasesPanel.RPContent(r);
-                ContentPanel panel = new ContentPanel(content, true);
+                ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE);
                 panel.addContentPanelListener(content);
                 this.scrollable.add(panel);
             }
@@ -90,7 +90,7 @@ public final class ReleasesPanel extends ScrollablePanel {
     private void processAddEvent() {
         Release r = ProjectManager.getCurrentProject().getReleases().addRelease();
         ReleasesPanel.RPContent content = new ReleasesPanel.RPContent(r);
-        ContentPanel panel = new ContentPanel(content, true);
+        ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE);
 
         this.scrollable.add(panel, this.scrollable.getComponentCount() - 1);
         this.scrollable.contentUpdated();

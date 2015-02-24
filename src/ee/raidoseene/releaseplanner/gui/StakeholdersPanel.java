@@ -57,7 +57,7 @@ public final class StakeholdersPanel extends JPanel {
             for (int i = 0; i < count; i++) {
                 Stakeholder s = stakeholders.getStakeholder(i);
                 StakeholdersPanel.SPContent content = new StakeholdersPanel.SPContent(s);
-                ContentPanel panel = new ContentPanel(content, false);
+                ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE);
                 panel.addContentPanelListener(content);
                 this.scrollable.add(panel);
             }
@@ -81,7 +81,7 @@ public final class StakeholdersPanel extends JPanel {
     private void processAddEvent() {
         Stakeholder s = ProjectManager.getCurrentProject().getStakeholders().addStakeholder();
         StakeholdersPanel.SPContent content = new StakeholdersPanel.SPContent(s);
-        ContentPanel panel = new ContentPanel(content, false);
+        ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE);
 
         this.scrollable.add(panel, this.scrollable.getComponentCount() - 1);
         this.scrollable.contentUpdated();

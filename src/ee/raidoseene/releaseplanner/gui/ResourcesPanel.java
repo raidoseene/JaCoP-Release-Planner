@@ -50,7 +50,7 @@ public final class ResourcesPanel extends JPanel {
             for (int i = 0; i < count; i++) {
                 Resource r = resources.getResource(i);
                 ResourcesPanel.RPContent content = new ResourcesPanel.RPContent(r);
-                ContentPanel panel = new ContentPanel(content, false);
+                ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE);
                 panel.addContentPanelListener(content);
                 this.scrollable.add(panel);
             }
@@ -74,7 +74,7 @@ public final class ResourcesPanel extends JPanel {
     private void processAddEvent() {
         Resource r = ProjectManager.getCurrentProject().getResources().addResource();
         ResourcesPanel.RPContent content = new ResourcesPanel.RPContent(r);
-        ContentPanel panel = new ContentPanel(content, false);
+        ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE);
 
         this.scrollable.add(panel, this.scrollable.getComponentCount() - 1);
         this.scrollable.contentUpdated();

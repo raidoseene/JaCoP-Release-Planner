@@ -5,8 +5,12 @@
  */
 package ee.raidoseene.releaseplanner.gui;
 
+import ee.raidoseene.releaseplanner.backend.ProjectFileFilter;
+import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.backend.Settings;
 import ee.raidoseene.releaseplanner.backend.SettingsManager;
+import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.gui.utils.ContentListLayout;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -60,6 +64,20 @@ public final class SettingsPanel extends JPanel {
         def.setLayout(new BorderLayout(10, 10));
         def.add(BorderLayout.PAGE_START, new JLabel("<html><b><u>Default Settings</u></b></html>"));
         this.add(def);
+        
+        JButton btn = new JButton("Set current project as default");
+        btn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    SettingsPanel.this.processDefaultProjectSet();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        def.add(BorderLayout.LINE_START, btn);
 
         this.add(new JSeparator());
 
@@ -88,7 +106,7 @@ public final class SettingsPanel extends JPanel {
         e.setLayout(new GridLayout(2, 1, 10, 10));
         c.add(BorderLayout.LINE_END, e);
 
-        JButton btn = new JButton("Modify");
+        btn = new JButton("Modify");
         btn.addActionListener(new ActionListener() {
 
             @Override
@@ -172,6 +190,22 @@ public final class SettingsPanel extends JPanel {
                 Messenger.showError(ex, null);
             }
         }
+    }
+    
+    private void processDefaultProjectSet() {
+        Project project = ProjectManager.getCurrentProject();
+        String storage = project.getStorage();
+        
+        try {
+            String fname = "default" + ProjectFileFilter.FILE_EXTENSION;
+            File file = new File(ResourceManager.getDirectory(), fname);
+            ProjectManager.saveCurrentProject(file);
+        } catch (Exception ex) {
+            String msg = "Failed to set the current project as default!";
+            Messenger.showError(ex, msg);
+        }
+        
+        project.setStorage(storage);
     }
 
 }

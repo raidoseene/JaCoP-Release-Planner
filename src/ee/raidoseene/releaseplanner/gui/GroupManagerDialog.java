@@ -93,7 +93,7 @@ public final class GroupManagerDialog extends JDialog {
     
     private void processAddEvent() {
         GroupManagerDialog.GMDContent content = new GroupManagerDialog.GMDContent();
-        ContentPanel panel = new ContentPanel(content, false);
+        ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE);
         
         this.scrollable.add(panel);
         this.scrollable.contentUpdated();

@@ -157,10 +157,12 @@ public final class MainFrame extends JFrame {
 
             if (name != null) {
                 if (def) {
-                    File file = ResourceManager.getResourceFile("default.proj");
-                    if (file != null && file.exists()) {
+                    String fname = "default" + ProjectFileFilter.FILE_EXTENSION;
+                    File file = new File(ResourceManager.getDirectory(), fname);
+                    if (file.exists() && file.isFile()) {
                         ProjectManager.loadSavedProject(file);
                         ProjectManager.getCurrentProject().setStorage(null);
+                        ProjectManager.getCurrentProject().setName(name);
                     } else {
                         Messenger.showWarning(null, "Default project not set!\nCreating empty project.");
                         ProjectManager.createNewProject(name);
