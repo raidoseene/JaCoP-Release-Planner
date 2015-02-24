@@ -10,7 +10,7 @@ import java.io.FilenameFilter;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public class ProjectFileFilter implements FilenameFilter {
     

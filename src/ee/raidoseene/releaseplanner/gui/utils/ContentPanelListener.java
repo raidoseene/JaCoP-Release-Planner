@@ -9,7 +9,7 @@ import java.util.EventListener;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public interface ContentPanelListener extends EventListener {
     

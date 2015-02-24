@@ -18,7 +18,7 @@ import java.io.OutputStream;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public final class ProjectManager {
 

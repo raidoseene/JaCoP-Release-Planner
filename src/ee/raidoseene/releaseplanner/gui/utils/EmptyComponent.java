@@ -10,7 +10,7 @@ import java.awt.Dimension;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public class EmptyComponent extends Component {
 

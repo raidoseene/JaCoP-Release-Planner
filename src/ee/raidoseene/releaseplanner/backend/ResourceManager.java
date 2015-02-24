@@ -10,7 +10,7 @@ import java.io.FileNotFoundException;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public final class ResourceManager {
 

@@ -21,7 +21,7 @@ import javax.swing.UIManager;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public final class MainFrame extends JFrame {
 

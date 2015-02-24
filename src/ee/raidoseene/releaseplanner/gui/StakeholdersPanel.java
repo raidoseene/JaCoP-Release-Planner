@@ -33,7 +33,7 @@ import javax.swing.event.ChangeListener;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public final class StakeholdersPanel extends JPanel {
 

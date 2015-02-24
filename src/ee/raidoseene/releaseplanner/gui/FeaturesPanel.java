@@ -42,7 +42,7 @@ import javax.swing.border.TitledBorder;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public final class FeaturesPanel extends JPanel {
 

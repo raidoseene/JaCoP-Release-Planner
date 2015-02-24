@@ -13,7 +13,7 @@ import java.awt.LayoutManager;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public class ContentListLayout implements LayoutManager {
     

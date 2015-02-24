@@ -27,7 +27,7 @@ import javax.swing.filechooser.FileFilter;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public final class SettingsPanel extends JPanel {
 

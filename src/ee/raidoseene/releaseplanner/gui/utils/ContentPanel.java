@@ -18,7 +18,7 @@ import javax.swing.border.BevelBorder;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public final class ContentPanel extends JPanel {
 

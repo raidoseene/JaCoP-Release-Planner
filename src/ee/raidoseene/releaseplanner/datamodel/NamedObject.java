@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public abstract class NamedObject implements Serializable {
 

@@ -9,7 +9,7 @@ import javax.swing.JPanel;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public final class UrgValPanel extends JPanel {
     

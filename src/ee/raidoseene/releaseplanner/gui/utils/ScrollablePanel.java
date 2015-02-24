@@ -15,7 +15,7 @@ import javax.swing.SwingUtilities;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public class ScrollablePanel extends JPanel {
     

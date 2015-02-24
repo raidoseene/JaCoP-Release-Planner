@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 abstract class ProjectElement implements Serializable {
     

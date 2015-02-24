@@ -26,7 +26,7 @@ import javax.swing.border.EmptyBorder;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public final class ResourcesPanel extends JPanel {
 

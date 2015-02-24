@@ -11,7 +11,7 @@ import javax.swing.JTabbedPane;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public class TabbedView extends JPanel {
     
