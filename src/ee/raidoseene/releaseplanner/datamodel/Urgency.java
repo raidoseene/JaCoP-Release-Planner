@@ -48,4 +48,12 @@ public class Urgency {
         return this.urgencies.containsKey(r);
     }
     
+    public Feature getFeature() {
+        return this.feature;
+    }
+    
+    public Stakeholder getStakeholder() {
+        return this.stakeholder;
+    }
+    
 }

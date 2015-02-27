@@ -5,7 +5,8 @@
 package ee.raidoseene.releaseplanner.datamodel;
 
 /**
- * Not in use at the moment, can be deleted
+ * Deprecated
+ * 
  * @author Raido Seene
  */
 public class Pair<L, R> {

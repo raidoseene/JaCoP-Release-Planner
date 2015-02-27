@@ -38,4 +38,24 @@ public class Urgencies implements Serializable {
         return this.urgenciesContainer.size();
     }
     
+    public List<Urgency> getUrgenciesByStakeholder(Stakeholder stakeholder) {
+        ArrayList<Urgency> list = new ArrayList<>();
+        for (Urgency u: this.urgenciesContainer) {
+            if(u.getStakeholder() == stakeholder) {
+                list.add(u);
+            }
+        }
+        return list;
+    }
+    
+    public List<Urgency> getUrgenciesByFeature(Feature feature) {
+        ArrayList<Urgency> list = new ArrayList<>();
+        for (Urgency u : this.urgenciesContainer) {
+            if (u.getFeature() == feature) {
+                list.add(u);
+            }
+        }
+        return list;
+    }
+    
 }

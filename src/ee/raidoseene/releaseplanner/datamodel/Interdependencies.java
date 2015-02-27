@@ -41,8 +41,8 @@ public class Interdependencies extends ProjectElement implements Serializable {
         return dependency;
     }
     
-    public Dependency addModifyingInterdependency(Feature feature1, Feature feature2, Value value) {
-        Dependency dependency = new ModifyingInterdependency(feature1, feature2, value);
+    public Dependency addModifyingInterdependency(Feature feature1, Feature feature2, Values values) {
+        Dependency dependency = new ModifyingInterdependency(feature1, feature2, values);
         this.interdependenciesContainer.add(dependency);
         return dependency;
     }
@@ -67,6 +67,7 @@ public class Interdependencies extends ProjectElement implements Serializable {
         return this.interdependenciesContainer.size();
     }
     
+    /*
     public int getDependencyCount(DependencyType type) {
         int counter = 0;
         for(int i = 0; i < getDependencyCount(); i++) {
@@ -76,7 +77,9 @@ public class Interdependencies extends ProjectElement implements Serializable {
         }
         return counter;
     }
+    */
     
+    /*
     public List<Dependency> getDependencyList(DependencyType type) {
         List<Dependency> list = new ArrayList<>();
         
@@ -87,7 +90,9 @@ public class Interdependencies extends ProjectElement implements Serializable {
         }
         return list;
     }
+    */
     
+    /*
     public List<Dependency> getInterdependencyList(DependencyType type, int subType) {
         List<Dependency> dList = getDependencyList(type);
         List<Dependency> list = new ArrayList<>();
@@ -100,6 +105,7 @@ public class Interdependencies extends ProjectElement implements Serializable {
         }
         return list;
     }
+    */
     
     /**
      * Query only certain types of dependencies.
@@ -111,10 +117,10 @@ public class Interdependencies extends ProjectElement implements Serializable {
      * @return Returns an array dependencies of type T
      */
     @SuppressWarnings("unchecked")
-    public <T extends Dependency> T[] getTypedDependencies(Class<T> cls) {
+    public <T extends Dependency> T[] getTypedDependencies(Class<T> cls, Integer criterium) {
         ArrayList<T> list = new ArrayList<>(this.interdependenciesContainer.size());
         for (Dependency d: this.interdependenciesContainer) {
-            if (cls.isInstance(d)) {
+            if (cls.isInstance(d) && (criterium == null || d.type == criterium)) {
                 list.add((T) d);
             }
         }
@@ -122,11 +128,11 @@ public class Interdependencies extends ProjectElement implements Serializable {
         return list.toArray((T[]) Array.newInstance(cls, list.size()));
     }
     
-    public int getTypedDependancyCount(Class<? extends Dependency> cls) {
+    public int getTypedDependancyCount(Class<? extends Dependency> cls, Integer criterium) {
         int count = 0;
         
         for (Dependency d: this.interdependenciesContainer) {
-            if (cls.isInstance(d)) {
+            if (cls.isInstance(d) && (criterium == null || d.type == criterium)) {
                 count++;
             }
         }
