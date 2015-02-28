@@ -15,7 +15,6 @@ import java.util.List;
 public class Features extends ProjectElement implements Serializable {
 
     private final List<Feature> featureContainer;
-    //private Releases releases;
 
     Features(Project project) {
         super(project);

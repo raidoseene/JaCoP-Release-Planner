@@ -99,4 +99,8 @@ public class Project extends NamedObject implements Serializable {
     void stakeholderRemoved(Stakeholder stakeohlder) {
         // TODO
     }
+
+    void groupRemoved(Group g) {
+        // TODO
+    }
 }

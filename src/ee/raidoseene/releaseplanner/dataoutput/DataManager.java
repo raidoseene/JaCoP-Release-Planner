@@ -8,7 +8,6 @@ import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
 import ee.raidoseene.releaseplanner.datamodel.FixedDependency;
-import ee.raidoseene.releaseplanner.datamodel.Interdependencies;
 import ee.raidoseene.releaseplanner.datamodel.Interdependency;
 import ee.raidoseene.releaseplanner.datamodel.ModifyingInterdependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
@@ -39,7 +38,6 @@ public final class DataManager {
 
             Project ModDep = new Project("ModifyingDependencies");
             modifier = dm.ModifyingDependencyConversion(ModDep);
-            //dm.printData(dm.ModifyingDependencyConversion(ModDep));
 
             dm.printFailHeader();
             dm.printProjectParameters(ModDep.getFeatures().getFeatureCount());
@@ -48,7 +46,7 @@ public final class DataManager {
             dm.printResources();
             dm.printFeatures(ModDep);
             //dm.printModifyingInterdependencies();
-            dm.printStakeholders();
+            dm.printStakeholders(ModDep);
         }
     }
 
@@ -57,7 +55,116 @@ public final class DataManager {
         this.printWriter = pw;
     }
 
-    private void printData(DataManager dm, boolean modifier) {
+    private boolean ModifyingDependencyConversion(Project ModDep) {
+
+        if (project.getInterdependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CC) > 0) {
+            ModifyingInterdependency[] CcDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CC);
+
+            for (int dep = 0; dep < CcDS.length; dep++) {
+                Feature f = ModDep.getFeatures().addFeature();
+                f.setName(CcDS[dep].getSecondary().getName() + "' (Cost Changed)");
+                for (int r = 0; r < project.getResources().getResourceCount(); r++) {
+                    if (CcDS[dep].getSecondary().hasConsumption(project.getResources().getResource(r))) {
+                        f.setConsumption(project.getResources().getResource(r),
+                                CcDS[dep].getChange(Feature.class).getConsumption(project.getResources().getResource(r)));
+                    }
+                }
+
+                List<Value> values = project.getValues().getValuesByFeature(CcDS[dep].getSecondary());
+                for (Value v : values) {
+                    Value newV = ModDep.getValues().addValue(f, v.getStakeholder());
+                    newV.setValue(v.getValue());
+                }
+
+                List<Urgency> urgencies = project.getUrgencies().getUrgenciesByFeature(CcDS[dep].getSecondary());
+                for (Urgency u : urgencies) {
+                    Urgency newU = ModDep.getUrgencies().addUrgency(f, u.getStakeholder());
+                    for (int r = 1; r <= project.getReleases().getReleaseCount(); r++) {
+                        if (u.getUrgency(project.getReleases().getRelease(r)) != 0) {
+                            newU.setUrgency(project.getReleases().getRelease(r), u.getUrgency(project.getReleases().getRelease(r)));
+                        }
+                    }
+                }
+
+
+                ModDep.getInterdependencies().addInterdependency(f, CcDS[dep].getPrimary(), Dependency.REQ);
+                ModDep.getInterdependencies().addInterdependency(CcDS[dep].getPrimary(), CcDS[dep].getSecondary(), Dependency.PRE);
+                ModDep.getInterdependencies().addInterdependency(CcDS[dep].getPrimary(), f, Dependency.XOR);
+            }
+        }
+
+        if (project.getInterdependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CV) > 0) {
+            ModifyingInterdependency[] CvDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CV);
+
+            for (int dep = 0; dep < CvDS.length; dep++) {
+                Feature f = ModDep.getFeatures().addFeature();
+                f.setName(CvDS[dep].getSecondary().getName() + "' (Value Changed)");
+                for (int r = 0; r < project.getResources().getResourceCount(); r++) {
+                    if (CvDS[dep].getSecondary().hasConsumption(project.getResources().getResource(r))) {
+                        f.setConsumption(project.getResources().getResource(r),
+                                CvDS[dep].getSecondary().getConsumption(project.getResources().getResource(r)));
+                    }
+                }
+
+                List<Value> values = CvDS[dep].getChange(Values.class).getValuesByFeature(CvDS[dep].getSecondary());
+                for (Value v : values) {
+                    Value newV = ModDep.getValues().addValue(f, v.getStakeholder());
+                    newV.setValue(v.getValue());
+                }
+
+                List<Urgency> urgencies = project.getUrgencies().getUrgenciesByFeature(CvDS[dep].getSecondary());
+                for (Urgency u : urgencies) {
+                    Urgency newU = ModDep.getUrgencies().addUrgency(f, u.getStakeholder());
+                    for (int r = 1; r <= project.getReleases().getReleaseCount(); r++) {
+                        if (u.getUrgency(project.getReleases().getRelease(r)) != 0) {
+                            newU.setUrgency(project.getReleases().getRelease(r), u.getUrgency(project.getReleases().getRelease(r)));
+                        }
+                    }
+                }
+
+
+                ModDep.getInterdependencies().addInterdependency(f, CvDS[dep].getPrimary(), Dependency.REQ);
+                ModDep.getInterdependencies().addInterdependency(CvDS[dep].getPrimary(), CvDS[dep].getSecondary(), Dependency.PRE);
+                ModDep.getInterdependencies().addInterdependency(CvDS[dep].getPrimary(), f, Dependency.XOR);
+            }
+        }
+
+        if (project.getInterdependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CU) > 0) {
+            ModifyingInterdependency[] CuDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CU);
+
+            for (int dep = 0; dep < CuDS.length; dep++) {
+                Feature f = ModDep.getFeatures().addFeature();
+                f.setName(CuDS[dep].getSecondary().getName() + "' (Urgency Changed)");
+                for (int r = 0; r < project.getResources().getResourceCount(); r++) {
+                    if (CuDS[dep].getSecondary().hasConsumption(project.getResources().getResource(r))) {
+                        f.setConsumption(project.getResources().getResource(r),
+                                CuDS[dep].getSecondary().getConsumption(project.getResources().getResource(r)));
+                    }
+                }
+
+                List<Value> values = CuDS[dep].getChange(Values.class).getValuesByFeature(CuDS[dep].getSecondary());
+                for (Value v : values) {
+                    Value newV = ModDep.getValues().addValue(f, v.getStakeholder());
+                    newV.setValue(v.getValue());
+                }
+
+                List<Urgency> urgencies = CuDS[dep].getChange(Urgencies.class).getUrgenciesByFeature(CuDS[dep].getSecondary());
+                for (Urgency u : urgencies) {
+                    Urgency newU = ModDep.getUrgencies().addUrgency(f, u.getStakeholder());
+                    for (int r = 1; r <= project.getReleases().getReleaseCount(); r++) {
+                        if (u.getUrgency(project.getReleases().getRelease(r)) != 0) {
+                            newU.setUrgency(project.getReleases().getRelease(r), u.getUrgency(project.getReleases().getRelease(r)));
+                        }
+                    }
+                }
+
+
+                ModDep.getInterdependencies().addInterdependency(f, CuDS[dep].getPrimary(), Dependency.REQ);
+                ModDep.getInterdependencies().addInterdependency(CuDS[dep].getPrimary(), CuDS[dep].getSecondary(), Dependency.PRE);
+                ModDep.getInterdependencies().addInterdependency(CuDS[dep].getPrimary(), f, Dependency.XOR);
+            }
+        }
+        return true;
     }
 
     private void printFailHeader() {
@@ -268,69 +375,95 @@ public final class DataManager {
         printWriter.println("% =========================");
     }
 
-    private void printModifyingInterdependencies() {
-        ModifyingInterdependency[] CcDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CC);
-        ModifyingInterdependency[] CvDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CV);
-        ModifyingInterdependency[] CuDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CU);
+    /*
+     private void printModifyingInterdependencies() {
+     ModifyingInterdependency[] CcDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CC);
+     ModifyingInterdependency[] CvDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CV);
+     ModifyingInterdependency[] CuDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CU);
 
-        printWriter.println("% Change in Cost  (feature, feature, costs 1, ..., cost n)");
+     printWriter.println("% Change in Cost  (feature, feature, costs 1, ..., cost n)");
 
-        // CHANGE IN COST dependency
-        printWriter.println("CC = " + CcDS.length + ";");
-        printWriter.print("cc = [| ");
-        if (CcDS.length > 0) {
-            for (int i = 0; i < CcDS.length; i++) {
-                printWriter.print((project.getFeatures().getFeatureIndex(CcDS[i].getPrimary()) + 1)
-                        + ", " + (project.getFeatures().getFeatureIndex(CcDS[i].getSecondary()) + 1)
-                        + "(missing costs)" + ", ");
-            }
-            printWriter.println("|];");
-        } else {
-            printWriter.println("1, 1, |];");
-        }
+     // CHANGE IN COST dependency
+     printWriter.println("CC = " + CcDS.length + ";");
+     printWriter.print("cc = [| ");
+     if (CcDS.length > 0) {
+     for (int i = 0; i < CcDS.length; i++) {
+     printWriter.print((project.getFeatures().getFeatureIndex(CcDS[i].getPrimary()) + 1)
+     + ", " + (project.getFeatures().getFeatureIndex(CcDS[i].getSecondary()) + 1)
+     + "(missing costs)" + ", ");
+     }
+     printWriter.println("|];");
+     } else {
+     printWriter.println("1, 1, |];");
+     }
 
-        // CHANGE IN VALUE dependency
-        printWriter.println("CV = " + CvDS.length + ";");
-        printWriter.print("cv = [| ");
-        if (CvDS.length > 0) {
-            for (int i = 0; i < CvDS.length; i++) {
-                printWriter.print((project.getFeatures().getFeatureIndex(CvDS[i].getPrimary()) + 1)
-                        + ", " + (project.getFeatures().getFeatureIndex(CvDS[i].getSecondary()) + 1)
-                        + "{missing values}" + ", ");
-            }
-            printWriter.println("|];");
-        } else {
-            printWriter.println("1, 1, |];");
-        }
+     // CHANGE IN VALUE dependency
+     printWriter.println("CV = " + CvDS.length + ";");
+     printWriter.print("cv = [| ");
+     if (CvDS.length > 0) {
+     for (int i = 0; i < CvDS.length; i++) {
+     printWriter.print((project.getFeatures().getFeatureIndex(CvDS[i].getPrimary()) + 1)
+     + ", " + (project.getFeatures().getFeatureIndex(CvDS[i].getSecondary()) + 1)
+     + "{missing values}" + ", ");
+     }
+     printWriter.println("|];");
+     } else {
+     printWriter.println("1, 1, |];");
+     }
 
-        // CHANGE IN URGENCY dependency
-        printWriter.println("CU = " + CuDS.length + ";");
-        printWriter.print("cu = [| ");
-        if (CuDS.length > 0) {
-            for (int i = 0; i < CuDS.length; i++) {
-                printWriter.print((project.getFeatures().getFeatureIndex(CuDS[i].getPrimary()) + 1)
-                        + ", " + (project.getFeatures().getFeatureIndex(CuDS[i].getSecondary()) + 1)
-                        + "{missing urgencies}" + ", ");
-            }
-            printWriter.println("|];");
-        } else {
-            printWriter.println("1, 1, |];");
-        }
+     // CHANGE IN URGENCY dependency
+     printWriter.println("CU = " + CuDS.length + ";");
+     printWriter.print("cu = [| ");
+     if (CuDS.length > 0) {
+     for (int i = 0; i < CuDS.length; i++) {
+     printWriter.print((project.getFeatures().getFeatureIndex(CuDS[i].getPrimary()) + 1)
+     + ", " + (project.getFeatures().getFeatureIndex(CuDS[i].getSecondary()) + 1)
+     + "{missing urgencies}" + ", ");
+     }
+     printWriter.println("|];");
+     } else {
+     printWriter.println("1, 1, |];");
+     }
 
-        printWriter.println("% =========================");
-    }
-
-    private void printStakeholders() {
-        printWriter.println("% Stakeholders value(1..9), urgency (x + y + z = 9)");
-        printWriter.print("value = [|");
+     printWriter.println("% =========================");
+     }
+     */
+    private void printStakeholders(Project ModDep) {
+        printWriter.println("% Stakeholders value(1..9), urgency");
+        printWriter.print("value = [| ");
         for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
+            List<Value> values = project.getValues().getValuesByStakeholder(project.getStakeholders().getStakeholder(s));
+            boolean valueNotFound = true;
             for (int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
-                for (int v = 0; v < project.getValues().getValueCount(); v++) {
-                    if (project.getValues().getValue(v).getStakeholder() == project.getStakeholders().getStakeholder(s)
-                            && project.getValues().getValue(v).getFeature() == project.getFeatures().getFeature(f)) {
-                        printWriter.print(project.getValues().getValue(v).getValue() + ", ");
+                for (Value v : values) {
+                    if (v.getFeature() == project.getFeatures().getFeature(f)) {
+                        printWriter.print(v.getValue() + ", ");
+                        valueNotFound = false;
+                        break;
                     } else {
+                        valueNotFound = true;
+                    }
+                    if (valueNotFound) {
                         printWriter.print("0, ");
+                    }
+                }
+            }
+
+            if (ModDep.getValues().getValueCount() > 0) {
+                List<Value> newValues = ModDep.getValues().getValuesByStakeholder(project.getStakeholders().getStakeholder(s));
+                boolean newValueNotFound = true;
+                for (int f = 0; f < ModDep.getFeatures().getFeatureCount(); f++) {
+                    for (Value v : newValues) {
+                        if (v.getFeature() == ModDep.getFeatures().getFeature(f)) {
+                            printWriter.print(v.getValue() + ", ");
+                            newValueNotFound = false;
+                            break;
+                        } else {
+                            newValueNotFound = true;
+                        }
+                        if (newValueNotFound) {
+                            printWriter.print("0, ");
+                        }
                     }
                 }
             }
@@ -341,121 +474,43 @@ public final class DataManager {
         }
         printWriter.println(" |];");
 
-        printWriter.println("urgency = array" + (project.getReleases().getReleaseCount() + 1) + "d(1..S, 1..F, 1.." + (project.getReleases().getReleaseCount() + 1) + ", [");
-        // TODO
+        printWriter.println("urgency = array3d(1..S, 1..F, 1.." + (project.getReleases().getReleaseCount() + 1) + ", [");
+        for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
+            List<Urgency> urgencies = project.getUrgencies().getUrgenciesByStakeholder(project.getStakeholders().getStakeholder(s));
+            printWriter.println("% stakeholder " + (s + 1));
+            for (int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
+                for (Urgency u : urgencies) {
+                    if (u.getFeature() == project.getFeatures().getFeature(f)) {
+                        for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                            printWriter.print(u.getUrgency(project.getReleases().getRelease(r)) + ", ");
+                        }
+                    } else {
+                        for (int i = 0; i < project.getFeatures().getFeatureCount(); i++) {
+                            printWriter.print("0, ");
+                        }
+                    }
+                    printWriter.print("\n");
+                }
+            }
+            if (ModDep.getUrgencies().getUrgecnyCount() > 0) {
+                List<Urgency> newUrgencies = ModDep.getUrgencies().getUrgenciesByStakeholder(project.getStakeholders().getStakeholder(s));
+                for (int f = 0; f < ModDep.getFeatures().getFeatureCount(); f++) {
+                    for (Urgency u : newUrgencies) {
+                        if (u.getFeature() == ModDep.getFeatures().getFeature(f)) {
+                            for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                                printWriter.print(u.getUrgency(project.getReleases().getRelease(r)) + ", ");
+                            }
+                        } else {
+                            for (int i = 0; i < project.getFeatures().getFeatureCount(); i++) {
+                                printWriter.print("0, ");
+                            }
+                        }
+                        printWriter.print("\n");
+                    }
+                }
+            }
+        }
         printWriter.println("]);");
-        printWriter.println("% =========================");
     }
 
-    private boolean ModifyingDependencyConversion(Project ModDep) {
-
-        if (project.getInterdependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CC) > 0) {
-            ModifyingInterdependency[] CcDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CC);
-
-            for (int dep = 0; dep < CcDS.length; dep++) {
-                Feature f = ModDep.getFeatures().addFeature();
-                f.setName(CcDS[dep].getSecondary().getName() + "' (Cost Changed)");
-                for (int r = 0; r < project.getResources().getResourceCount(); r++) {
-                    if (CcDS[dep].getSecondary().hasConsumption(project.getResources().getResource(r))) {
-                        f.setConsumption(project.getResources().getResource(r),
-                                CcDS[dep].getChange(Feature.class).getConsumption(project.getResources().getResource(r)));
-                    }
-                }
-
-                List<Value> values = project.getValues().getValuesByFeature(CcDS[dep].getSecondary());
-                for (Value v : values) {
-                    Value newV = ModDep.getValues().addValue(f, v.getStakeholder());
-                    newV.setValue(v.getValue());
-                }
-
-                List<Urgency> urgencies = project.getUrgencies().getUrgenciesByFeature(CcDS[dep].getSecondary());
-                for (Urgency u : urgencies) {
-                    Urgency newU = ModDep.getUrgencies().addUrgency(f, u.getStakeholder());
-                    for (int r = 1; r <= project.getReleases().getReleaseCount(); r++) {
-                        if (u.getUrgency(project.getReleases().getRelease(r)) != 0) {
-                            newU.setUrgency(project.getReleases().getRelease(r), u.getUrgency(project.getReleases().getRelease(r)));
-                        }
-                    }
-                }
-
-
-                ModDep.getInterdependencies().addInterdependency(f, CcDS[dep].getPrimary(), Dependency.REQ);
-                ModDep.getInterdependencies().addInterdependency(CcDS[dep].getPrimary(), CcDS[dep].getSecondary(), Dependency.PRE);
-                ModDep.getInterdependencies().addInterdependency(CcDS[dep].getPrimary(), f, Dependency.XOR);
-            }
-        }
-
-        if (project.getInterdependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CV) > 0) {
-            ModifyingInterdependency[] CvDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CV);
-
-            for (int dep = 0; dep < CvDS.length; dep++) {
-                Feature f = ModDep.getFeatures().addFeature();
-                f.setName(CvDS[dep].getSecondary().getName() + "' (Value Changed)");
-                for (int r = 0; r < project.getResources().getResourceCount(); r++) {
-                    if (CvDS[dep].getSecondary().hasConsumption(project.getResources().getResource(r))) {
-                        f.setConsumption(project.getResources().getResource(r),
-                                CvDS[dep].getSecondary().getConsumption(project.getResources().getResource(r)));
-                    }
-                }
-
-                List<Value> values = CvDS[dep].getChange(Values.class).getValuesByFeature(CvDS[dep].getSecondary());
-                for (Value v : values) {
-                    Value newV = ModDep.getValues().addValue(f, v.getStakeholder());
-                    newV.setValue(v.getValue());
-                }
-
-                List<Urgency> urgencies = project.getUrgencies().getUrgenciesByFeature(CvDS[dep].getSecondary());
-                for (Urgency u : urgencies) {
-                    Urgency newU = ModDep.getUrgencies().addUrgency(f, u.getStakeholder());
-                    for (int r = 1; r <= project.getReleases().getReleaseCount(); r++) {
-                        if (u.getUrgency(project.getReleases().getRelease(r)) != 0) {
-                            newU.setUrgency(project.getReleases().getRelease(r), u.getUrgency(project.getReleases().getRelease(r)));
-                        }
-                    }
-                }
-
-
-                ModDep.getInterdependencies().addInterdependency(f, CvDS[dep].getPrimary(), Dependency.REQ);
-                ModDep.getInterdependencies().addInterdependency(CvDS[dep].getPrimary(), CvDS[dep].getSecondary(), Dependency.PRE);
-                ModDep.getInterdependencies().addInterdependency(CvDS[dep].getPrimary(), f, Dependency.XOR);
-            }
-        }
-
-        if (project.getInterdependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CU) > 0) {
-            ModifyingInterdependency[] CuDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CU);
-
-            for (int dep = 0; dep < CuDS.length; dep++) {
-                Feature f = ModDep.getFeatures().addFeature();
-                f.setName(CuDS[dep].getSecondary().getName() + "' (Urgency Changed)");
-                for (int r = 0; r < project.getResources().getResourceCount(); r++) {
-                    if (CuDS[dep].getSecondary().hasConsumption(project.getResources().getResource(r))) {
-                        f.setConsumption(project.getResources().getResource(r),
-                                CuDS[dep].getSecondary().getConsumption(project.getResources().getResource(r)));
-                    }
-                }
-
-                List<Value> values = CuDS[dep].getChange(Values.class).getValuesByFeature(CuDS[dep].getSecondary());
-                for (Value v : values) {
-                    Value newV = ModDep.getValues().addValue(f, v.getStakeholder());
-                    newV.setValue(v.getValue());
-                }
-
-                List<Urgency> urgencies = CuDS[dep].getChange(Urgencies.class).getUrgenciesByFeature(CuDS[dep].getSecondary());
-                for (Urgency u : urgencies) {
-                    Urgency newU = ModDep.getUrgencies().addUrgency(f, u.getStakeholder());
-                    for (int r = 1; r <= project.getReleases().getReleaseCount(); r++) {
-                        if (u.getUrgency(project.getReleases().getRelease(r)) != 0) {
-                            newU.setUrgency(project.getReleases().getRelease(r), u.getUrgency(project.getReleases().getRelease(r)));
-                        }
-                    }
-                }
-
-
-                ModDep.getInterdependencies().addInterdependency(f, CuDS[dep].getPrimary(), Dependency.REQ);
-                ModDep.getInterdependencies().addInterdependency(CuDS[dep].getPrimary(), CuDS[dep].getSecondary(), Dependency.PRE);
-                ModDep.getInterdependencies().addInterdependency(CuDS[dep].getPrimary(), f, Dependency.XOR);
-            }
-        }
-        return true;
-    }
 }
