@@ -14,6 +14,7 @@ public class Project extends NamedObject implements Serializable {
 
     private transient String storage;
     private final Features features;
+    private final Groups groups;
     private final Interdependencies interdependencies;
     private final Urgencies urgencies;
     private final Values values;
@@ -26,6 +27,7 @@ public class Project extends NamedObject implements Serializable {
 
         this.storage = null;
         this.features = new Features(this);
+        this.groups = new Groups(this);
         this.interdependencies = new Interdependencies(this);
         this.urgencies = new Urgencies();
         this.values = new Values();
@@ -33,8 +35,6 @@ public class Project extends NamedObject implements Serializable {
         this.releases = new Releases(this);
         this.stakeholders = new Stakeholders(this);
        
-        //DataManager foo = new DataManager();
-        //foo.saveDataFile(this);
     }
     
     public void setStorage(String storage) {
@@ -45,14 +45,12 @@ public class Project extends NamedObject implements Serializable {
         return this.storage;
     }
 
-    /*public Project(String name, List<String> defaultResources, List<String> defaultReleases, List<String> defaultStakeholders) {
-     this.name = name;
-     resources = new Resources(defaultResources, releases);
-     releases = new Releases(resources);
-     stakeholders = new Stakeholders(defaultStakeholders);
-     }*/
     public Features getFeatures() {
         return this.features;
+    }
+    
+    public Groups getGroups() {
+        return this.groups;
     }
 
     public Urgencies getUrgencies() {

@@ -7,7 +7,9 @@ package ee.raidoseene.releaseplanner.datamodel;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -16,9 +18,11 @@ import java.util.List;
 public class Values implements Serializable {
     
     private final List<Value> valuesContainer;
+    //private final Map<Pair<Feature, Stakeholder>, Integer> values; // Test
     
     Values() {
         this.valuesContainer = new ArrayList<>();
+        //this.values = new HashMap<>(); // Test
     }
     
     public Value addValue(Feature feature, Stakeholder stakeholder) {
@@ -33,6 +37,11 @@ public class Values implements Serializable {
     
     public Value getValue(int index) {
         return this.valuesContainer.get(index);
+    }
+    
+    public Value getValue(Feature feature, Stakeholder stakeholder) {
+        
+        return null;
     }
 
     public int getValueCount() {
