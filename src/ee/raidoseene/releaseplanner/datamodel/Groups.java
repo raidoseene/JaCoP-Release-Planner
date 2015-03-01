@@ -45,6 +45,14 @@ public class Groups extends ProjectElement {
         return this.groupContainer.indexOf(g);
     }
     
+    public void addFeature(Group g, Feature f) {
+        Group group = getGroupByFeature(f);
+        if(group != null) {
+            group.removeFeature(f);
+        }
+        g.addFeature(f);
+    }
+    
     public List<Feature> getFeaturesInGroup(Group g) {
         ArrayList<Feature> list = new ArrayList<>();
         Group group = getGroup(getGroupIndex(g));

@@ -18,8 +18,9 @@ public class Group extends NamedObject {
          this.featureContainer = new ArrayList<>();
     }
 
-    public void addFeature(Feature f) {
+    protected void addFeature(Feature f) {
         this.featureContainer.add(f);
+        
     }
 
     public void removeFeature(Feature f) {
