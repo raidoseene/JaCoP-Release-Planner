@@ -8,9 +8,12 @@ package ee.raidoseene.releaseplanner.gui;
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
 import ee.raidoseene.releaseplanner.datamodel.Features;
+import ee.raidoseene.releaseplanner.datamodel.Group;
+import ee.raidoseene.releaseplanner.datamodel.Groups;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Stakeholder;
 import ee.raidoseene.releaseplanner.datamodel.Stakeholders;
+import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
 import ee.raidoseene.releaseplanner.gui.utils.ContentListLayout;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanel;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanelListener;
@@ -26,8 +29,12 @@ import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  *
@@ -107,11 +114,18 @@ public final class UrgValPanel extends JPanel {
         private void listFilteredContent() {
             this.scrollable.removeAll();
             try {
-                int index = this.stakec.getSelectedIndex();
-                Stakeholders stakeholders = ProjectManager.getCurrentProject().getStakeholders();
-                Stakeholder filter = null;
-                if (index > 0) {
-                    filter = stakeholders.getStakeholder(index - 1);
+                int gindex = this.groupc.getSelectedIndex();
+                int sindex = this.stakec.getSelectedIndex();
+                Project project = ProjectManager.getCurrentProject();
+                Stakeholders stakeholders = project.getStakeholders();
+                Groups groups = project.getGroups();
+                Stakeholder sfilter = null;
+                Group gfilter = null;
+                if (sindex > 0) {
+                    sfilter = stakeholders.getStakeholder(sindex - 1);
+                }
+                if (gindex > 0) {
+                    gfilter = groups.getGroup(gindex - 1);
                 }
 
                 if (this.type.equals(Stakeholder.class)) {
@@ -119,8 +133,8 @@ public final class UrgValPanel extends JPanel {
 
                     for (int i = 0; i < count; i++) {
                         Stakeholder s = stakeholders.getStakeholder(i);
-                        if (filter == null || s == filter) {
-                            UVTab.UVSContent content = new UVTab.UVSContent(s);
+                        if (sfilter == null || s == sfilter) {
+                            UVTab.UVSContent content = new UVTab.UVSContent(s, gfilter);
                             ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_EXPANDABLE);
                             panel.addContentPanelListener(content);
                             this.scrollable.add(panel);
@@ -132,10 +146,12 @@ public final class UrgValPanel extends JPanel {
 
                     for (int i = 0; i < count; i++) {
                         Feature f = features.getFeature(i);
-                        UVTab.UVFContent content = new UVTab.UVFContent(f, filter);
-                        ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_EXPANDABLE);
-                        panel.addContentPanelListener(content);
-                        this.scrollable.add(panel);
+                        if (gfilter == null || gfilter == groups.getGroupByFeature(f)) {
+                            UVTab.UVFContent content = new UVTab.UVFContent(f, sfilter);
+                            ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_EXPANDABLE);
+                            panel.addContentPanelListener(content);
+                            this.scrollable.add(panel);
+                        }
                     }
                 }
             } catch (Throwable t) {
@@ -151,7 +167,18 @@ public final class UrgValPanel extends JPanel {
 
                 try {
                     Object item = this.groupc.getSelectedItem();
-                    // TODO:
+                    Groups groups = project.getGroups();
+                    int count = groups.getGroupCount();
+                    this.groupc.removeActionListener(this.listener);
+                    this.groupc.removeAllItems();
+                    this.groupc.addItem(this.all);
+                    this.groupc.setSelectedIndex(0);
+                    for (int i = 0; i < count; i++) {
+                        this.groupc.addItem(groups.getGroup(i).getName());
+                    }
+
+                    this.groupc.setSelectedItem(item);
+                    this.groupc.addActionListener(this.listener);
                 } catch (Throwable t) {
                     t.printStackTrace();
                 }
@@ -180,14 +207,16 @@ public final class UrgValPanel extends JPanel {
 
         private final class UVSContent extends JPanel implements ContentPanelListener, HierarchyListener {
 
+            private final Group filter;
             private final Stakeholder stakeholder;
             private final ScrollablePanel scrollable;
             private final JScrollPane scroller;
 
-            private UVSContent(Stakeholder s) {
+            private UVSContent(Stakeholder s, Group filter) {
                 this.setBorder(new EmptyBorder(10, 10, 10, 10));
                 this.setLayout(new BorderLayout(10, 10));
 
+                this.filter = filter;
                 this.stakeholder = s;
                 this.add(BorderLayout.PAGE_START, new JLabel(s.getName()));
 
@@ -204,17 +233,12 @@ public final class UrgValPanel extends JPanel {
             }
 
             @Override
-            public void contentPanelExpanded(ContentPanel source) {
-                if (this.getComponentCount() == 1) {
+            public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
+                if (expanded && this.getComponentCount() == 1) {
                     this.add(this.scroller);
 
                     UVSContent.this.scrollable.contentUpdated();
-                }
-            }
-
-            @Override
-            public void contentPanelCompressed(ContentPanel source) {
-                if (this.getComponentCount() > 1) {
+                } else if (!expanded && this.getComponentCount() > 1) {
                     this.remove(this.scroller);
 
                     UVSContent.this.scrollable.contentUpdated();
@@ -222,19 +246,26 @@ public final class UrgValPanel extends JPanel {
             }
 
             @Override
+            public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
+            }
+
+            @Override
             public void hierarchyChanged(HierarchyEvent he) {
                 int mask = HierarchyEvent.SHOWING_CHANGED;
                 if ((he.getChangeFlags() & mask) == mask && he.getChanged().isShowing()) {
                     Features features = ProjectManager.getCurrentProject().getFeatures();
+                    Groups groups = ProjectManager.getCurrentProject().getGroups();
                     int count = features.getFeatureCount();
                     this.scrollable.removeAll();
 
                     for (int i = 0; i < count; i++) {
                         Feature f = features.getFeature(i);
-                        UVSContent.UVSFContent content = new UVSContent.UVSFContent(f);
-                        ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_EXPANDABLE);
-                        panel.addContentPanelListener(content);
-                        this.scrollable.add(panel);
+                        if (this.filter == null || this.filter == groups.getGroupByFeature(f)) {
+                            UVSContent.UVSFContent content = new UVSContent.UVSFContent(f);
+                            ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_EXPANDABLE);
+                            panel.addContentPanelListener(content);
+                            this.scrollable.add(panel);
+                        }
                     }
                 }
             }
@@ -242,12 +273,41 @@ public final class UrgValPanel extends JPanel {
             private final class UVSFContent extends JPanel implements ContentPanelListener {
 
                 private final Feature feature;
+                private final JPanel cont1;
+                private final JSpinner value;
 
                 private UVSFContent(Feature f) {
                     this.setBorder(new EmptyBorder(10, 10, 10, 10));
-                    this.setLayout(new BorderLayout(10, 10));
-
+                    this.setLayout(new BorderLayout());
                     this.feature = f;
+
+                    this.cont1 = new JPanel(new BorderLayout(10, 10));
+                    this.cont1.setBorder(new EmptyBorder(0, 0, 0, 80));
+                    this.cont1.add(BorderLayout.CENTER, new JLabel(f.getName()));
+                    this.add(BorderLayout.PAGE_START, this.cont1);
+
+                    Container c = new Container();
+                    c.setLayout(new BorderLayout(10, 10));
+                    this.cont1.add(BorderLayout.LINE_END, c);
+
+                    ValueAndUrgency vus = ProjectManager.getCurrentProject().getValueAndUrgency();
+                    this.value = new JSpinner(new SpinnerNumberModel(vus.getValue(UVSContent.this.stakeholder, f), 0, 9, 1));
+                    this.value.addChangeListener(new ChangeListener() {
+
+                        @Override
+                        public void stateChanged(ChangeEvent ce) {
+                            ValueAndUrgency vus = ProjectManager.getCurrentProject().getValueAndUrgency();
+                            try {
+                                Object o = UVSFContent.this.value.getValue();
+                                vus.setValue(UVSContent.this.stakeholder, UVSFContent.this.feature, (Integer) o);
+                            } catch (Exception ex) {
+                                Messenger.showError(ex, null);
+                            }
+                            UVSFContent.this.value.setValue(vus.getValue(UVSContent.this.stakeholder, UVSFContent.this.feature));
+                        }
+                    });
+                    c.add(BorderLayout.LINE_START, this.value);
+                    c.add(BorderLayout.CENTER, new JLabel("Value to stakeholder"));
                 }
 
                 @Override
@@ -255,11 +315,11 @@ public final class UrgValPanel extends JPanel {
                 }
 
                 @Override
-                public void contentPanelExpanded(ContentPanel source) {
+                public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
                 }
 
                 @Override
-                public void contentPanelCompressed(ContentPanel source) {
+                public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
                 }
 
             }
@@ -294,21 +354,20 @@ public final class UrgValPanel extends JPanel {
             }
 
             @Override
-            public void contentPanelExpanded(ContentPanel source) {
-                if (this.getComponentCount() == 1) {
+            public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
+                if (expanded && this.getComponentCount() == 1) {
                     this.add(this.scroller);
+
+                    UVFContent.this.scrollable.contentUpdated();
+                } else if (!expanded && this.getComponentCount() > 1) {
+                    this.remove(this.scroller);
 
                     UVFContent.this.scrollable.contentUpdated();
                 }
             }
 
             @Override
-            public void contentPanelCompressed(ContentPanel source) {
-                if (this.getComponentCount() > 1) {
-                    this.remove(this.scroller);
-
-                    UVFContent.this.scrollable.contentUpdated();
-                }
+            public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
             }
 
             @Override
@@ -330,16 +389,45 @@ public final class UrgValPanel extends JPanel {
                     }
                 }
             }
-            
+
             private final class UVFSContent extends JPanel implements ContentPanelListener {
 
                 private final Stakeholder stakeholder;
+                private final JPanel cont1;
+                private final JSpinner value;
 
                 private UVFSContent(Stakeholder s) {
                     this.setBorder(new EmptyBorder(10, 10, 10, 10));
-                    this.setLayout(new BorderLayout(10, 10));
-
+                    this.setLayout(new BorderLayout());
                     this.stakeholder = s;
+
+                    this.cont1 = new JPanel(new BorderLayout(10, 10));
+                    this.cont1.setBorder(new EmptyBorder(0, 0, 0, 80));
+                    this.cont1.add(BorderLayout.CENTER, new JLabel(s.getName()));
+                    this.add(BorderLayout.PAGE_START, this.cont1);
+
+                    Container c = new Container();
+                    c.setLayout(new BorderLayout(10, 10));
+                    this.cont1.add(BorderLayout.LINE_END, c);
+
+                    ValueAndUrgency vus = ProjectManager.getCurrentProject().getValueAndUrgency();
+                    this.value = new JSpinner(new SpinnerNumberModel(vus.getValue(s, UVFContent.this.feature), 0, 9, 1));
+                    this.value.addChangeListener(new ChangeListener() {
+
+                        @Override
+                        public void stateChanged(ChangeEvent ce) {
+                            ValueAndUrgency vus = ProjectManager.getCurrentProject().getValueAndUrgency();
+                            try {
+                                Object o = UVFSContent.this.value.getValue();
+                                vus.setValue(UVFSContent.this.stakeholder, UVFContent.this.feature, (Integer) o);
+                            } catch (Exception ex) {
+                                Messenger.showError(ex, null);
+                            }
+                            UVFSContent.this.value.setValue(vus.getValue(UVFSContent.this.stakeholder, UVFContent.this.feature));
+                        }
+                    });
+                    c.add(BorderLayout.LINE_START, this.value);
+                    c.add(BorderLayout.CENTER, new JLabel("Value to stakeholder"));
                 }
 
                 @Override
@@ -347,11 +435,11 @@ public final class UrgValPanel extends JPanel {
                 }
 
                 @Override
-                public void contentPanelExpanded(ContentPanel source) {
+                public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
                 }
 
                 @Override
-                public void contentPanelCompressed(ContentPanel source) {
+                public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
                 }
 
             }

@@ -204,21 +204,20 @@ public final class ReleasesPanel extends ScrollablePanel {
         }
 
         @Override
-        public void contentPanelExpanded(ContentPanel source) {
-            if (this.getComponentCount() == 1) {
+        public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
+            if (expanded && this.getComponentCount() == 1) {
                 this.add(this.cont2);
+
+                ReleasesPanel.this.scrollable.contentUpdated();
+            } else if (!expanded && this.getComponentCount() > 1) {
+                this.remove(this.cont2);
 
                 ReleasesPanel.this.scrollable.contentUpdated();
             }
         }
 
         @Override
-        public void contentPanelCompressed(ContentPanel source) {
-            if (this.getComponentCount() > 1) {
-                this.remove(this.cont2);
-
-                ReleasesPanel.this.scrollable.contentUpdated();
-            }
+        public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
         }
 
         private final class RPCPanel extends JPanel implements HierarchyListener {

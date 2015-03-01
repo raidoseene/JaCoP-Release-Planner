@@ -14,7 +14,7 @@ import java.util.EventListener;
 public interface ContentPanelListener extends EventListener {
     
     public void contentPanelClosed(ContentPanel source);
-    public void contentPanelExpanded(ContentPanel source);
-    public void contentPanelCompressed(ContentPanel source);
+    public void contentPanelExpansionChanged(ContentPanel source, boolean expanded);
+    public void contentPanelSelectionChanged(ContentPanel source, boolean selected);
     
 }

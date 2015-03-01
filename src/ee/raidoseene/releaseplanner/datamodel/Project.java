@@ -15,7 +15,7 @@ public class Project extends NamedObject implements Serializable {
     private transient String storage;
     private final Features features;
     private final Groups groups;
-    private final Interdependencies interdependencies;
+    private final Dependencies dependencies;
     private final ValueAndUrgency valueAndUrgency;
     //private final Urgencies urgencies;
     //private final Values values;
@@ -29,7 +29,7 @@ public class Project extends NamedObject implements Serializable {
         this.storage = null;
         this.features = new Features(this);
         this.groups = new Groups(this);
-        this.interdependencies = new Interdependencies(this);
+        this.dependencies = new Dependencies(this);
         this.valueAndUrgency = new ValueAndUrgency();
         //this.urgencies = new Urgencies();
         //this.values = new Values();
@@ -83,8 +83,8 @@ public class Project extends NamedObject implements Serializable {
         return this.stakeholders;
     }
     
-    public Interdependencies getInterdependencies() {
-        return this.interdependencies;
+    public Dependencies getDependencies() {
+        return this.dependencies;
     }
 
     void featureRemoved(Feature feature) {

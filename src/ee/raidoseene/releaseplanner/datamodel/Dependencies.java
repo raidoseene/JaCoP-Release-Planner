@@ -13,11 +13,11 @@ import java.util.List;
  *
  * @author Raido Seene
  */
-public class Interdependencies extends ProjectElement implements Serializable {
+public class Dependencies extends ProjectElement implements Serializable {
 
     private final List<Dependency> interdependenciesContainer;
 
-    Interdependencies(Project project) {
+    Dependencies(Project project) {
         super(project);
 
         this.interdependenciesContainer = new ArrayList<>();

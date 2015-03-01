@@ -64,7 +64,7 @@ public class Groups extends ProjectElement {
     
     public Group getGroupByFeature(Feature f) {
         for(Group g : groupContainer) {
-            if(g.inGroup(f)) {
+            if(g.contains(f)) {
                 return g;
             }
         }

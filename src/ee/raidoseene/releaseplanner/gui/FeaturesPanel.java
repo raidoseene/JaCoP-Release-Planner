@@ -6,8 +6,12 @@
 package ee.raidoseene.releaseplanner.gui;
 
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
 import ee.raidoseene.releaseplanner.datamodel.Features;
+import ee.raidoseene.releaseplanner.datamodel.Group;
+import ee.raidoseene.releaseplanner.datamodel.Groups;
+import ee.raidoseene.releaseplanner.datamodel.Dependencies;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Resource;
 import ee.raidoseene.releaseplanner.datamodel.Resources;
@@ -20,6 +24,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
@@ -32,11 +37,16 @@ import java.awt.event.HierarchyListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.ArrayList;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
@@ -48,6 +58,7 @@ public final class FeaturesPanel extends JPanel {
 
     public static final String TITLE_STRING = "Features";
     private final FeaturesPanel.FPScrollable scrollable;
+    private final FeaturesPanel.DepHandler handler;
 
     public FeaturesPanel() {
         this.setLayout(new BorderLayout(10, 10));
@@ -57,6 +68,7 @@ public final class FeaturesPanel extends JPanel {
 
         Container c = new Container();
         this.add(BorderLayout.PAGE_END, c);
+        c.add(this.handler = new DepHandler());
         c.setLayout(new LayoutManager() {
 
             @Override
@@ -69,11 +81,12 @@ public final class FeaturesPanel extends JPanel {
 
             @Override
             public Dimension preferredLayoutSize(Container cntnr) {
+                Component[] comps = cntnr.getComponents();
+                int height = comps[0].getPreferredSize().height;
                 int width = 250;
-                int height = 1;
 
-                for (Component c : cntnr.getComponents()) {
-                    Dimension d = c.getPreferredSize();
+                for (int i = 1; i < comps.length; i++) {
+                    Dimension d = comps[i].getPreferredSize();
                     width += (10 + d.width);
 
                     if (d.height > height) {
@@ -86,11 +99,12 @@ public final class FeaturesPanel extends JPanel {
 
             @Override
             public Dimension minimumLayoutSize(Container cntnr) {
+                Component[] comps = cntnr.getComponents();
+                int height = comps[0].getMinimumSize().height;
                 int width = 250;
-                int height = 1;
 
-                for (Component c : cntnr.getComponents()) {
-                    Dimension d = c.getMinimumSize();
+                for (int i = 1; i < comps.length; i++) {
+                    Dimension d = comps[i].getMinimumSize();
                     width += (10 + d.width);
 
                     if (d.height > height) {
@@ -103,12 +117,14 @@ public final class FeaturesPanel extends JPanel {
 
             @Override
             public void layoutContainer(Container cntnr) {
+                Component[] comps = cntnr.getComponents();
                 int height = cntnr.getHeight();
                 int x = 250;
 
-                for (Component c : cntnr.getComponents()) {
-                    int w = c.getPreferredSize().width;
-                    c.setBounds(x + 10, 0, w, height);
+                comps[0].setBounds(0, 0, 250, height);
+                for (int i = 1; i < comps.length; i++) {
+                    int w = comps[i].getPreferredSize().width;
+                    comps[i].setBounds(x + 10, 0, w, height);
                     x += (10 + w);
                 }
             }
@@ -146,7 +162,7 @@ public final class FeaturesPanel extends JPanel {
     private void processAddEvent() {
         Feature f = ProjectManager.getCurrentProject().getFeatures().addFeature();
         FeaturesPanel.FPContent content = new FeaturesPanel.FPContent(f);
-        ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE);
+        ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE | ContentPanel.TYPE_TOGGLEABLE);
 
         this.scrollable.add(panel);
         this.scrollable.contentUpdated();
@@ -157,6 +173,16 @@ public final class FeaturesPanel extends JPanel {
 
     private void processManageEvent() {
         GroupManagerDialog.showGroupManagerDialog();
+        // Update group selections
+        Component[] comps = this.scrollable.getComponents();
+        for (Component comp : comps) {
+            if (comp instanceof ContentPanel) {
+                Component cont = ((ContentPanel) comp).getContent();
+                if (cont != null && cont instanceof FeaturesPanel.FPContent) {
+                    ((FeaturesPanel.FPContent) cont).updateGroupSelection();
+                }
+            }
+        }
     }
 
     private final class FPScrollable extends ScrollablePanel {
@@ -173,7 +199,7 @@ public final class FeaturesPanel extends JPanel {
                 for (int i = 0; i < count; i++) {
                     Feature f = features.getFeature(i);
                     FeaturesPanel.FPContent content = new FeaturesPanel.FPContent(f);
-                    ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE);
+                    ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE | ContentPanel.TYPE_TOGGLEABLE);
                     panel.addContentPanelListener(content);
                     this.add(panel);
                 }
@@ -186,6 +212,135 @@ public final class FeaturesPanel extends JPanel {
         }
 
     }
+    
+    private final class DepHandler extends JPanel {
+        
+        private final JToggleButton fixed, req, and, xor;
+        private final ArrayList<FPContent> selections;
+        private final ActionListener listener;
+        
+        private DepHandler() {
+            this.setLayout(new FlowLayout(FlowLayout.CENTER, 2, 0));
+            this.selections = new ArrayList<>(2);
+            this.listener = new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent ae) {
+                    try {
+                        Object source = ae.getSource();
+                        if (source == DepHandler.this.fixed) {
+                            boolean state = DepHandler.this.fixed.isSelected();
+                            DepHandler.this.req.setEnabled(!state);
+                            DepHandler.this.and.setEnabled(!state);
+                            DepHandler.this.xor.setEnabled(!state);
+                        } else if (source == DepHandler.this.req) {
+                            boolean state = DepHandler.this.req.isSelected();
+                            DepHandler.this.fixed.setEnabled(!state);
+                            DepHandler.this.and.setEnabled(!state);
+                            DepHandler.this.xor.setEnabled(!state);
+                        } else if (source == DepHandler.this.and) {
+                            boolean state = DepHandler.this.and.isSelected();
+                            DepHandler.this.fixed.setEnabled(!state);
+                            DepHandler.this.req.setEnabled(!state);
+                            DepHandler.this.xor.setEnabled(!state);
+                        } else if (source == DepHandler.this.xor) {
+                            boolean state = DepHandler.this.xor.isSelected();
+                            DepHandler.this.fixed.setEnabled(!state);
+                            DepHandler.this.req.setEnabled(!state);
+                            DepHandler.this.and.setEnabled(!state);
+                        }
+                        
+                        for (FPContent sel : DepHandler.this.selections) {
+                            ((ContentPanel) sel.getParent()).setSelected(false);
+                        }
+                        DepHandler.this.selections.clear();
+                    } catch (Exception ex) {
+                        Messenger.showError(ex, null);
+                    }
+                }
+            };
+            
+            this.fixed = new JToggleButton("FIXED");
+            this.fixed.addActionListener(this.listener);
+            this.add(this.fixed);
+            
+            this.add(new JSeparator(JSeparator.VERTICAL));
+            
+            this.req = new JToggleButton("REQ");
+            this.req.addActionListener(this.listener);
+            this.add(this.req);
+            
+            this.add(new JSeparator(JSeparator.VERTICAL));
+            
+            this.and = new JToggleButton("AND");
+            this.and.addActionListener(this.listener);
+            this.add(this.and);
+            
+            this.xor = new JToggleButton("XOR");
+            this.xor.addActionListener(this.listener);
+            this.add(this.xor);
+        }
+        
+        public boolean processFeatureEvent(FPContent source, boolean selected) {
+            if (selected) {
+                this.selections.add(source);
+            } else {
+                this.selections.remove(source);
+            }
+            
+            if (this.fixed.isSelected()) {
+                if (this.selections.size() == 1) {
+                    Feature f = this.selections.get(0).feature;
+                    FixedDependencyDialog.showFixedDependencyDialog(f);
+                    
+                    this.fixed.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.fixed, ActionEvent.ACTION_PERFORMED, null);
+                    this.listener.actionPerformed(ae);
+                }
+                return true;
+            } else if (this.req.isSelected()) {
+                if (this.selections.size() == 2) {
+                    Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
+                    Feature f1 = this.selections.get(0).feature;
+                    Feature f2 = this.selections.get(1).feature;
+                    ids.addInterdependency(f1, f2, Dependency.REQ);
+                    
+                    this.req.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.req, ActionEvent.ACTION_PERFORMED, null);
+                    this.listener.actionPerformed(ae);
+                }
+                return true;
+            } else if (this.and.isSelected()) {
+                if (this.selections.size() == 2) {
+                    Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
+                    Feature f1 = this.selections.get(0).feature;
+                    Feature f2 = this.selections.get(1).feature;
+                    ids.addInterdependency(f1, f2, Dependency.AND);
+                    
+                    this.and.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.and, ActionEvent.ACTION_PERFORMED, null);
+                    this.listener.actionPerformed(ae);
+                }
+                return true;
+            } else if (this.xor.isSelected()) {
+                if (this.selections.size() == 2) {
+                    Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
+                    Feature f1 = this.selections.get(0).feature;
+                    Feature f2 = this.selections.get(1).feature;
+                    ids.addInterdependency(f1, f2, Dependency.XOR);
+                    
+                    this.xor.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.xor, ActionEvent.ACTION_PERFORMED, null);
+                    this.listener.actionPerformed(ae);
+                }
+                return true;
+            }
+            
+            this.selections.clear();
+            return false;
+        }
+        
+    }
 
     private final class FPContent extends JPanel implements ContentPanelListener {
 
@@ -194,6 +349,9 @@ public final class FeaturesPanel extends JPanel {
         private final JTextField name;
         private final JPanel cont2;
         private final FPContent.FPCPanel panel;
+        private final JComboBox group;
+        private final ActionListener listener;
+        private final JRadioButton hours, days;
 
         private FPContent(Feature f) {
             this.setLayout(new ExtendableLayout(ExtendableLayout.VERTICAL, 10));
@@ -254,8 +412,81 @@ public final class FeaturesPanel extends JPanel {
                 }
             });
             p2.add(BorderLayout.LINE_START, btn);
-
             p2.add(BorderLayout.LINE_END, new JButton("Change in cost"));
+            
+            Container c = new Container();
+            c.setLayout(new BorderLayout(10, 10));
+            this.cont2.add(BorderLayout.LINE_END, c);
+            
+            Container c1 = new Container();
+            c1.setLayout(new BorderLayout(10, 10));
+            c.add(BorderLayout.PAGE_START, c1);
+            
+            Container c2 = new Container();
+            c2.setLayout(new GridLayout(1, 2, 5, 5));
+            this.listener = new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent ae) {
+                    try {
+                        Groups groups = ProjectManager.getCurrentProject().getGroups();
+                        int index = FPContent.this.group.getSelectedIndex();
+                        if (index > 0) {
+                            
+                        } else {
+                            
+                        }
+                    } catch (Exception ex) {
+                        Messenger.showError(ex, null);
+                    }
+                }
+            };
+            this.group = new JComboBox();
+            this.updateGroupSelection();
+            c2.add(this.group);
+            c2.add(new JLabel("Belongs to"));
+            c1.add(BorderLayout.PAGE_START, c2);
+            
+            c2 = new Container();
+            c2.setLayout(new GridLayout(1, 2, 5, 5));
+            Container c3 = new Container();
+            c3.setLayout(new GridLayout(2, 1, 5, 5));
+            c2.add(c3);
+            c2.add(new JLabel("Time format"));
+            c1.add(BorderLayout.CENTER, c2);
+            
+            ButtonGroup bg = new ButtonGroup();
+            this.hours = new JRadioButton("hours");
+            this.days = new JRadioButton("days");
+            c3.add(this.hours);
+            bg.add(this.hours);
+            c3.add(this.days);
+            bg.add(this.days);
+        }
+        
+        private void updateGroupSelection() {
+            try {
+                Groups groups = ProjectManager.getCurrentProject().getGroups();
+                Group ogroup = groups.getGroupByFeature(this.feature);
+                int count = groups.getGroupCount();
+                
+                this.group.removeActionListener(this.listener);
+                this.group.removeAllItems();
+                this.group.addItem("None");
+                this.group.setSelectedIndex(0);
+                
+                for (int i = 0; i < count; i++) {
+                    Group g = groups.getGroup(i);
+                    this.group.addItem(g.getName());
+                    if (ogroup == g) {
+                        this.group.setSelectedIndex(i + 1);
+                    }
+                }
+                
+                this.group.addActionListener(this.listener);
+            } catch (Exception ex) {
+                Messenger.showError(ex, null);
+            }
         }
 
         @Override
@@ -272,20 +503,22 @@ public final class FeaturesPanel extends JPanel {
         }
 
         @Override
-        public void contentPanelExpanded(ContentPanel source) {
-            if (this.getComponentCount() == 1) {
+        public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
+            if (expanded && this.getComponentCount() == 1) {
                 this.add(this.cont2);
+
+                FeaturesPanel.this.scrollable.contentUpdated();
+            } else if (!expanded && this.getComponentCount() > 1) {
+                this.remove(this.cont2);
 
                 FeaturesPanel.this.scrollable.contentUpdated();
             }
         }
 
         @Override
-        public void contentPanelCompressed(ContentPanel source) {
-            if (this.getComponentCount() > 1) {
-                this.remove(this.cont2);
-
-                FeaturesPanel.this.scrollable.contentUpdated();
+        public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
+            if (!FeaturesPanel.this.handler.processFeatureEvent(this, selected) && selected) {
+                ((ContentPanel) this.getParent()).setSelected(false);
             }
         }
 

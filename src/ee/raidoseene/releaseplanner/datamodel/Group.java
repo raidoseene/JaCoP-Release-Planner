@@ -35,13 +35,8 @@ public class Group extends NamedObject {
         return featureContainer.size();
     }
 
-    boolean inGroup(Feature f) {
-        for(Feature feature : featureContainer) {
-            if(f == feature) {
-                return true;
-            }
-        }
-        return false;
+    boolean contains(Feature f) {
+        return this.featureContainer.contains(f);
     }
     
 }

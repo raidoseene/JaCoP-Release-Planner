@@ -58,8 +58,8 @@ public final class DataManager {
 
     private boolean ModifyingDependencyConversion(Project ModDep) {
 
-        if (project.getInterdependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CC) > 0) {
-            ModifyingInterdependency[] CcDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CC);
+        if (project.getDependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CC) > 0) {
+            ModifyingInterdependency[] CcDS = project.getDependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CC);
 
             for (int dep = 0; dep < CcDS.length; dep++) {
                 Feature f = ModDep.getFeatures().addFeature();
@@ -102,14 +102,14 @@ public final class DataManager {
                 }
                 */
 
-                ModDep.getInterdependencies().addInterdependency(f, CcDS[dep].getPrimary(), Dependency.REQ);
-                ModDep.getInterdependencies().addInterdependency(CcDS[dep].getPrimary(), CcDS[dep].getSecondary(), Dependency.PRE);
-                ModDep.getInterdependencies().addInterdependency(CcDS[dep].getPrimary(), f, Dependency.XOR);
+                ModDep.getDependencies().addInterdependency(f, CcDS[dep].getPrimary(), Dependency.REQ);
+                ModDep.getDependencies().addInterdependency(CcDS[dep].getPrimary(), CcDS[dep].getSecondary(), Dependency.PRE);
+                ModDep.getDependencies().addInterdependency(CcDS[dep].getPrimary(), f, Dependency.XOR);
             }
         }
 
-        if (project.getInterdependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CV) > 0) {
-            ModifyingInterdependency[] CvDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CV);
+        if (project.getDependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CV) > 0) {
+            ModifyingInterdependency[] CvDS = project.getDependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CV);
 
             for (int dep = 0; dep < CvDS.length; dep++) {
                 Feature f = ModDep.getFeatures().addFeature();
@@ -153,14 +153,14 @@ public final class DataManager {
                 }
                 */
 
-                ModDep.getInterdependencies().addInterdependency(f, CvDS[dep].getPrimary(), Dependency.REQ);
-                ModDep.getInterdependencies().addInterdependency(CvDS[dep].getPrimary(), CvDS[dep].getSecondary(), Dependency.PRE);
-                ModDep.getInterdependencies().addInterdependency(CvDS[dep].getPrimary(), f, Dependency.XOR);
+                ModDep.getDependencies().addInterdependency(f, CvDS[dep].getPrimary(), Dependency.REQ);
+                ModDep.getDependencies().addInterdependency(CvDS[dep].getPrimary(), CvDS[dep].getSecondary(), Dependency.PRE);
+                ModDep.getDependencies().addInterdependency(CvDS[dep].getPrimary(), f, Dependency.XOR);
             }
         }
 
-        if (project.getInterdependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CU) > 0) {
-            ModifyingInterdependency[] CuDS = project.getInterdependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CU);
+        if (project.getDependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CU) > 0) {
+            ModifyingInterdependency[] CuDS = project.getDependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CU);
 
             for (int dep = 0; dep < CuDS.length; dep++) {
                 Feature f = ModDep.getFeatures().addFeature();
@@ -204,9 +204,9 @@ public final class DataManager {
                 }
                 */
 
-                ModDep.getInterdependencies().addInterdependency(f, CuDS[dep].getPrimary(), Dependency.REQ);
-                ModDep.getInterdependencies().addInterdependency(CuDS[dep].getPrimary(), CuDS[dep].getSecondary(), Dependency.PRE);
-                ModDep.getInterdependencies().addInterdependency(CuDS[dep].getPrimary(), f, Dependency.XOR);
+                ModDep.getDependencies().addInterdependency(f, CuDS[dep].getPrimary(), Dependency.REQ);
+                ModDep.getDependencies().addInterdependency(CuDS[dep].getPrimary(), CuDS[dep].getSecondary(), Dependency.PRE);
+                ModDep.getDependencies().addInterdependency(CuDS[dep].getPrimary(), f, Dependency.XOR);
             }
         }
         return true;
@@ -253,11 +253,11 @@ public final class DataManager {
 
     private void printDependencies(Project proj) {
 
-        FixedDependency[] FixDS = project.getInterdependencies().getTypedDependencies(FixedDependency.class, Dependency.FIXED);
-        Interdependency[] AndDS = project.getInterdependencies().getTypedDependencies(Interdependency.class, Dependency.AND);
-        Interdependency[] ReqDS = project.getInterdependencies().getTypedDependencies(Interdependency.class, Dependency.REQ);
-        Interdependency[] PreDS = project.getInterdependencies().getTypedDependencies(Interdependency.class, Dependency.PRE);
-        Interdependency[] XorDS = project.getInterdependencies().getTypedDependencies(Interdependency.class, Dependency.XOR);
+        FixedDependency[] FixDS = project.getDependencies().getTypedDependencies(FixedDependency.class, Dependency.FIXED);
+        Interdependency[] AndDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.AND);
+        Interdependency[] ReqDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.REQ);
+        Interdependency[] PreDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.PRE);
+        Interdependency[] XorDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.XOR);
 
         printWriter.println("% FIXED features / AND features / REQUIRED features / PRECEDING features / XOR features");
 
@@ -295,8 +295,8 @@ public final class DataManager {
                 printWriter.print((project.getFeatures().getFeatureIndex(ReqDS[i].getPrimary()) + 1)
                         + ", " + (project.getFeatures().getFeatureIndex(ReqDS[i].getSecondary()) + 1) + ", ");
             }
-        } else if (proj.getInterdependencies().getDependencyCount() > 0) {
-            Interdependency[] newReqDS = proj.getInterdependencies().getTypedDependencies(Interdependency.class, Dependency.REQ);
+        } else if (proj.getDependencies().getDependencyCount() > 0) {
+            Interdependency[] newReqDS = proj.getDependencies().getTypedDependencies(Interdependency.class, Dependency.REQ);
             for (int i = 0; i < newReqDS.length; i++) {
                 printWriter.print((proj.getFeatures().getFeatureIndex(newReqDS[i].getPrimary()) + 1
                         + project.getFeatures().getFeatureCount())
@@ -315,8 +315,8 @@ public final class DataManager {
                 printWriter.print((project.getFeatures().getFeatureIndex(PreDS[i].getPrimary()) + 1)
                         + ", " + (project.getFeatures().getFeatureIndex(PreDS[i].getSecondary()) + 1) + ", ");
             }
-        } else if (proj.getInterdependencies().getDependencyCount() > 0) {
-            Interdependency[] newPreDS = proj.getInterdependencies().getTypedDependencies(Interdependency.class, Dependency.PRE);
+        } else if (proj.getDependencies().getDependencyCount() > 0) {
+            Interdependency[] newPreDS = proj.getDependencies().getTypedDependencies(Interdependency.class, Dependency.PRE);
             for (int i = 0; i < newPreDS.length; i++) {
                 printWriter.print((project.getFeatures().getFeatureIndex(newPreDS[i].getPrimary()) + 1)
                         + ", " + (project.getFeatures().getFeatureIndex(newPreDS[i].getSecondary()) + 1) + ", ");
@@ -334,8 +334,8 @@ public final class DataManager {
                 printWriter.print((project.getFeatures().getFeatureIndex(XorDS[i].getPrimary()) + 1)
                         + ", " + (project.getFeatures().getFeatureIndex(XorDS[i].getSecondary()) + 1) + ", ");
             }
-        } else if (proj.getInterdependencies().getDependencyCount() > 0) {
-            Interdependency[] newXorDS = proj.getInterdependencies().getTypedDependencies(Interdependency.class, Dependency.XOR);
+        } else if (proj.getDependencies().getDependencyCount() > 0) {
+            Interdependency[] newXorDS = proj.getDependencies().getTypedDependencies(Interdependency.class, Dependency.XOR);
             for (int i = 0; i < newXorDS.length; i++) {
                 printWriter.print((project.getFeatures().getFeatureIndex(newXorDS[i].getPrimary()) + 1)
                         + ", " + ((proj.getFeatures().getFeatureIndex(newXorDS[i].getSecondary()) + 1)

@@ -156,11 +156,12 @@ public final class StakeholdersPanel extends JPanel {
         }
 
         @Override
-        public void contentPanelExpanded(ContentPanel source) {
+        public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
         }
 
         @Override
-        public void contentPanelCompressed(ContentPanel source) {
+        public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
         }
+        
     }
 }

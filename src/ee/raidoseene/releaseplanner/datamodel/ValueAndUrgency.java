@@ -7,6 +7,7 @@ package ee.raidoseene.releaseplanner.datamodel;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  *
@@ -14,31 +15,33 @@ import java.util.Map;
  */
 public class ValueAndUrgency implements Serializable {
 
-    private final Map<Pair<Stakeholder, Feature>, Pair<Integer, Urgency>> parameters;
+    private final Map<ValueAndUrgency.Key, ValueAndUrgency.Value> parameters;
 
     ValueAndUrgency() {
         this.parameters = new HashMap<>();
     }
 
     public void setValue(Stakeholder s, Feature f, int value) {
-        Pair<Stakeholder, Feature> stkFea = new Pair(s, f);
+        ValueAndUrgency.Key key = new ValueAndUrgency.Key(s, f);
+        ValueAndUrgency.Value val = this.parameters.get(key);
         if (value > 0) {
-            Urgency u = new Urgency();
-            Pair<Integer, Urgency> valUrg = new Pair(value, u);
-            this.parameters.put(stkFea, valUrg);
-        } else {
-            this.parameters.remove(stkFea);
+            if (val == null) {
+                this.parameters.put(key, new ValueAndUrgency.Value(value, null));
+            } else {
+                val.value = value;
+            }
+        } else if (val != null) {
+            this.parameters.remove(key);
         }
     }
 
     public void setUrgency(Stakeholder s, Feature f, Release r, int urgency) {
-        Pair<Stakeholder, Feature> stkFea = new Pair(s, f);
-        Pair<Integer, Urgency> valUrg = this.parameters.get(stkFea);
-        if (valUrg != null) {
+        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (val != null) {
             if (urgency > 0) {
-                valUrg.getSecondary().setUrgency(r, urgency);
+                val.urgency.setUrgency(r, urgency);
             } else {
-                valUrg.getSecondary().removeUrgency(r);
+                val.urgency.removeUrgency(r);
             }
         } else {
             throw new RuntimeException("Urgency cannot be set without value!");
@@ -46,19 +49,17 @@ public class ValueAndUrgency implements Serializable {
     }
 
     public int getValue(Stakeholder s, Feature f) {
-        Pair<Stakeholder, Feature> stkFea = new Pair(s, f);
-        Pair<Integer, Urgency> valUrg = this.parameters.get(stkFea);
-        if (valUrg != null) {
-            return valUrg.getPrimary();
+        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (val != null) {
+            return val.value;
         }
         return 0;
     }
 
     public int getUrgency(Stakeholder s, Feature f, Release r) {
-        Pair<Stakeholder, Feature> stkFea = new Pair(s, f);
-        Pair<Integer, Urgency> valUrg = this.parameters.get(stkFea);
-        if (valUrg != null) {
-            return valUrg.getSecondary().getUrgency(r);
+        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (val != null) {
+            return val.urgency.getUrgency(r);
         }
         return 0;
     }
@@ -66,49 +67,47 @@ public class ValueAndUrgency implements Serializable {
     public int getValueAndUrgencyCount() {
         return this.parameters.size();
     }
-
-    private final class Pair<P, S> {
-
-        private P primary;
-        private S secondary;
-
-        public Pair(P primary, S secondary) {
-            this.primary = primary;
-            this.secondary = secondary;
+    
+    private final class Key {
+        
+        private final Stakeholder stakeholder;
+        private final Feature feature;
+        
+        private Key(Stakeholder s, Feature f) {
+            this.stakeholder = s;
+            this.feature = f;
         }
-
-        public P getPrimary() {
-            return primary;
-        }
-
-        public S getSecondary() {
-            return secondary;
-        }
-
-        public void setPrimary(P primary) {
-            this.primary = primary;
-        }
-
-        public void setSecondary(S secondary) {
-            this.secondary = secondary;
+        
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof ValueAndUrgency.Key) {
+                ValueAndUrgency.Key k = (ValueAndUrgency.Key) o;
+                return (this.stakeholder == k.stakeholder && this.feature == k.feature);
+            }
+            
+            return false;
         }
 
         @Override
         public int hashCode() {
-            return primary.hashCode() ^ secondary.hashCode();
+            int hash = 7;
+            hash = 17 * hash + Objects.hashCode(this.stakeholder);
+            hash = 17 * hash + Objects.hashCode(this.feature);
+            return hash;
         }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o == null) {
-                return false;
-            }
-            if (!(o instanceof Pair)) {
-                return false;
-            }
-            Pair pairo = (Pair) o;
-            return this.primary.equals(pairo.getPrimary())
-                    && this.secondary.equals(pairo.getSecondary());
-        }
+        
     }
+    
+    private final class Value {
+        
+        private int value;
+        private Urgency urgency;
+        
+        private Value(int v, Urgency u) {
+            this.value = v;
+            this.urgency = u;
+        }
+        
+    }
+    
 }
