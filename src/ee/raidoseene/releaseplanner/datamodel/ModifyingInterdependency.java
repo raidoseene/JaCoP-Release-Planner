@@ -21,7 +21,7 @@ public final class ModifyingInterdependency extends Interdependency implements S
         this.change = feature;
     }
     
-    public ModifyingInterdependency(Feature feature1, Feature feature2, Values values) {
+    public ModifyingInterdependency(Feature feature1, Feature feature2, ValueAndUrgency values) {
         super(feature1, feature2, CV);
         this.change = values;
     }

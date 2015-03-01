@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * Needs to be deprecated
  * @author Raido Seene
  */
 public class Urgencies implements Serializable {
@@ -20,6 +20,7 @@ public class Urgencies implements Serializable {
         this.urgenciesContainer = new ArrayList<>();
     }
     
+    /*
     public Urgency addUrgency(Feature feature, Stakeholder stakeholder) {
         Urgency urgency = new Urgency(feature, stakeholder);
         this.urgenciesContainer.add(urgency);
@@ -57,5 +58,5 @@ public class Urgencies implements Serializable {
         }
         return list;
     }
-    
+    */
 }

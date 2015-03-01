@@ -5,26 +5,22 @@
 package ee.raidoseene.releaseplanner.datamodel;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
- *
+ * Needs to be deprecated
  * @author Raido Seene
  */
 public class Values implements Serializable {
     
     private final List<Value> valuesContainer;
-    //private final Map<Pair<Feature, Stakeholder>, Integer> values; // Test
     
     Values() {
         this.valuesContainer = new ArrayList<>();
-        //this.values = new HashMap<>(); // Test
     }
     
+    /*
     public Value addValue(Feature feature, Stakeholder stakeholder) {
         Value value = new Value(feature, stakeholder);
         this.valuesContainer.add(value);
@@ -67,5 +63,5 @@ public class Values implements Serializable {
         }
         return list;
     }
-    
+    */
 }

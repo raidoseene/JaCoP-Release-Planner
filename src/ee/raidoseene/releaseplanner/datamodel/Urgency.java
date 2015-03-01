@@ -13,13 +13,19 @@ import java.util.Map;
  */
 public class Urgency {
     
-    private final Feature feature;
-    private final Stakeholder stakeholder;
+    //private final Feature feature;
+    //private final Stakeholder stakeholder;
     private final Map<Release, Integer> urgencies;
     
+    /*
     Urgency(Feature feature, Stakeholder stakeholder) {
         this.feature = feature;
         this.stakeholder = stakeholder;
+        this.urgencies = new HashMap<>();
+    }
+    */
+    
+    Urgency () {
         this.urgencies = new HashMap<>();
     }
 
@@ -48,6 +54,7 @@ public class Urgency {
         return this.urgencies.containsKey(r);
     }
     
+    /*
     public Feature getFeature() {
         return this.feature;
     }
@@ -55,5 +62,6 @@ public class Urgency {
     public Stakeholder getStakeholder() {
         return this.stakeholder;
     }
+    */
     
 }

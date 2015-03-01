@@ -16,8 +16,9 @@ public class Project extends NamedObject implements Serializable {
     private final Features features;
     private final Groups groups;
     private final Interdependencies interdependencies;
-    private final Urgencies urgencies;
-    private final Values values;
+    private final ValueAndUrgency valueAndUrgency;
+    //private final Urgencies urgencies;
+    //private final Values values;
     private final Resources resources;
     private final Releases releases;
     private final Stakeholders stakeholders;
@@ -29,8 +30,9 @@ public class Project extends NamedObject implements Serializable {
         this.features = new Features(this);
         this.groups = new Groups(this);
         this.interdependencies = new Interdependencies(this);
-        this.urgencies = new Urgencies();
-        this.values = new Values();
+        this.valueAndUrgency = new ValueAndUrgency();
+        //this.urgencies = new Urgencies();
+        //this.values = new Values();
         this.resources = new Resources(this);
         this.releases = new Releases(this);
         this.stakeholders = new Stakeholders(this);
@@ -52,14 +54,22 @@ public class Project extends NamedObject implements Serializable {
     public Groups getGroups() {
         return this.groups;
     }
+    
+    public ValueAndUrgency getValueAndUrgency() {
+        return this.valueAndUrgency;
+    }
 
+    /*
     public Urgencies getUrgencies() {
         return this.urgencies;
     }
+    */
 
+    /*
     public Values getValues() {
         return this.values;
     }
+    */
 
     public Resources getResources() {
         return this.resources;

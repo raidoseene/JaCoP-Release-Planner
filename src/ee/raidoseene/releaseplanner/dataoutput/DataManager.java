@@ -14,6 +14,7 @@ import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Urgencies;
 import ee.raidoseene.releaseplanner.datamodel.Urgency;
 import ee.raidoseene.releaseplanner.datamodel.Value;
+import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
 import ee.raidoseene.releaseplanner.datamodel.Values;
 import java.io.File;
 import java.io.PrintWriter;
@@ -69,13 +70,27 @@ public final class DataManager {
                                 CcDS[dep].getChange(Feature.class).getConsumption(project.getResources().getResource(r)));
                     }
                 }
+                
+                for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
+                    int value = project.getValueAndUrgency().getValue(project.getStakeholders().getStakeholder(s), f);
+                    if (value > 0) {
+                        ModDep.getValueAndUrgency().setValue(project.getStakeholders().getStakeholder(s), f, value);
+                        for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                            ModDep.getValueAndUrgency().setUrgency(project.getStakeholders().getStakeholder(s), f,
+                                    project.getReleases().getRelease(r),
+                                    project.getValueAndUrgency().getUrgency(project.getStakeholders().getStakeholder(s), f,
+                                    project.getReleases().getRelease(r)));
+                        }
+                    }
+                }
 
+                /*
                 List<Value> values = project.getValues().getValuesByFeature(CcDS[dep].getSecondary());
                 for (Value v : values) {
                     Value newV = ModDep.getValues().addValue(f, v.getStakeholder());
                     newV.setValue(v.getValue());
                 }
-
+                
                 List<Urgency> urgencies = project.getUrgencies().getUrgenciesByFeature(CcDS[dep].getSecondary());
                 for (Urgency u : urgencies) {
                     Urgency newU = ModDep.getUrgencies().addUrgency(f, u.getStakeholder());
@@ -85,7 +100,7 @@ public final class DataManager {
                         }
                     }
                 }
-
+                */
 
                 ModDep.getInterdependencies().addInterdependency(f, CcDS[dep].getPrimary(), Dependency.REQ);
                 ModDep.getInterdependencies().addInterdependency(CcDS[dep].getPrimary(), CcDS[dep].getSecondary(), Dependency.PRE);
@@ -106,6 +121,21 @@ public final class DataManager {
                     }
                 }
 
+                ValueAndUrgency values = CvDS[dep].getChange(ValueAndUrgency.class);
+                for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
+                    if (values.getValue(project.getStakeholders().getStakeholder(s), f) > 0) {
+                        ModDep.getValueAndUrgency().setValue(project.getStakeholders().getStakeholder(s), f,
+                                values.getValue(project.getStakeholders().getStakeholder(s), f));
+                        for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                            ModDep.getValueAndUrgency().setUrgency(project.getStakeholders().getStakeholder(s), f,
+                                    project.getReleases().getRelease(r),
+                                    project.getValueAndUrgency().getUrgency(project.getStakeholders().getStakeholder(s), f,
+                                    project.getReleases().getRelease(r)));
+                        }
+                    }
+                }
+                
+                /*
                 List<Value> values = CvDS[dep].getChange(Values.class).getValuesByFeature(CvDS[dep].getSecondary());
                 for (Value v : values) {
                     Value newV = ModDep.getValues().addValue(f, v.getStakeholder());
@@ -121,7 +151,7 @@ public final class DataManager {
                         }
                     }
                 }
-
+                */
 
                 ModDep.getInterdependencies().addInterdependency(f, CvDS[dep].getPrimary(), Dependency.REQ);
                 ModDep.getInterdependencies().addInterdependency(CvDS[dep].getPrimary(), CvDS[dep].getSecondary(), Dependency.PRE);
@@ -142,6 +172,21 @@ public final class DataManager {
                     }
                 }
 
+                ValueAndUrgency urgencies = CuDS[dep].getChange(ValueAndUrgency.class);
+                for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
+                    int value = project.getValueAndUrgency().getValue(project.getStakeholders().getStakeholder(s), f);
+                    if (value > 0) {
+                        ModDep.getValueAndUrgency().setValue(project.getStakeholders().getStakeholder(s), f, value);
+                        for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                            ModDep.getValueAndUrgency().setUrgency(project.getStakeholders().getStakeholder(s), f,
+                                    project.getReleases().getRelease(r),
+                                    urgencies.getUrgency(project.getStakeholders().getStakeholder(s), f,
+                                    project.getReleases().getRelease(r)));
+                        }
+                    }
+                }
+                
+                /*
                 List<Value> values = CuDS[dep].getChange(Values.class).getValuesByFeature(CuDS[dep].getSecondary());
                 for (Value v : values) {
                     Value newV = ModDep.getValues().addValue(f, v.getStakeholder());
@@ -157,7 +202,7 @@ public final class DataManager {
                         }
                     }
                 }
-
+                */
 
                 ModDep.getInterdependencies().addInterdependency(f, CuDS[dep].getPrimary(), Dependency.REQ);
                 ModDep.getInterdependencies().addInterdependency(CuDS[dep].getPrimary(), CuDS[dep].getSecondary(), Dependency.PRE);
@@ -432,39 +477,46 @@ public final class DataManager {
         printWriter.println("% Stakeholders value(1..9), urgency");
         printWriter.print("value = [| ");
         for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
-            List<Value> values = project.getValues().getValuesByStakeholder(project.getStakeholders().getStakeholder(s));
-            boolean valueNotFound = true;
+            ValueAndUrgency valueAndUrgency = project.getValueAndUrgency();
+            //List<Value> values = project.getValues().getValuesByStakeholder(project.getStakeholders().getStakeholder(s));
+            //boolean valueNotFound = true;
             for (int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
-                for (Value v : values) {
-                    if (v.getFeature() == project.getFeatures().getFeature(f)) {
-                        printWriter.print(v.getValue() + ", ");
-                        valueNotFound = false;
-                        break;
-                    } else {
-                        valueNotFound = true;
-                    }
-                    if (valueNotFound) {
-                        printWriter.print("0, ");
-                    }
-                }
+                //for (Value v : values) {
+                    //if (v.getFeature() == project.getFeatures().getFeature(f)) {
+                        //printWriter.print(v.getValue() + ", ");
+                        printWriter.print(valueAndUrgency.getValue(project.getStakeholders().getStakeholder(s),
+                                project.getFeatures().getFeature(f)) + ", ");
+                        //valueNotFound = false;
+                        //break;
+                    //} else {
+                        //valueNotFound = true;
+                    //}
+                    //if (valueNotFound) {
+                        //printWriter.print("0, ");
+                    //}
+                //}
             }
 
-            if (ModDep.getValues().getValueCount() > 0) {
-                List<Value> newValues = ModDep.getValues().getValuesByStakeholder(project.getStakeholders().getStakeholder(s));
-                boolean newValueNotFound = true;
+            if (ModDep.getValueAndUrgency().getValueAndUrgencyCount() > 0) {
+            //if (ModDep.getValues().getValueCount() > 0) {
+                ValueAndUrgency newValueAndUrgency = ModDep.getValueAndUrgency();
+                //List<Value> newValues = ModDep.getValues().getValuesByStakeholder(project.getStakeholders().getStakeholder(s));
+                //boolean newValueNotFound = true;
                 for (int f = 0; f < ModDep.getFeatures().getFeatureCount(); f++) {
-                    for (Value v : newValues) {
-                        if (v.getFeature() == ModDep.getFeatures().getFeature(f)) {
-                            printWriter.print(v.getValue() + ", ");
-                            newValueNotFound = false;
-                            break;
-                        } else {
-                            newValueNotFound = true;
-                        }
-                        if (newValueNotFound) {
-                            printWriter.print("0, ");
-                        }
-                    }
+                    //for (Value v : newValues) {
+                        //if (v.getFeature() == ModDep.getFeatures().getFeature(f)) {
+                            //printWriter.print(v.getValue() + ", ");
+                            printWriter.print(newValueAndUrgency.getValue(project.getStakeholders().getStakeholder(s),
+                                    ModDep.getFeatures().getFeature(f)) + ", ");
+                            //newValueNotFound = false;
+                            //break;
+                        //} else {
+                            //newValueNotFound = true;
+                        //}
+                        //if (newValueNotFound) {
+                            //printWriter.print("0, ");
+                        //}
+                    //}
                 }
             }
             printWriter.print("| ");
@@ -476,37 +528,46 @@ public final class DataManager {
 
         printWriter.println("urgency = array3d(1..S, 1..F, 1.." + (project.getReleases().getReleaseCount() + 1) + ", [");
         for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
-            List<Urgency> urgencies = project.getUrgencies().getUrgenciesByStakeholder(project.getStakeholders().getStakeholder(s));
+            ValueAndUrgency valueAndUrgency = project.getValueAndUrgency();
+            //List<Urgency> urgencies = project.getUrgencies().getUrgenciesByStakeholder(project.getStakeholders().getStakeholder(s));
             printWriter.println("% stakeholder " + (s + 1));
             for (int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
-                for (Urgency u : urgencies) {
-                    if (u.getFeature() == project.getFeatures().getFeature(f)) {
+                //for (Urgency u : urgencies) {
+                    //if (u.getFeature() == project.getFeatures().getFeature(f)) {
                         for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
-                            printWriter.print(u.getUrgency(project.getReleases().getRelease(r)) + ", ");
+                            //printWriter.print(u.getUrgency(project.getReleases().getRelease(r)) + ", ");
+                            printWriter.print(valueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
+                                    project.getFeatures().getFeature(f),
+                                    project.getReleases().getRelease(r)) + ", ");
                         }
-                    } else {
-                        for (int i = 0; i < project.getFeatures().getFeatureCount(); i++) {
-                            printWriter.print("0, ");
-                        }
-                    }
+                    //} else {
+                        //for (int i = 0; i < project.getFeatures().getFeatureCount(); i++) {
+                            //printWriter.print("0, ");
+                        //}
+                    //}
                     printWriter.print("\n");
-                }
+                //}
             }
-            if (ModDep.getUrgencies().getUrgecnyCount() > 0) {
-                List<Urgency> newUrgencies = ModDep.getUrgencies().getUrgenciesByStakeholder(project.getStakeholders().getStakeholder(s));
+            if (ModDep.getValueAndUrgency().getValueAndUrgencyCount() > 0) {
+            //if (ModDep.getUrgencies().getUrgecnyCount() > 0) {
+                //List<Urgency> newUrgencies = ModDep.getUrgencies().getUrgenciesByStakeholder(project.getStakeholders().getStakeholder(s));
+                ValueAndUrgency newValueAndUrgency = ModDep.getValueAndUrgency();
                 for (int f = 0; f < ModDep.getFeatures().getFeatureCount(); f++) {
-                    for (Urgency u : newUrgencies) {
-                        if (u.getFeature() == ModDep.getFeatures().getFeature(f)) {
+                    //for (Urgency u : newUrgencies) {
+                        //if (u.getFeature() == ModDep.getFeatures().getFeature(f)) {
                             for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
-                                printWriter.print(u.getUrgency(project.getReleases().getRelease(r)) + ", ");
+                                //printWriter.print(u.getUrgency(project.getReleases().getRelease(r)) + ", ");
+                                printWriter.print(newValueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
+                                    ModDep.getFeatures().getFeature(f),
+                                    project.getReleases().getRelease(r)) + ", ");
                             }
-                        } else {
-                            for (int i = 0; i < project.getFeatures().getFeatureCount(); i++) {
-                                printWriter.print("0, ");
-                            }
-                        }
+                        //} else {
+                            //for (int i = 0; i < project.getFeatures().getFeatureCount(); i++) {
+                                //printWriter.print("0, ");
+                            //}
+                        //}
                         printWriter.print("\n");
-                    }
+                    //}
                 }
             }
         }

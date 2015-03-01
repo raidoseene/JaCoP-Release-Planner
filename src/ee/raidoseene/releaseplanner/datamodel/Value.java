@@ -5,7 +5,7 @@
 package ee.raidoseene.releaseplanner.datamodel;
 
 /**
- *
+ * Needs to be deprecated
  * @author Raido Seene
  */
 public class Value {
@@ -20,6 +20,7 @@ public class Value {
         this.value = 0;
     }
 
+    /*
     public void setValue(int value) {
         if (value >= 0 && value < 10) {
             this.value = value;
@@ -40,5 +41,5 @@ public class Value {
     public Stakeholder getStakeholder() {
         return this.stakeholder;
     }
-    
+    */
 }

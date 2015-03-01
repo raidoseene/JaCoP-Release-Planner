@@ -41,7 +41,7 @@ public class Interdependencies extends ProjectElement implements Serializable {
         return dependency;
     }
     
-    public Dependency addModifyingInterdependency(Feature feature1, Feature feature2, Values values) {
+    public Dependency addModifyingInterdependency(Feature feature1, Feature feature2, ValueAndUrgency values) {
         Dependency dependency = new ModifyingInterdependency(feature1, feature2, values);
         this.interdependenciesContainer.add(dependency);
         return dependency;
