@@ -506,13 +506,10 @@ public final class FeaturesPanel extends JPanel {
         public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
             if (expanded && this.getComponentCount() == 1) {
                 this.add(this.cont2);
-
-                FeaturesPanel.this.scrollable.contentUpdated();
             } else if (!expanded && this.getComponentCount() > 1) {
                 this.remove(this.cont2);
-
-                FeaturesPanel.this.scrollable.contentUpdated();
             }
+            FeaturesPanel.this.scrollable.contentUpdated();
         }
 
         @Override

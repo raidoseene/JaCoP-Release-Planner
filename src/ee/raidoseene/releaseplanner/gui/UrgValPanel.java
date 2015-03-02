@@ -20,17 +20,20 @@ import ee.raidoseene.releaseplanner.gui.utils.ContentPanelListener;
 import ee.raidoseene.releaseplanner.gui.utils.ScrollablePanel;
 import java.awt.BorderLayout;
 import java.awt.Container;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -236,13 +239,10 @@ public final class UrgValPanel extends JPanel {
             public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
                 if (expanded && this.getComponentCount() == 1) {
                     this.add(this.scroller);
-
-                    UVSContent.this.scrollable.contentUpdated();
                 } else if (!expanded && this.getComponentCount() > 1) {
                     this.remove(this.scroller);
-
-                    UVSContent.this.scrollable.contentUpdated();
                 }
+                UVSContent.this.scrollable.contentUpdated();
             }
 
             @Override
@@ -275,6 +275,7 @@ public final class UrgValPanel extends JPanel {
                 private final Feature feature;
                 private final JPanel cont1;
                 private final JSpinner value;
+                private final UVTab.UrgencyPanel cont2;
 
                 private UVSFContent(Feature f) {
                     this.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -308,6 +309,8 @@ public final class UrgValPanel extends JPanel {
                     });
                     c.add(BorderLayout.LINE_START, this.value);
                     c.add(BorderLayout.CENTER, new JLabel("Value to stakeholder"));
+
+                    this.cont2 = new UVTab.UrgencyPanel(UVSContent.this.stakeholder, this.feature);
                 }
 
                 @Override
@@ -316,6 +319,12 @@ public final class UrgValPanel extends JPanel {
 
                 @Override
                 public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
+                    if (expanded && this.getComponentCount() == 1) {
+                        this.add(this.cont2);
+                    } else if (!expanded && this.getComponentCount() > 1) {
+                        this.remove(this.cont2);
+                    }
+                    UVSContent.this.scrollable.contentUpdated();
                 }
 
                 @Override
@@ -357,13 +366,10 @@ public final class UrgValPanel extends JPanel {
             public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
                 if (expanded && this.getComponentCount() == 1) {
                     this.add(this.scroller);
-
-                    UVFContent.this.scrollable.contentUpdated();
                 } else if (!expanded && this.getComponentCount() > 1) {
                     this.remove(this.scroller);
-
-                    UVFContent.this.scrollable.contentUpdated();
                 }
+                UVFContent.this.scrollable.contentUpdated();
             }
 
             @Override
@@ -395,6 +401,7 @@ public final class UrgValPanel extends JPanel {
                 private final Stakeholder stakeholder;
                 private final JPanel cont1;
                 private final JSpinner value;
+                private final UVTab.UrgencyPanel cont2;
 
                 private UVFSContent(Stakeholder s) {
                     this.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -428,6 +435,8 @@ public final class UrgValPanel extends JPanel {
                     });
                     c.add(BorderLayout.LINE_START, this.value);
                     c.add(BorderLayout.CENTER, new JLabel("Value to stakeholder"));
+
+                    this.cont2 = new UVTab.UrgencyPanel(this.stakeholder, UVFContent.this.feature);
                 }
 
                 @Override
@@ -436,12 +445,64 @@ public final class UrgValPanel extends JPanel {
 
                 @Override
                 public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
+                    if (expanded && this.getComponentCount() == 1) {
+                        this.add(this.cont2);
+                    } else if (!expanded && this.getComponentCount() > 1) {
+                        this.remove(this.cont2);
+                    }
+                    UVFContent.this.scrollable.contentUpdated();
                 }
 
                 @Override
                 public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
                 }
 
+            }
+
+        }
+
+        private final class UrgencyPanel extends JPanel {
+            
+            private final Feature feature;
+            private final Stakeholder stakeholder;
+            private final JTextField[] values;
+
+            private UrgencyPanel(Stakeholder s, Feature f) {
+                this.setBorder(new EmptyBorder(10, 0, 0, 0));
+                this.setLayout(new BorderLayout());
+                this.stakeholder = s;
+                this.feature = f;
+
+                Container c = new Container();
+                c.setLayout(new BorderLayout(10, 10));
+                this.add(BorderLayout.CENTER, c);
+                
+                Container grid = new Container();
+                grid.setLayout(new GridLayout(2, 6, 10, 2));
+                c.add(BorderLayout.LINE_START, grid);
+                
+                this.values = new JTextField[4];
+                for (int i = 0; i < 4; i++) {
+                    this.values[i] = new JTextField();
+                    grid.add(this.values[i]);
+                }
+                
+                grid.add(new JLabel());
+                grid.add(new JButton("Clear urgency"));
+                
+                grid.add(new JLabel("1", JLabel.CENTER));
+                grid.add(new JLabel("2", JLabel.CENTER));
+                grid.add(new JLabel("3", JLabel.CENTER));
+                grid.add(new JLabel("postpone", JLabel.CENTER));
+                grid.add(new JLabel());
+                grid.add(new JLabel());
+                
+                Container btns = new Container();
+                btns.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
+                c.add(BorderLayout.PAGE_END, btns);
+                
+                btns.add(new JButton("Change in value"));
+                btns.add(new JButton("Change in urgency"));
             }
 
         }

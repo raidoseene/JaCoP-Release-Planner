@@ -207,13 +207,10 @@ public final class ReleasesPanel extends ScrollablePanel {
         public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
             if (expanded && this.getComponentCount() == 1) {
                 this.add(this.cont2);
-
-                ReleasesPanel.this.scrollable.contentUpdated();
             } else if (!expanded && this.getComponentCount() > 1) {
                 this.remove(this.cont2);
-
-                ReleasesPanel.this.scrollable.contentUpdated();
             }
+            ReleasesPanel.this.scrollable.contentUpdated();
         }
 
         @Override
