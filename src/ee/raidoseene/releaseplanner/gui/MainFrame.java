@@ -26,7 +26,7 @@ import javax.swing.UIManager;
 public final class MainFrame extends JFrame {
 
     private final JMenuItem save, saveas, close;
-    private final JMenuItem solver;
+    private final JMenuItem dataDump, solver;
 
     private MainFrame() {
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -136,12 +136,24 @@ public final class MainFrame extends JFrame {
         menu = new JMenu("Temporary");
         menubar.add(menu);
 
-        this.solver = new JMenuItem("Dump Data");
-        this.solver.addActionListener(new ActionListener() {
+        this.dataDump = new JMenuItem("Dump Data");
+        this.dataDump.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
                     MainFrame.this.dumpData();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        menu.add(this.dataDump);
+        this.solver = new JMenuItem("Simulate");
+        this.solver.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    MainFrame.this.runSolver();
                 } catch (Throwable t) {
                     t.printStackTrace();
                 }
@@ -265,6 +277,21 @@ public final class MainFrame extends JFrame {
             Messenger.showError(ex, null);
         }
     }
+    
+    private void runSolver() {
+        this.saveCurrentProject(false);
+        
+        try {
+            if (ProjectManager.getCurrentProject().getStorage() == null) {
+                String msg = "Project is not saved!\nUnable to determine dump location!";
+                throw new Exception(msg);
+            }
+            
+            DataManager.saveDataFile(ProjectManager.getCurrentProject());
+        } catch (Exception ex) {
+            Messenger.showError(ex, null);
+        }
+    }
 
     private void updateEnablity() {
         boolean has = (ProjectManager.getCurrentProject() != null);
@@ -272,6 +299,7 @@ public final class MainFrame extends JFrame {
         this.save.setEnabled(has);
         this.saveas.setEnabled(has);
         this.close.setEnabled(has);
+        this.dataDump.setEnabled(has);
         this.solver.setEnabled(has);
 
         this.revalidate();
