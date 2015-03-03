@@ -26,7 +26,7 @@ public class ValueAndUrgency implements Serializable {
         ValueAndUrgency.Value val = this.parameters.get(key);
         if (value > 0) {
             if (val == null) {
-                this.parameters.put(key, new ValueAndUrgency.Value(value, null));
+                this.parameters.put(key, new ValueAndUrgency.Value(value));
             } else {
                 val.value = value;
             }
@@ -38,11 +38,7 @@ public class ValueAndUrgency implements Serializable {
     public void setUrgency(Stakeholder s, Feature f, Release r, int urgency) {
         ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (val != null) {
-            if (urgency > 0) {
-                val.urgency.setUrgency(r, urgency);
-            } else {
-                val.urgency.removeUrgency(r);
-            }
+            val.setUrgency(r, urgency);
         } else {
             throw new RuntimeException("Urgency cannot be set without value!");
         }
@@ -59,32 +55,32 @@ public class ValueAndUrgency implements Serializable {
     public int getUrgency(Stakeholder s, Feature f, Release r) {
         ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (val != null) {
-            return val.urgency.getUrgency(r);
+            return val.getUrgency(r);
         }
         return 0;
     }
-    
+
     public int getValueAndUrgencyCount() {
         return this.parameters.size();
     }
-    
-    private final class Key {
-        
+
+    private final class Key implements Serializable {
+
         private final Stakeholder stakeholder;
         private final Feature feature;
-        
+
         private Key(Stakeholder s, Feature f) {
             this.stakeholder = s;
             this.feature = f;
         }
-        
+
         @Override
         public boolean equals(Object o) {
             if (o instanceof ValueAndUrgency.Key) {
                 ValueAndUrgency.Key k = (ValueAndUrgency.Key) o;
                 return (this.stakeholder == k.stakeholder && this.feature == k.feature);
             }
-            
+
             return false;
         }
 
@@ -95,19 +91,36 @@ public class ValueAndUrgency implements Serializable {
             hash = 17 * hash + Objects.hashCode(this.feature);
             return hash;
         }
-        
+
     }
-    
-    private final class Value {
-        
+
+    private final class Value implements Serializable {
+
+        private final Map<Release, Integer> urgencies;
         private int value;
-        private Urgency urgency;
-        
-        private Value(int v, Urgency u) {
+
+        private Value(int v) {
+            this.urgencies = new HashMap<>();
             this.value = v;
-            this.urgency = u;
         }
-        
+
+        public void setUrgency(Release release, int urgency) {
+            if (urgency > 0) {
+                this.urgencies.put(release, urgency);
+            } else {
+                this.urgencies.remove(release);
+            }
+        }
+
+        public int getUrgency(Release release) {
+            Integer uval = this.urgencies.get(release);
+            if (uval != null) {
+                return uval;
+            }
+
+            return 0;
+        }
+
     }
-    
+
 }
