@@ -4,11 +4,13 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
+
 /**
  *
  * @author Raido Seene
  */
-public abstract class Dependency {
+public abstract class Dependency implements Serializable {
     
     public static final int TYPE_MASK = 0xf0;
     public static final int SUB_MASK = 0x0f;

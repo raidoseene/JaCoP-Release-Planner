@@ -83,7 +83,7 @@ public final class FeaturesPanel extends JPanel {
             public Dimension preferredLayoutSize(Container cntnr) {
                 Component[] comps = cntnr.getComponents();
                 int height = comps[0].getPreferredSize().height;
-                int width = 280;
+                int width = 300;
 
                 for (int i = 1; i < comps.length; i++) {
                     Dimension d = comps[i].getPreferredSize();
@@ -101,7 +101,7 @@ public final class FeaturesPanel extends JPanel {
             public Dimension minimumLayoutSize(Container cntnr) {
                 Component[] comps = cntnr.getComponents();
                 int height = comps[0].getMinimumSize().height;
-                int width = 250;
+                int width = 300;
 
                 for (int i = 1; i < comps.length; i++) {
                     Dimension d = comps[i].getMinimumSize();
@@ -119,9 +119,9 @@ public final class FeaturesPanel extends JPanel {
             public void layoutContainer(Container cntnr) {
                 Component[] comps = cntnr.getComponents();
                 int height = cntnr.getHeight();
-                int x = 250;
+                int x = 300;
 
-                comps[0].setBounds(0, 0, 250, height);
+                comps[0].setBounds(0, 0, 300, height);
                 for (int i = 1; i < comps.length; i++) {
                     int w = comps[i].getPreferredSize().width;
                     comps[i].setBounds(x + 10, 0, w, height);
