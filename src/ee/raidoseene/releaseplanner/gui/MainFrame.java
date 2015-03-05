@@ -4,6 +4,7 @@ import ee.raidoseene.releaseplanner.backend.ProjectFileFilter;
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
+import ee.raidoseene.releaseplanner.solverutils.Solver;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Toolkit;
@@ -287,7 +288,7 @@ public final class MainFrame extends JFrame {
                 throw new Exception(msg);
             }
             
-            DataManager.saveDataFile(ProjectManager.getCurrentProject());
+            Solver.runSolver();
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }

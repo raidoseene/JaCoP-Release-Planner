@@ -83,7 +83,7 @@ public final class FeaturesPanel extends JPanel {
             public Dimension preferredLayoutSize(Container cntnr) {
                 Component[] comps = cntnr.getComponents();
                 int height = comps[0].getPreferredSize().height;
-                int width = 250;
+                int width = 280;
 
                 for (int i = 1; i < comps.length; i++) {
                     Dimension d = comps[i].getPreferredSize();
@@ -215,7 +215,7 @@ public final class FeaturesPanel extends JPanel {
     
     private final class DepHandler extends JPanel {
         
-        private final JToggleButton fixed, req, and, xor;
+        private final JToggleButton fixed, and, req, pre, xor;
         private final ArrayList<FPContent> selections;
         private final ActionListener listener;
         
@@ -231,22 +231,32 @@ public final class FeaturesPanel extends JPanel {
                         if (source == DepHandler.this.fixed) {
                             boolean state = DepHandler.this.fixed.isSelected();
                             DepHandler.this.req.setEnabled(!state);
+                            DepHandler.this.pre.setEnabled(!state);
                             DepHandler.this.and.setEnabled(!state);
                             DepHandler.this.xor.setEnabled(!state);
                         } else if (source == DepHandler.this.req) {
                             boolean state = DepHandler.this.req.isSelected();
                             DepHandler.this.fixed.setEnabled(!state);
+                            DepHandler.this.pre.setEnabled(!state);
+                            DepHandler.this.and.setEnabled(!state);
+                            DepHandler.this.xor.setEnabled(!state);
+                        } else if (source == DepHandler.this.pre) {
+                            boolean state = DepHandler.this.pre.isSelected();
+                            DepHandler.this.fixed.setEnabled(!state);
+                            DepHandler.this.req.setEnabled(!state);
                             DepHandler.this.and.setEnabled(!state);
                             DepHandler.this.xor.setEnabled(!state);
                         } else if (source == DepHandler.this.and) {
                             boolean state = DepHandler.this.and.isSelected();
                             DepHandler.this.fixed.setEnabled(!state);
                             DepHandler.this.req.setEnabled(!state);
+                            DepHandler.this.pre.setEnabled(!state);
                             DepHandler.this.xor.setEnabled(!state);
                         } else if (source == DepHandler.this.xor) {
                             boolean state = DepHandler.this.xor.isSelected();
                             DepHandler.this.fixed.setEnabled(!state);
                             DepHandler.this.req.setEnabled(!state);
+                            DepHandler.this.pre.setEnabled(!state);
                             DepHandler.this.and.setEnabled(!state);
                         }
                         
@@ -269,6 +279,10 @@ public final class FeaturesPanel extends JPanel {
             this.req = new JToggleButton("REQ");
             this.req.addActionListener(this.listener);
             this.add(this.req);
+            
+            this.pre = new JToggleButton("PRE");
+            this.pre.addActionListener(this.listener);
+            this.add(this.pre);
             
             this.add(new JSeparator(JSeparator.VERTICAL));
             
@@ -307,6 +321,18 @@ public final class FeaturesPanel extends JPanel {
                     
                     this.req.setSelected(false);
                     ActionEvent ae = new ActionEvent(this.req, ActionEvent.ACTION_PERFORMED, null);
+                    this.listener.actionPerformed(ae);
+                }
+                return true;
+            } else if (this.pre.isSelected()) {
+                if (this.selections.size() == 2) {
+                    Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
+                    Feature f1 = this.selections.get(0).feature;
+                    Feature f2 = this.selections.get(1).feature;
+                    ids.addInterdependency(f1, f2, Dependency.PRE);
+                    
+                    this.pre.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.pre, ActionEvent.ACTION_PERFORMED, null);
                     this.listener.actionPerformed(ae);
                 }
                 return true;
