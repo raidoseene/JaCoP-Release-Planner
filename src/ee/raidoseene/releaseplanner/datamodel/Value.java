@@ -4,23 +4,23 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
+
 /**
- * Needs to be deprecated
  * @author Raido Seene
  */
-public class Value {
+public class Value implements Serializable {
     
     private final Feature feature;
     private final Stakeholder stakeholder;
     private int value;
     
-    Value(Feature feature, Stakeholder stakeholder) {
+    public Value(Feature feature, Stakeholder stakeholder) {
         this.feature = feature;
         this.stakeholder = stakeholder;
         this.value = 0;
     }
 
-    /*
     public void setValue(int value) {
         if (value >= 0 && value < 10) {
             this.value = value;
@@ -41,5 +41,5 @@ public class Value {
     public Stakeholder getStakeholder() {
         return this.stakeholder;
     }
-    */
+
 }

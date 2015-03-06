@@ -14,16 +14,16 @@ import java.util.ArrayList;
  */
 public final class ModifyingInterdependency extends Interdependency implements Serializable {
     
-    private Object change;
+    private final Object change;
     
     public ModifyingInterdependency(Feature feature1, Feature feature2, Feature feature) {
         super(feature1, feature2, CC);
         this.change = feature;
     }
     
-    public ModifyingInterdependency(Feature feature1, Feature feature2, ValueAndUrgency values) {
+    public ModifyingInterdependency(Feature feature1, Feature feature2, Value value) {
         super(feature1, feature2, CV);
-        this.change = values;
+        this.change = value;
     }
     
     public ModifyingInterdependency(Feature feature1, Feature feature2, Urgency urgency) {

@@ -188,7 +188,7 @@ public final class FeaturesPanel extends JPanel {
     private final class FPScrollable extends ScrollablePanel {
 
         private FPScrollable() {
-            this.setBorder(new EmptyBorder(10, 260, 10, 10));
+            this.setBorder(new EmptyBorder(10, 310, 10, 10));
             this.setLayout(new ContentListLayout(ContentPanel.class));
 
             Project project = ProjectManager.getCurrentProject();

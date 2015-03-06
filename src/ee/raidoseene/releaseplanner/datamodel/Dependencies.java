@@ -23,32 +23,32 @@ public class Dependencies extends ProjectElement implements Serializable {
         this.interdependenciesContainer = new ArrayList<>();
     }
     
-    public Dependency addFixedDependency(Feature feature, Release release) {
-        Dependency dependency = new FixedDependency(feature, release);
+    public FixedDependency addFixedDependency(Feature feature, Release release) {
+        FixedDependency dependency = new FixedDependency(feature, release);
         this.interdependenciesContainer.add(dependency);
         return dependency;
     }
     
-    public Dependency addInterdependency(Feature feature1, Feature feature2, int type) {
-        Dependency dependency = new Interdependency(feature1, feature2, type);
+    public Interdependency addInterdependency(Feature feature1, Feature feature2, int type) {
+        Interdependency dependency = new Interdependency(feature1, feature2, type);
         this.interdependenciesContainer.add(dependency);
         return dependency;
     }
     
-    public Dependency addModifyingInterdependency(Feature feature1, Feature feature2, Feature feature) {
-        Dependency dependency = new ModifyingInterdependency(feature1, feature2, feature);
+    public ModifyingInterdependency addModifyingInterdependency(Feature feature1, Feature feature2, Feature feature) {
+        ModifyingInterdependency dependency = new ModifyingInterdependency(feature1, feature2, feature);
         this.interdependenciesContainer.add(dependency);
         return dependency;
     }
     
-    public Dependency addModifyingInterdependency(Feature feature1, Feature feature2, ValueAndUrgency values) {
-        Dependency dependency = new ModifyingInterdependency(feature1, feature2, values);
+    public ModifyingInterdependency addModifyingInterdependency(Feature feature1, Feature feature2, Value value) {
+        ModifyingInterdependency dependency = new ModifyingInterdependency(feature1, feature2, value);
         this.interdependenciesContainer.add(dependency);
         return dependency;
     }
     
-    public Dependency addModifyingInterdependency(Feature feature1, Feature feature2, Urgency urgency) {
-        Dependency dependency = new ModifyingInterdependency(feature1, feature2, urgency);
+    public ModifyingInterdependency addModifyingInterdependency(Feature feature1, Feature feature2, Urgency urgency) {
+        ModifyingInterdependency dependency = new ModifyingInterdependency(feature1, feature2, urgency);
         this.interdependenciesContainer.add(dependency);
         return dependency;
     }
@@ -110,10 +110,11 @@ public class Dependencies extends ProjectElement implements Serializable {
     /**
      * Query only certain types of dependencies.
      * For example, to get all instances of <code>FixedDependancy</code>:
-     * FixedDependency[] fds = dependencies.getTypedDependencies(FixedDependency.class);
+     * FixedDependency[] fds = dependencies.getTypedDependencies(FixedDependency.class, null);
      * 
      * @param <T> type of dependencies to query
      * @param cls class that represents the type T
+     * @param criterium optional criterium for filtering dependencies
      * @return Returns an array dependencies of type T
      */
     @SuppressWarnings("unchecked")
