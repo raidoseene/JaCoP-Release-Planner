@@ -7,6 +7,7 @@ package ee.raidoseene.releaseplanner.solverutils;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -42,87 +43,46 @@ public class Solver {
         minizincInput.add(dataFile);
         String[] solverInput = new String[]{"-v", "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_problem.fzn"};
 
-        Process process = Runtime.getRuntime().exec(minizincInput.toArray((String[]) solverInput));
+        Process process = Runtime.getRuntime().exec(minizincInput.toArray((String[]) Array.newInstance(String.class, minizincInput.size())));
         String minizincErrors = process.getOutputStream().toString();
-        System.out.println("MiniZinc Errors:\n" + minizincErrors + "==========\n\n");
+        System.out.println("MiniZinc Errors:\n" + minizincErrors + "\n==========\n\n");
         try {
             process.waitFor();
         } catch (InterruptedException ex) {
             Logger.getLogger(Solver.class.getName()).log(Level.SEVERE, null, ex);
         }
-        String jacopOutput = null;
-        InterceptionManager icMan = new InterceptionManager( jacopOutput, false );
+
+        StringBuilder sb = new StringBuilder();
+
+        PrintStream origOut = System.out;
+        PrintStream interceptor = new Interceptor(origOut, sb);
+        System.setOut(interceptor);
+
         Fz2jacop.main(solverInput);
-        System.out.println("==========\nJacop Output:\n" + jacopOutput + "==========\n\n");
+
+        System.setOut(origOut);
+        System.out.println("\n==========\nJacop Output:\n" + sb.toString() + "\n==========\n\n");
+
     }
 
-    /*
-     private class Interceptor extends PrintStream {
-
-     public Interceptor(OutputStream out) {
-     super(out, true);
-     }
-
-     @Override
-     public void print(String s) {//do what ever you like
-     super.print(s);
-     }
-     }
-     */
     private static class Interceptor extends PrintStream {
 
-        private String str;
-        PrintStream orig;
+        private StringBuilder sb;
 
-        public Interceptor(OutputStream out, String str) {
+        public Interceptor(OutputStream out, StringBuilder sb) {
             super(out, true);
-            this.str = str;
+            this.sb = sb;
         }
 
         @Override
         public void print(String s) {
-            //do what ever you like
-            orig.print(s);
-            str = s;
+            sb.append(s);
         }
 
         @Override
         public void println(String s) {
-            print(s);
-        }
-
-        public void attachOut() {
-            orig = System.out;
-            System.setOut(this);
-        }
-
-        public void attachErr() {
-            orig = System.err;
-            System.setErr(this);
-        }
-
-        public void detachOut() {
-            if (null != orig) {
-                System.setOut(orig);
-            }
-        }
-
-        public void detachErr() {
-            if (null != orig) {
-                System.setErr(orig);
-            }
+            sb.append(s);
+            sb.append("\n");
         }
     }
-
-    private static class InterceptionManager {
-
-        private Interceptor out;
-        private Interceptor err;
-
-        public InterceptionManager(String str, boolean append) {
-            this.err = new Interceptor(System.err, str);
-            this.err.attachErr();
-        }
-    }
-    
 }
