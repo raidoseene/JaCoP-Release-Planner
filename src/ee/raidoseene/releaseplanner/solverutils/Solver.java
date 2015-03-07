@@ -4,7 +4,10 @@
  */
 package ee.raidoseene.releaseplanner.solverutils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Array;
@@ -43,15 +46,21 @@ public class Solver {
         minizincInput.add(dataFile);
         String[] solverInput = new String[]{"-v", "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_problem.fzn"};
 
-        Process process = Runtime.getRuntime().exec(minizincInput.toArray((String[]) Array.newInstance(String.class, minizincInput.size())));
-        String minizincErrors = process.getOutputStream().toString();
-        System.out.println("MiniZinc Errors:\n" + minizincErrors + "\n==========\n\n");
+        Process process = Runtime.getRuntime().exec(minizincInput.toArray(new String[minizincInput.size()]));
+        InputStream in = process.getInputStream();
+        
+        //String minizincErrors = process.getOutputStream().toString();
+        //System.out.println("MiniZinc Errors:\n" + minizincErrors + "\n==========\n\n");
         try {
             process.waitFor();
         } catch (InterruptedException ex) {
             Logger.getLogger(Solver.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        //BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        //System.out.println(reader.readLine());
+
+        
         StringBuilder sb = new StringBuilder();
 
         PrintStream origOut = System.out;
@@ -62,7 +71,6 @@ public class Solver {
 
         System.setOut(origOut);
         System.out.println("\n==========\nJacop Output:\n" + sb.toString() + "\n==========\n\n");
-
     }
 
     private static class Interceptor extends PrintStream {
