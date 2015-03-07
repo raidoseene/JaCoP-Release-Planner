@@ -4,13 +4,11 @@
  */
 package ee.raidoseene.releaseplanner.solverutils;
 
-import java.io.BufferedReader;
+import ee.raidoseene.releaseplanner.backend.InputListener;
+import ee.raidoseene.releaseplanner.backend.InputReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -46,31 +44,50 @@ public class Solver {
         minizincInput.add(dataFile);
         String[] solverInput = new String[]{"-v", "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_problem.fzn"};
 
+        // Running MiniZinc
+        System.out.println("\n*** *** *** MiniZinc Started *** *** ***\n");
         Process process = Runtime.getRuntime().exec(minizincInput.toArray(new String[minizincInput.size()]));
-        InputStream in = process.getInputStream();
+        InputListener listener = new InputListener() {
+
+            @Override
+            public void lineRead(String line) {
+                // These methods are called from another thread so be careful
+                // especially don't update UI directly from here
+                System.out.println(line);
+            }
+
+            @Override
+            public void errorThrown(Throwable error) {
+                error.printStackTrace();
+            }
+
+            @Override
+            public void finishedReading() {
+                System.out.println("Done!");
+            }
+        };
         
-        //String minizincErrors = process.getOutputStream().toString();
-        //System.out.println("MiniZinc Errors:\n" + minizincErrors + "\n==========\n\n");
+        new InputReader(process.getInputStream(), listener);
+        new InputReader(process.getErrorStream(), listener);
+        
         try {
             process.waitFor();
         } catch (InterruptedException ex) {
             Logger.getLogger(Solver.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        //BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-        //System.out.println(reader.readLine());
-
+        System.out.println("\n*** *** *** MiniZinc Stopped *** *** ***\n");
         
+        // Running JaCoP
         StringBuilder sb = new StringBuilder();
 
         PrintStream origOut = System.out;
         PrintStream interceptor = new Interceptor(origOut, sb);
         System.setOut(interceptor);
-
+        
         Fz2jacop.main(solverInput);
 
         System.setOut(origOut);
-        System.out.println("\n==========\nJacop Output:\n" + sb.toString() + "\n==========\n\n");
+        System.out.println("\n*** *** *** JaCoP Output Start *** *** ***\n" + sb.toString() + "\n*** *** *** JaCoP End *** *** ***\n");
     }
 
     private static class Interceptor extends PrintStream {
