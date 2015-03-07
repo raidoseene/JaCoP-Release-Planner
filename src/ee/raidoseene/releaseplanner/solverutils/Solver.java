@@ -44,6 +44,7 @@ public class Solver {
         minizincInput.add(dataFile);
         String[] solverInput = new String[]{"-v", "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_problem.fzn"};
 
+        System.out.println("\n*** *** *** MiniZinc Started *** *** ***\n");
         Process process = Runtime.getRuntime().exec(minizincInput.toArray(new String[minizincInput.size()]));
         InputListener listener = new InputListener() {
 

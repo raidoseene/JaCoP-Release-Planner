@@ -14,6 +14,7 @@ import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  *
@@ -23,6 +24,18 @@ public final class DataManager {
 
     private final Project project;
     private final PrintWriter printWriter;
+    
+    public static void errorLoging(List<String> input) throws Exception {
+        // TO DO: create a directory for logs if it do not exist
+        
+        // TO DO: create a new log file if it do not exist
+        
+        // TO DO: append input into the log file
+    }
+    
+    public static void jacopOutput(String input) {
+        // TO DO: create or write over project named jacop output file
+    }
 
     public static void saveDataFile(Project project) throws Exception {
         File dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage()));
@@ -49,6 +62,7 @@ public final class DataManager {
         this.printWriter = pw;
     }
 
+    /*
     private boolean ModifyingDependencyConversion(Project ModDep) {
 
         if (project.getDependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CC) > 0) {
@@ -150,6 +164,7 @@ public final class DataManager {
         }
         return true;
     }
+    */
 
     private void printFailHeader() {
         printWriter.println("% Release planner data file\n% =========================\n\n");
