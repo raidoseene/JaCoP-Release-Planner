@@ -46,7 +46,7 @@ public class Solver {
 
     public static void runSolver(File file) throws IOException {
         String minizincLocation = "C:/Program Files (x86)/MiniZinc 1.6/bin/mzn2fzn.bat";
-        String outputFile = "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_problem.fzn";
+        String outputFile = "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn";
         String solverCode = "D:/University/UT/Magistritöö/UI/Test/SolverCode.mzn";
         //String solverCode = "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_problem_0.8.mzn";
         String dataFile = file.getAbsolutePath();
@@ -67,7 +67,8 @@ public class Solver {
         minizincInput.add("-d");
 
         minizincInput.add(dataFile);
-        String[] solverInput = new String[]{"-v", "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_problem.fzn"};
+        //String[] solverInput = new String[]{"-v", "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_problem.fzn"};
+        String[] solverInput = new String[]{"D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn"};
 
         System.out.println("\n*** *** *** MiniZinc Started *** *** ***\n");
         Process process = Runtime.getRuntime().exec(minizincInput.toArray(new String[minizincInput.size()]));
