@@ -288,7 +288,8 @@ public final class MainFrame extends JFrame {
                 throw new Exception(msg);
             }
             
-            Solver.runSolver();
+            //Solver.runSolver();
+            Solver.executeSimulation();
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }

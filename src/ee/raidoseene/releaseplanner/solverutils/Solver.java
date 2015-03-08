@@ -6,6 +6,11 @@ package ee.raidoseene.releaseplanner.solverutils;
 
 import ee.raidoseene.releaseplanner.backend.InputListener;
 import ee.raidoseene.releaseplanner.backend.InputReader;
+import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.datamodel.Project;
+import ee.raidoseene.releaseplanner.dataoutput.DataManager;
+import ee.raidoseene.releaseplanner.gui.Messenger;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -21,11 +26,31 @@ import org.jacop.fz.Fz2jacop;
  */
 public class Solver {
 
-    public static void runSolver() throws IOException {
+    public static void executeSimulation() throws IOException {
+        // TO DO: check if all needed elements are filled in the project
+        Project project = ProjectManager.getCurrentProject();
+        if (project.getFeatures().getFeatureCount() > 0 & project.getReleases().getReleaseCount() > 0 &
+                project.getResources().getResourceCount() > 0 & project.getStakeholders().getStakeholderCount() > 0) {
+            File file = null;
+            try {
+                file = DataManager.saveDataFile(ProjectManager.getCurrentProject());
+            } catch (Exception ex) {
+                Messenger.showError(ex, null);
+            }
+
+            runSolver(file);
+        } else {
+            Messenger.showError(null, "For simulation, features, releases, resources and stakeholder need to be defined!");
+        }
+    }
+
+    public static void runSolver(File file) throws IOException {
         String minizincLocation = "C:/Program Files (x86)/MiniZinc 1.6/bin/mzn2fzn.bat";
         String outputFile = "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_problem.fzn";
-        String solverCode = "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_problem_0.8.mzn";
-        String dataFile = "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_input_0.6.dzn";
+        String solverCode = "D:/University/UT/Magistritöö/UI/Test/SolverCode.mzn";
+        //String solverCode = "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_problem_0.8.mzn";
+        String dataFile = file.getAbsolutePath();
+        //String dataFile = "D:/University/UT/Magistritöö/Code/InputFiles/ruhe_input_0.6.dzn";
 
 
         List<String> minizincInput = new ArrayList<>();
@@ -47,7 +72,6 @@ public class Solver {
         System.out.println("\n*** *** *** MiniZinc Started *** *** ***\n");
         Process process = Runtime.getRuntime().exec(minizincInput.toArray(new String[minizincInput.size()]));
         InputListener listener = new InputListener() {
-
             @Override
             public void lineRead(String line) {
                 // These methods are called from another thread so be careful
@@ -65,24 +89,24 @@ public class Solver {
                 System.out.println("Done!");
             }
         };
-        
+
         new InputReader(process.getInputStream(), listener);
         new InputReader(process.getErrorStream(), listener);
-        
+
         try {
             process.waitFor();
         } catch (InterruptedException ex) {
             Logger.getLogger(Solver.class.getName()).log(Level.SEVERE, null, ex);
         }
         System.out.println("\n*** *** *** MiniZinc Stopped *** *** ***\n");
-        
+
         // Running JaCoP
         StringBuilder sb = new StringBuilder();
 
         PrintStream origOut = System.out;
         PrintStream interceptor = new Interceptor(origOut, sb);
         System.setOut(interceptor);
-        
+
         Fz2jacop.main(solverInput);
 
         System.setOut(origOut);
