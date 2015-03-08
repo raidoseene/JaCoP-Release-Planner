@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ import java.util.Map;
  *
  * @author Raido Seene
  */
-public class Urgency {
+public class Urgency implements Serializable {
     
     //private final Feature feature;
     //private final Stakeholder stakeholder;
@@ -25,7 +26,7 @@ public class Urgency {
     }
     */
     
-    Urgency () {
+    public Urgency () {
         this.urgencies = new HashMap<>();
     }
 

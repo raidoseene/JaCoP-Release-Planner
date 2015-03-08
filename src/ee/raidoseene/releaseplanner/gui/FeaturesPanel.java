@@ -458,9 +458,13 @@ public final class FeaturesPanel extends JPanel {
                         Groups groups = ProjectManager.getCurrentProject().getGroups();
                         int index = FPContent.this.group.getSelectedIndex();
                         if (index > 0) {
-                            
+                            Group g = groups.getGroup(index - 1);
+                            groups.addFeature(g, FPContent.this.feature);
                         } else {
-                            
+                            Group g = groups.getGroupByFeature(FPContent.this.feature);
+                            if (g != null) {
+                                g.removeFeature(FPContent.this.feature);
+                            }
                         }
                     } catch (Exception ex) {
                         Messenger.showError(ex, null);

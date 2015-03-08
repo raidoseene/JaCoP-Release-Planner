@@ -18,6 +18,7 @@ import ee.raidoseene.releaseplanner.datamodel.Release;
 import ee.raidoseene.releaseplanner.datamodel.Releases;
 import ee.raidoseene.releaseplanner.datamodel.Stakeholder;
 import ee.raidoseene.releaseplanner.datamodel.Stakeholders;
+import ee.raidoseene.releaseplanner.datamodel.Urgency;
 import ee.raidoseene.releaseplanner.datamodel.Value;
 import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
 import ee.raidoseene.releaseplanner.gui.utils.ContentListLayout;
@@ -25,6 +26,7 @@ import ee.raidoseene.releaseplanner.gui.utils.ContentPanel;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanelListener;
 import ee.raidoseene.releaseplanner.gui.utils.ScrollablePanel;
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -250,7 +252,7 @@ public final class UrgValPanel extends JPanel {
                 } else if (!expanded && this.getComponentCount() > 1) {
                     this.remove(this.scroller);
                 }
-                UVSContent.this.scrollable.contentUpdated();
+                UVTab.this.scrollable.contentUpdated();
             }
 
             @Override
@@ -336,7 +338,7 @@ public final class UrgValPanel extends JPanel {
                         this.remove(this.cont2);
                         this.remove(this.cont3);
                     }
-                    UVSContent.this.scrollable.contentUpdated();
+                    UVTab.this.scrollable.contentUpdated();
                 }
 
                 @Override
@@ -381,7 +383,7 @@ public final class UrgValPanel extends JPanel {
                 } else if (!expanded && this.getComponentCount() > 1) {
                     this.remove(this.scroller);
                 }
-                UVFContent.this.scrollable.contentUpdated();
+                UVTab.this.scrollable.contentUpdated();
             }
 
             @Override
@@ -466,7 +468,7 @@ public final class UrgValPanel extends JPanel {
                         this.remove(this.cont2);
                         this.remove(this.cont3);
                     }
-                    UVFContent.this.scrollable.contentUpdated();
+                    UVTab.this.scrollable.contentUpdated();
                 }
 
                 @Override
@@ -478,7 +480,7 @@ public final class UrgValPanel extends JPanel {
         }
 
         private final class UrgencyPanel extends JPanel {
-            
+
             private final Feature feature;
             private final Stakeholder stakeholder;
             private final JTextField[] vreleases;
@@ -493,11 +495,11 @@ public final class UrgValPanel extends JPanel {
                 Container c = new Container();
                 c.setLayout(new BorderLayout(10, 10));
                 this.add(BorderLayout.CENTER, c);
-                
+
                 Container grid = new Container();
                 grid.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
                 c.add(BorderLayout.LINE_START, grid);
-                
+
                 Project project = ProjectManager.getCurrentProject();
                 ValueAndUrgency vus = project.getValueAndUrgency();
                 Releases releases = project.getReleases();
@@ -513,7 +515,7 @@ public final class UrgValPanel extends JPanel {
                             JTextField tf = (JTextField) fe.getSource();
                             Project proj = ProjectManager.getCurrentProject();
                             Release rel = null;
-                            
+
                             if (tf != UrgencyPanel.this.vpostpone) {
                                 JTextField[] tfs = UrgencyPanel.this.vreleases;
                                 Releases releases = proj.getReleases();
@@ -524,7 +526,7 @@ public final class UrgValPanel extends JPanel {
                                     }
                                 }
                             }
-                            
+
                             ValueAndUrgency vus = proj.getValueAndUrgency();
                             try {
                                 String txt = tf.getText();
@@ -533,7 +535,7 @@ public final class UrgValPanel extends JPanel {
                             } catch (Exception ex2) {
                                 Messenger.showError(ex2, null);
                             }
-                            
+
                             int val = vus.getUrgency(UrgencyPanel.this.stakeholder, UrgencyPanel.this.feature, rel);
                             tf.setText((val > 0) ? Integer.toString(val) : "");
                         } catch (Exception ex) {
@@ -541,13 +543,13 @@ public final class UrgValPanel extends JPanel {
                         }
                     }
                 };
-                
+
                 String str = "        ";
                 this.vreleases = new JTextField[releases.getReleaseCount()];
                 for (int i = 0; i < this.vreleases.length; i++) {
                     int urg = vus.getUrgency(s, f, releases.getRelease(i));
                     String val = (urg > 0) ? Integer.toString(urg) : "";
-                    
+
                     Container ge = new Container();
                     ge.setLayout(new GridLayout(2, 1, 10, 10));
                     ge.add(this.vreleases[i] = new JTextField(val));
@@ -555,18 +557,18 @@ public final class UrgValPanel extends JPanel {
                     this.vreleases[i].addFocusListener(listener);
                     grid.add(ge);
                 }
-                
+
                 {
                     int urg = vus.getUrgency(s, f, null);
                     String val = (urg > 0) ? Integer.toString(urg) : "";
-                    
+
                     Container ge = new Container();
                     ge.setLayout(new GridLayout(2, 1, 10, 10));
                     ge.add(this.vpostpone = new JTextField(val));
                     ge.add(new JLabel("  postpone  ", JLabel.CENTER));
                     this.vpostpone.addFocusListener(listener);
                     grid.add(ge);
-                    
+
                     Container ce = new Container();
                     ce.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
                     JButton btn = new JButton("Clear urgency");
@@ -582,153 +584,423 @@ public final class UrgValPanel extends JPanel {
                         }
                     });
                     ce.add(BorderLayout.PAGE_START, btn);
-                    
+
                     c.add(ce);
                 }
-                
+
                 Container btns = new Container();
                 btns.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
                 c.add(BorderLayout.PAGE_END, btns);
             }
-            
+
             private void clearUrgency() {
                 Project project = ProjectManager.getCurrentProject();
                 ValueAndUrgency vus = project.getValueAndUrgency();
                 Releases releases = project.getReleases();
                 int rcount = releases.getReleaseCount();
-                
+
                 for (int i = 0; i < rcount; i++) {
                     Release release = releases.getRelease(i);
                     vus.setUrgency(this.stakeholder, this.feature, release, 0);
                     this.vreleases[i].setText("");
                 }
-                
+
                 vus.setUrgency(this.stakeholder, this.feature, null, 0);
                 this.vpostpone.setText("");
             }
 
         }
-        
+
         private final class ChangePanel extends JPanel {
-            
+
             private final Feature feature;
             private final Stakeholder stakeholder;
             private final JButton chval, churg;
             private final Container chpanel;
-            
+
             private ChangePanel(Stakeholder s, Feature f) {
                 this.setBorder(new EmptyBorder(10, 0, 0, 0));
                 this.setLayout(new BorderLayout(10, 10));
                 this.stakeholder = s;
                 this.feature = f;
-                
+
                 Container btns = new Container();
                 btns.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
                 this.add(BorderLayout.CENTER, btns);
-                
+
                 ActionListener listener = new ActionListener() {
 
                     @Override
                     public void actionPerformed(ActionEvent ae) {
                         try {
                             JButton btn = (JButton) ae.getSource();
-                            ChangePanel.this.OpenChangePanel(btn);
+                            ChangePanel.this.openChangePanel(btn);
                         } catch (Throwable t) {
                             t.printStackTrace();
                         }
                     }
                 };
-                
+
                 this.chval = new JButton("Change in value");
                 this.chval.addActionListener(listener);
                 btns.add(this.chval);
-                
+
                 this.churg = new JButton("Change in urgency");
                 this.churg.addActionListener(listener);
                 btns.add(this.churg);
-                
+
                 this.chpanel = new Container();
                 this.chpanel.setLayout(new ContentListLayout(Container.class));
+
+                Dependencies deps = ProjectManager.getCurrentProject().getDependencies();
+                ModifyingInterdependency[] mds = deps.getTypedDependencies(ModifyingInterdependency.class, null);
+                for (ModifyingInterdependency md : mds) {
+                    if (md.getSecondary() == ChangePanel.this.feature) {
+                        if (md.type == Dependency.CV) {
+                            this.openChangePanel(this.chval);
+                        } else if (md.type == Dependency.CU) {
+                            this.openChangePanel(this.churg);
+                        }
+                    }
+                }
             }
-            
-            private void OpenChangePanel(JButton button) {
+
+            private void openChangePanel(JButton button) {
                 button.setEnabled(false);
-                
+
                 if (button == this.chval) {
                     ChangePanel.CPVContent content = new ChangePanel.CPVContent();
                     ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE);
+                    panel.addContentPanelListener(content);
                     this.chpanel.add(panel);
                 } else if (button == this.churg) {
-                    
+                    ChangePanel.CPUContent content = new ChangePanel.CPUContent();
+                    ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE);
+                    panel.addContentPanelListener(content);
+                    this.chpanel.add(panel);
                 } else {
                     return;
                 }
-                
+
                 if (this.chpanel.getComponentCount() == 1) {
                     this.add(BorderLayout.PAGE_END, this.chpanel);
                 }
-                
-                Container c = this.getParent();
-                if (c != null && c instanceof ScrollablePanel) {
-                    ((ScrollablePanel) c).contentUpdated();
-                }
+
+                UVTab.this.scrollable.contentUpdated();
             }
-            
-            private class CPVContent extends JPanel {
-                
+
+            private void closeChangePanel(JButton button, ContentPanel panel) {
+                this.chpanel.remove(panel);
+                button.setEnabled(true);
+
+                if (this.chpanel.getComponentCount() == 0) {
+                    this.remove(this.chpanel);
+                }
+
+                UVTab.this.scrollable.contentUpdated();
+            }
+
+            private class CPVContent extends JPanel implements ContentPanelListener {
+
                 private ModifyingInterdependency dependency;
                 private final JComboBox feature;
                 private final JSpinner value;
-                
+
                 private CPVContent() {
                     this.setBorder(new EmptyBorder(5, 10, 10, 80));
                     this.setLayout(new GridLayout(3, 1, 10, 10));
                     this.add(new JLabel("Change in value"));
                     Container c;
-                    
+
                     c = new Container();
                     c.setLayout(new BorderLayout(10, 10));
                     c.add(BorderLayout.LINE_END, new JLabel("Preceding feature"));
                     this.add(c);
-                    
+
                     Project project = ProjectManager.getCurrentProject();
                     Dependencies deps = project.getDependencies();
                     Features features = project.getFeatures();
-                    
+
                     ModifyingInterdependency[] mds = deps.getTypedDependencies(ModifyingInterdependency.class, Dependency.CV);
-                    for (ModifyingInterdependency md: mds) {
-                        // TODO
+                    for (ModifyingInterdependency md : mds) {
+                        if (md.getSecondary() == ChangePanel.this.feature) {
+                            this.dependency = md;
+                            break;
+                        }
                     }
-                    
+
                     if (this.dependency == null) {
                         Value val = new Value(ChangePanel.this.feature, ChangePanel.this.stakeholder);
-                        this.dependency = deps.addModifyingInterdependency(val.getFeature(), features.getFeature(0), val); // TODO: check if is correct
+                        this.dependency = deps.addModifyingInterdependency(features.getFeature(0), val.getFeature(), val);
                     }
-                    
+
                     this.feature = new JComboBox();
                     c.add(BorderLayout.CENTER, this.feature);
                     int fcount = features.getFeatureCount();
                     for (int i = 0; i < fcount; i++) {
                         Feature f = features.getFeature(i);
                         this.feature.addItem(f.getName());
-                        
-                        if (f == this.dependency.getSecondary()) { // TODO: check if is correct
+
+                        if (f == this.dependency.getPrimary()) {
                             this.feature.setSelectedIndex(i);
                         }
                     }
-                    
+                    this.feature.addActionListener(new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent ae) {
+                            CPVContent.this.changeFeature();
+                        }
+                    });
+
                     c = new Container();
                     c.setLayout(new BorderLayout(10, 10));
                     c.add(BorderLayout.CENTER, new JLabel("Value to stakeholder"));
                     this.add(c);
-                    
-                    this.value = new JSpinner();
+
+                    int val = this.dependency.getChange(Value.class).getValue();
+                    this.value = new JSpinner(new SpinnerNumberModel(val, 0, 9, 1));
+                    this.value.addChangeListener(new ChangeListener() {
+
+                        @Override
+                        public void stateChanged(ChangeEvent ce) {
+                            try {
+                                Value value = CPVContent.this.dependency.getChange(Value.class);
+                                value.setValue((Integer) CPVContent.this.value.getValue());
+                            } catch (Exception ex) {
+                                Messenger.showError(ex, null);
+                            }
+                            try {
+                                int val = CPVContent.this.dependency.getChange(Value.class).getValue();
+                                CPVContent.this.value.setValue(val);
+                            } catch (Throwable t) {
+                                t.printStackTrace();
+                            }
+                        }
+                    });
                     c.add(BorderLayout.LINE_START, this.value);
-                    
                 }
-                
+
+                private void changeFeature() {
+                    try {
+                        Project project = ProjectManager.getCurrentProject();
+                        Dependencies deps = project.getDependencies();
+                        Features feats = project.getFeatures();
+
+                        deps.removeInterdependency(this.dependency);
+
+                        int index = this.feature.getSelectedIndex();
+                        Feature f = feats.getFeature(index);
+
+                        Value val = new Value(ChangePanel.this.feature, ChangePanel.this.stakeholder);
+                        this.dependency = deps.addModifyingInterdependency(f, val.getFeature(), val);
+                    } catch (Exception ex) {
+                        Messenger.showError(ex, null);
+                    }
+                }
+
+                @Override
+                public void contentPanelClosed(ContentPanel source) {
+                    ProjectManager.getCurrentProject().getDependencies().removeInterdependency(this.dependency);
+                    ChangePanel.this.closeChangePanel(ChangePanel.this.chval, source);
+                }
+
+                @Override
+                public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
+                }
+
+                @Override
+                public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
+                }
+
             }
-            
+
+            private class CPUContent extends JPanel implements ContentPanelListener {
+
+                private ModifyingInterdependency dependency;
+                private final JComboBox feature;
+                private final JTextField[] vreleases;
+                private final JTextField vpostpone;
+
+                private CPUContent() {
+                    this.setBorder(new EmptyBorder(5, 10, 10, 80));
+                    this.setLayout(new BorderLayout(10, 10));
+                    Container c, c2;
+
+                    c = new Container();
+                    c.setLayout(new GridLayout(2, 1, 10, 10));
+                    c.add(new JLabel("Change in urgency"));
+                    this.add(BorderLayout.PAGE_START, c);
+
+                    c2 = new Container();
+                    c2.setLayout(new BorderLayout(10, 10));
+                    c2.add(BorderLayout.LINE_END, new JLabel("Preceding feature"));
+                    c.add(c2);
+
+                    Project project = ProjectManager.getCurrentProject();
+                    Dependencies deps = project.getDependencies();
+                    Features features = project.getFeatures();
+
+                    ModifyingInterdependency[] mds = deps.getTypedDependencies(ModifyingInterdependency.class, Dependency.CU);
+                    for (ModifyingInterdependency md : mds) {
+                        if (md.getSecondary() == ChangePanel.this.feature) {
+                            this.dependency = md;
+                            break;
+                        }
+                    }
+
+                    if (this.dependency == null) {
+                        Urgency urg = new Urgency();
+                        this.dependency = deps.addModifyingInterdependency(features.getFeature(0), ChangePanel.this.feature, urg);
+                    }
+
+                    this.feature = new JComboBox();
+                    c2.add(BorderLayout.CENTER, this.feature);
+                    int fcount = features.getFeatureCount();
+                    for (int i = 0; i < fcount; i++) {
+                        Feature f = features.getFeature(i);
+                        this.feature.addItem(f.getName());
+
+                        if (f == this.dependency.getPrimary()) {
+                            this.feature.setSelectedIndex(i);
+                        }
+                    }
+                    this.feature.addActionListener(new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent ae) {
+                            CPUContent.this.changeFeature();
+                        }
+                    });
+
+                    c = new Container();
+                    c.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
+                    this.add(BorderLayout.CENTER, c);
+
+                    Releases releases = project.getReleases();
+                    Urgency urgs = this.dependency.getChange(Urgency.class);
+                    FocusListener listener = new FocusListener() {
+
+                        @Override
+                        public void focusGained(FocusEvent fe) {
+                        }
+
+                        @Override
+                        public void focusLost(FocusEvent fe) {
+                            try {
+                                JTextField tf = (JTextField) fe.getSource();
+                                Project proj = ProjectManager.getCurrentProject();
+                                Release rel = null;
+
+                                if (tf != CPUContent.this.vpostpone) {
+                                    JTextField[] tfs = CPUContent.this.vreleases;
+                                    Releases releases = proj.getReleases();
+                                    for (int i = 0; i < tfs.length; i++) {
+                                        if (tf == tfs[i]) {
+                                            rel = releases.getRelease(i);
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                Urgency urgs = CPUContent.this.dependency.getChange(Urgency.class);
+                                try {
+                                    String txt = tf.getText();
+                                    int val = (txt.length() > 0) ? Integer.parseInt(txt) : 0;
+                                    urgs.setUrgency(rel, val);
+                                } catch (Exception ex2) {
+                                    Messenger.showError(ex2, null);
+                                }
+
+                                int val = urgs.getUrgency(rel);
+                                tf.setText((val > 0) ? Integer.toString(val) : "");
+                            } catch (Exception ex) {
+                                Messenger.showError(ex, null);
+                            }
+                        }
+                    };
+
+                    String str = "        ";
+                    this.vreleases = new JTextField[releases.getReleaseCount()];
+                    for (int i = 0; i < this.vreleases.length; i++) {
+                        int urg = urgs.getUrgency(releases.getRelease(i));
+                        String val = (urg > 0) ? Integer.toString(urg) : "";
+
+                        c2 = new Container();
+                        c2.setLayout(new GridLayout(2, 1, 10, 10));
+                        c2.add(this.vreleases[i] = new JTextField(val));
+                        c2.add(new JLabel(str + Integer.toString(i + 1) + str, JLabel.CENTER));
+                        this.vreleases[i].addFocusListener(listener);
+                        c.add(c2);
+                    }
+
+                    {
+                        int urg = urgs.getUrgency(null);
+                        String val = (urg > 0) ? Integer.toString(urg) : "";
+
+                        c2 = new Container();
+                        c2.setLayout(new GridLayout(2, 1, 10, 10));
+                        c2.add(this.vpostpone = new JTextField(val));
+                        c2.add(new JLabel("  postpone  ", JLabel.CENTER));
+                        this.vpostpone.addFocusListener(listener);
+                        c.add(c2);
+                    }
+                }
+
+                private void changeFeature() {
+                    try {
+                        Project project = ProjectManager.getCurrentProject();
+                        Dependencies deps = project.getDependencies();
+                        Features feats = project.getFeatures();
+                        Releases rels = project.getReleases();
+
+                        deps.removeInterdependency(this.dependency);
+
+                        int index = this.feature.getSelectedIndex();
+                        Feature f = feats.getFeature(index);
+
+                        Urgency urg = new Urgency();
+                        for (int i = 0; i < this.vreleases.length; i++) {
+                            String txt = this.vreleases[i].getText();
+                            if (txt.length() > 0) {
+                                try {
+                                    int val = Integer.parseInt(txt);
+                                    urg.setUrgency(rels.getRelease(i), val);
+                                } catch (Exception ex) {
+                                    this.vreleases[i].setText("");
+                                }
+                            }
+                        }
+                        if (this.vpostpone.getText().length() > 0) {
+                            try {
+                                int val = Integer.parseInt(this.vpostpone.getText());
+                                urg.setUrgency(null, val);
+                            } catch (Exception ex) {
+                                this.vpostpone.setText("");
+                            }
+                        }
+                        this.dependency = deps.addModifyingInterdependency(f, ChangePanel.this.feature, urg);
+                    } catch (Exception ex) {
+                        Messenger.showError(ex, null);
+                    }
+                }
+
+                @Override
+                public void contentPanelClosed(ContentPanel source) {
+                    ProjectManager.getCurrentProject().getDependencies().removeInterdependency(this.dependency);
+                    ChangePanel.this.closeChangePanel(ChangePanel.this.churg, source);
+                }
+
+                @Override
+                public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
+                }
+
+                @Override
+                public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
+                }
+
+            }
+
         }
 
     }
