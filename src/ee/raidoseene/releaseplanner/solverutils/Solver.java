@@ -37,7 +37,7 @@ public class Solver {
             } catch (Exception ex) {
                 Messenger.showError(ex, null);
             }
-
+            
             runSolver(file);
         } else {
             Messenger.showError(null, "For simulation, features, releases, resources and stakeholder need to be defined!");
