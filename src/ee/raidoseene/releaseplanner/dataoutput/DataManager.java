@@ -216,86 +216,86 @@ public final class DataManager {
 
         // Fixed release
         printWriter.println("FIX = " + FixDS.length + ";");
-        printWriter.print("fx = [| ");
+        printWriter.print("fx = [|");
         if (FixDS.length > 0) {
             for (int i = 0; i < FixDS.length; i++) {
-                printWriter.print((project.getFeatures().getFeatureIndex(FixDS[i].getFeature()) + 1)
-                        + ", " + (project.getReleases().getReleaseIndex(FixDS[i].getRelease()) + 1) + ", ");
+                printWriter.print(" " + (project.getFeatures().getFeatureIndex(FixDS[i].getFeature()) + 1)
+                        + ", " + (project.getReleases().getReleaseIndex(FixDS[i].getRelease()) + 1) + ", |");
             }
-            printWriter.println("|];");
+            printWriter.println("];");
         } else {
-            printWriter.println("1, 1, |];");
+            printWriter.println(" 1, 1, |];");
         }
 
         // AND dependency
         printWriter.println("AND = " + AndDS.length + ";");
-        printWriter.print("and = [| ");
+        printWriter.print("and = [|");
         if (AndDS.length > 0) {
             for (int i = 0; i < AndDS.length; i++) {
-                printWriter.print((project.getFeatures().getFeatureIndex(AndDS[i].getPrimary()) + 1)
-                        + ", " + (project.getFeatures().getFeatureIndex(AndDS[i].getSecondary()) + 1) + ", ");
+                printWriter.print(" " + (project.getFeatures().getFeatureIndex(AndDS[i].getPrimary()) + 1)
+                        + ", " + (project.getFeatures().getFeatureIndex(AndDS[i].getSecondary()) + 1) + ", |");
             }
-            printWriter.println("|];");
+            printWriter.println("];");
         } else {
-            printWriter.println("1, 1, |];");
+            printWriter.println(" 1, 1, |];");
         }
 
         // REQUIRES dependency
         printWriter.println("REQ = " + ReqDS.length + ";");
-        printWriter.print("req = [| ");
+        printWriter.print("req = [|");
         if (ReqDS.length > 0) {
             for (int i = 0; i < ReqDS.length; i++) {
-                printWriter.print((project.getFeatures().getFeatureIndex(ReqDS[i].getPrimary()) + 1)
-                        + ", " + (project.getFeatures().getFeatureIndex(ReqDS[i].getSecondary()) + 1) + ", ");
+                printWriter.print(" " + (project.getFeatures().getFeatureIndex(ReqDS[i].getPrimary()) + 1)
+                        + ", " + (project.getFeatures().getFeatureIndex(ReqDS[i].getSecondary()) + 1) + ", |");
             }
         } else if (proj.getDependencies().getDependencyCount() > 0) {
             Interdependency[] newReqDS = proj.getDependencies().getTypedDependencies(Interdependency.class, Dependency.REQ);
             for (int i = 0; i < newReqDS.length; i++) {
-                printWriter.print((proj.getFeatures().getFeatureIndex(newReqDS[i].getPrimary()) + 1
+                printWriter.print(" " + (proj.getFeatures().getFeatureIndex(newReqDS[i].getPrimary()) + 1
                         + project.getFeatures().getFeatureCount())
-                        + ", " + (project.getFeatures().getFeatureIndex(newReqDS[i].getSecondary()) + 1) + ", ");
+                        + ", " + (project.getFeatures().getFeatureIndex(newReqDS[i].getSecondary()) + 1) + ", |");
             }
         } else {
-            printWriter.print("1, 1, ");
+            printWriter.print(" 1, 1, ");
         }
         printWriter.println("|];");
 
         // PRECEDES dependency
         printWriter.println("PRE = " + PreDS.length + ";");
-        printWriter.print("pre = [| ");
+        printWriter.print("pre = [|");
         if (PreDS.length > 0) {
             for (int i = 0; i < PreDS.length; i++) {
-                printWriter.print((project.getFeatures().getFeatureIndex(PreDS[i].getPrimary()) + 1)
-                        + ", " + (project.getFeatures().getFeatureIndex(PreDS[i].getSecondary()) + 1) + ", ");
+                printWriter.print(" " + (project.getFeatures().getFeatureIndex(PreDS[i].getPrimary()) + 1)
+                        + ", " + (project.getFeatures().getFeatureIndex(PreDS[i].getSecondary()) + 1) + ", |");
             }
         } else if (proj.getDependencies().getDependencyCount() > 0) {
             Interdependency[] newPreDS = proj.getDependencies().getTypedDependencies(Interdependency.class, Dependency.PRE);
             for (int i = 0; i < newPreDS.length; i++) {
-                printWriter.print((project.getFeatures().getFeatureIndex(newPreDS[i].getPrimary()) + 1)
-                        + ", " + (project.getFeatures().getFeatureIndex(newPreDS[i].getSecondary()) + 1) + ", ");
+                printWriter.print(" " + (project.getFeatures().getFeatureIndex(newPreDS[i].getPrimary()) + 1)
+                        + ", " + (project.getFeatures().getFeatureIndex(newPreDS[i].getSecondary()) + 1) + ", |");
             }
         } else {
-            printWriter.print("1, 1, ");
+            printWriter.print(" 1, 1, ");
         }
         printWriter.println("|];");
 
         // XOR dependency
         printWriter.println("XOR = " + XorDS.length + ";");
-        printWriter.print("xr = [| ");
+        printWriter.print("xr = [|");
         if (XorDS.length > 0) {
             for (int i = 0; i < XorDS.length; i++) {
-                printWriter.print((project.getFeatures().getFeatureIndex(XorDS[i].getPrimary()) + 1)
-                        + ", " + (project.getFeatures().getFeatureIndex(XorDS[i].getSecondary()) + 1) + ", ");
+                printWriter.print(" " + (project.getFeatures().getFeatureIndex(XorDS[i].getPrimary()) + 1)
+                        + ", " + (project.getFeatures().getFeatureIndex(XorDS[i].getSecondary()) + 1) + ", |");
             }
         } else if (proj.getDependencies().getDependencyCount() > 0) {
             Interdependency[] newXorDS = proj.getDependencies().getTypedDependencies(Interdependency.class, Dependency.XOR);
             for (int i = 0; i < newXorDS.length; i++) {
-                printWriter.print((project.getFeatures().getFeatureIndex(newXorDS[i].getPrimary()) + 1)
+                printWriter.print(" " + (project.getFeatures().getFeatureIndex(newXorDS[i].getPrimary()) + 1)
                         + ", " + ((proj.getFeatures().getFeatureIndex(newXorDS[i].getSecondary()) + 1)
-                        + project.getFeatures().getFeatureCount()) + ", ");
+                        + project.getFeatures().getFeatureCount()) + ", |");
             }
         } else {
-            printWriter.println("1, 1, ");
+            printWriter.println(" 1, 1, ");
         }
         printWriter.println("|];");
 
