@@ -11,6 +11,7 @@ import java.io.Serializable;
  */
 public class Value implements Serializable {
     
+    private static final long serialVersionUID = 1;
     private final Feature feature;
     private final Stakeholder stakeholder;
     private int value;

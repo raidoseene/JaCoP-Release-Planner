@@ -12,7 +12,8 @@ import java.io.Serializable;
  * @author Raido Seene
  */
 abstract class ProjectElement implements Serializable {
-    
+
+    private static final long serialVersionUID = 1;
     protected Project parent;
     
     protected ProjectElement(Project project) {

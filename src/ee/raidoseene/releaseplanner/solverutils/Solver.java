@@ -10,6 +10,7 @@ import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import ee.raidoseene.releaseplanner.gui.Messenger;
+import ee.raidoseene.releaseplanner.gui.SolverOutputFrame;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -112,6 +113,8 @@ public class Solver {
 
         System.setOut(origOut);
         System.out.println("\n*** *** *** JaCoP Output Start *** *** ***\n" + sb.toString() + "\n*** *** *** JaCoP End *** *** ***\n");
+        
+        SolverOutputFrame.showSolverOutputFrame(sb.toString());
     }
 
     private static class Interceptor extends PrintStream {
@@ -131,7 +134,7 @@ public class Solver {
         @Override
         public void println(String s) {
             sb.append(s);
-            sb.append("\n");
+            sb.append("\r\n");
         }
     }
 }

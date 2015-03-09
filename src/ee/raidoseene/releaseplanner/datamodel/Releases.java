@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class Releases extends ProjectElement implements Serializable {
 
+    private static final long serialVersionUID = 1;
     private final List<Release> releaseContainer;
     //private Resources resources;
 

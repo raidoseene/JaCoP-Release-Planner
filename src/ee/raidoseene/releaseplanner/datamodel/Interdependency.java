@@ -22,6 +22,7 @@ public class Interdependency extends Dependency implements Serializable {
     public static final int TYPE_CHANGE_IN_URGENCY = 7;
     */
     
+    private static final long serialVersionUID = 1;
     protected final Feature primary, secondary;
     //protected final int type;
     

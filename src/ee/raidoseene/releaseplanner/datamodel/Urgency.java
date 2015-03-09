@@ -16,6 +16,7 @@ public class Urgency implements Serializable {
     
     //private final Feature feature;
     //private final Stakeholder stakeholder;
+    private static final long serialVersionUID = 1;
     private final Map<Release, Integer> urgencies;
     
     /*

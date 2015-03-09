@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class Features extends ProjectElement implements Serializable {
 
+    private static final long serialVersionUID = 1;
     private final List<Feature> featureContainer;
 
     Features(Project project) {

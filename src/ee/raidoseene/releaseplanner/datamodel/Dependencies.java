@@ -15,6 +15,7 @@ import java.util.List;
  */
 public class Dependencies extends ProjectElement implements Serializable {
 
+    private static final long serialVersionUID = 1;
     private final List<Dependency> interdependenciesContainer;
 
     Dependencies(Project project) {

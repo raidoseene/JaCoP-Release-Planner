@@ -13,6 +13,7 @@ import java.io.Serializable;
  */
 public class Stakeholder extends NamedObject implements Serializable {
 
+    private static final long serialVersionUID = 1;
     private int importance;
 
     Stakeholder() {

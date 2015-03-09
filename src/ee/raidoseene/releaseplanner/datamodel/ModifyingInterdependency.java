@@ -14,6 +14,7 @@ import java.util.ArrayList;
  */
 public final class ModifyingInterdependency extends Interdependency implements Serializable {
     
+    private static final long serialVersionUID = 1;
     private final Object change;
     
     public ModifyingInterdependency(Feature feature1, Feature feature2, Feature feature) {

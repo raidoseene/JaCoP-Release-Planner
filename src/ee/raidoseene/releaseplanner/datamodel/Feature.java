@@ -14,6 +14,7 @@ import java.util.Map;
  */
 public class Feature extends NamedObject implements Serializable {
 
+    private static final long serialVersionUID = 1;
     private final Map<Resource, Integer> consumptions;
     private String comment;
 

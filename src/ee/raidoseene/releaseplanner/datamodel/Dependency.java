@@ -12,6 +12,7 @@ import java.io.Serializable;
  */
 public abstract class Dependency implements Serializable {
     
+    private static final long serialVersionUID = 1;    
     public static final int TYPE_MASK = 0xf0;
     public static final int SUB_MASK = 0x0f;
     

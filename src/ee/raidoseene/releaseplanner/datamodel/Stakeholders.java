@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class Stakeholders extends ProjectElement implements Serializable {
 
+    private static final long serialVersionUID = 1;
     private List<Stakeholder> stakeholderContainer;
     private int importance;
 

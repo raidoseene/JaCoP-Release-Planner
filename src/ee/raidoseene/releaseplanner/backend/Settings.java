@@ -13,6 +13,7 @@ import java.io.Serializable;
  */
 public final class Settings implements Serializable {
     
+    private static final long serialVersionUID = 1;
     private String pathMiniZinc, pathJaCoP;
     
     Settings() {

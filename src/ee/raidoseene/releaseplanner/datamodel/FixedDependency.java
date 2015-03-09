@@ -12,6 +12,7 @@ import java.io.Serializable;
  */
 public class FixedDependency extends Dependency implements Serializable {
     
+    private static final long serialVersionUID = 1;
     private Feature feature;
     private Release release;
     

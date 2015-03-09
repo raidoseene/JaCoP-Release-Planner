@@ -15,6 +15,7 @@ import java.util.Objects;
  */
 public class ValueAndUrgency implements Serializable {
 
+    private static final long serialVersionUID = 1;
     private final Map<ValueAndUrgency.Key, ValueAndUrgency.Value> parameters;
 
     ValueAndUrgency() {
@@ -66,6 +67,7 @@ public class ValueAndUrgency implements Serializable {
 
     private final class Key implements Serializable {
 
+        private static final long serialVersionUID = 1;
         private final Stakeholder stakeholder;
         private final Feature feature;
 
@@ -96,6 +98,7 @@ public class ValueAndUrgency implements Serializable {
 
     private final class Value implements Serializable {
 
+        private static final long serialVersionUID = 1;
         private final Urgency urgency;
         private int value;
 

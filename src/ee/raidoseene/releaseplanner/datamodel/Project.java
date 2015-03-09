@@ -12,6 +12,7 @@ import java.io.Serializable;
  */
 public class Project extends NamedObject implements Serializable {
 
+    private static final long serialVersionUID = 1;
     private transient String storage;
     private final Features features;
     private final Groups groups;

@@ -34,6 +34,18 @@ public final class DataManager {
     public static void jacopOutput(String input) {
         // TO DO: create or write over project named jacop output file
     }
+    
+    // Needed for testing Simulator output
+    public static void testFileWriting (Project project, String s) throws Exception {
+        File dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage()));
+        File file = new File(dir, "testOut.txt");
+
+        try (PrintWriter pw = new PrintWriter(file)) { // try with resource: printwriter closes automatically!
+            DataManager dm = new DataManager(null, pw);
+            dm.printWriter.print(s);
+        }
+    }
+    //
 
     public static File saveDataFile(Project project) throws Exception {
         //public static void saveDataFile(Project project) throws Exception {

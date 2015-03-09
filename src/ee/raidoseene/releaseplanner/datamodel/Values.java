@@ -14,6 +14,7 @@ import java.util.List;
  */
 public class Values implements Serializable {
     
+    private static final long serialVersionUID = 1;
     private final List<Value> valuesContainer;
     
     Values() {
