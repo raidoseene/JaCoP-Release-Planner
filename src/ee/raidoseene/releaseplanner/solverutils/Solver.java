@@ -129,12 +129,13 @@ public class Solver {
         @Override
         public void print(String s) {
             sb.append(s);
+            sb.append("\n");
         }
 
         @Override
         public void println(String s) {
             sb.append(s);
-            sb.append("\r\n");
+            sb.append("\n");
         }
     }
 }
