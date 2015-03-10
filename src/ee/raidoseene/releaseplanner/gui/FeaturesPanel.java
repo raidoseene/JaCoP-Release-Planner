@@ -12,6 +12,7 @@ import ee.raidoseene.releaseplanner.datamodel.Features;
 import ee.raidoseene.releaseplanner.datamodel.Group;
 import ee.raidoseene.releaseplanner.datamodel.Groups;
 import ee.raidoseene.releaseplanner.datamodel.Dependencies;
+import ee.raidoseene.releaseplanner.datamodel.ModifyingInterdependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Resource;
 import ee.raidoseene.releaseplanner.datamodel.Resources;
@@ -156,6 +157,20 @@ public final class FeaturesPanel extends JPanel {
             }
         });
         c.add(btn);
+
+        Project project = ProjectManager.getCurrentProject();
+        if (project != null) {
+            Features features = project.getFeatures();
+            int count = features.getFeatureCount();
+
+            for (int i = 0; i < count; i++) {
+                Feature f = features.getFeature(i);
+                FeaturesPanel.FPContent content = new FeaturesPanel.FPContent(f);
+                ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE | ContentPanel.TYPE_TOGGLEABLE);
+                panel.addContentPanelListener(content);
+                this.scrollable.add(panel);
+            }
+        }
     }
 
     private void processAddEvent() {
@@ -189,20 +204,6 @@ public final class FeaturesPanel extends JPanel {
         private FPScrollable() {
             this.setBorder(new EmptyBorder(10, 310, 10, 10));
             this.setLayout(new ContentListLayout(ContentPanel.class));
-
-            Project project = ProjectManager.getCurrentProject();
-            if (project != null) {
-                Features features = project.getFeatures();
-                int count = features.getFeatureCount();
-
-                for (int i = 0; i < count; i++) {
-                    Feature f = features.getFeature(i);
-                    FeaturesPanel.FPContent content = new FeaturesPanel.FPContent(f);
-                    ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE | ContentPanel.TYPE_TOGGLEABLE);
-                    panel.addContentPanelListener(content);
-                    this.add(panel);
-                }
-            }
         }
 
         @Override
@@ -506,6 +507,15 @@ public final class FeaturesPanel extends JPanel {
             bg.add(this.hours);
             c3.add(this.days);
             bg.add(this.days);
+
+            Project project = ProjectManager.getCurrentProject();
+            ModifyingInterdependency[] deps = project.getDependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CC);
+            for (ModifyingInterdependency dep : deps) {
+                if (dep.getSecondary() == this.feature) {
+                    this.openChangePanel(this.chcost);
+                    break;
+                }
+            }
         }
 
         private void updateGroupSelection() {
@@ -539,6 +549,7 @@ public final class FeaturesPanel extends JPanel {
             FPContent.FPCCContent content = new FPContent.FPCCContent();
             ContentPanel p = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE);
             p.addContentPanelListener(content);
+            p.addHierarchyListener(content);
 
             this.cont2.add(BorderLayout.PAGE_END, p);
             FeaturesPanel.this.scrollable.contentUpdated();
@@ -734,13 +745,21 @@ public final class FeaturesPanel extends JPanel {
 
         }
 
-        private final class FPCCContent extends JPanel implements ContentPanelListener {
+        private final class FPCCContent extends JPanel implements ContentPanelListener, HierarchyListener {
 
+            private ModifyingInterdependency dependency;
             private final JComboBox feature;
+            private final ArrayList<JTextField> texts;
+            private final ArrayList<JComboBox> combos;
+            private final FocusListener flistener;
+            private final ItemListener ilistener;
+            private final Container cpanel;
+            private String[] selection;
 
             private FPCCContent() {
                 this.setBorder(new EmptyBorder(10, 10, 10, 80));
                 this.setLayout(new BorderLayout(10, 10));
+                this.reinitializeDependency();
                 Container c, c2;
 
                 c = new Container();
@@ -759,12 +778,225 @@ public final class FeaturesPanel extends JPanel {
                 Features feats = ProjectManager.getCurrentProject().getFeatures();
                 int fcount = feats.getFeatureCount();
                 for (int i = 0; i < fcount; i++) {
-                    this.feature.addItem(feats.getFeature(i).getName());
+                    Feature f = feats.getFeature(i);
+                    this.feature.addItem(f.getName());
+                    if (f == this.dependency.getPrimary()) {
+                        this.feature.setSelectedIndex(i);
+                    }
                 }
+                this.feature.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent ae) {
+                        FPCCContent.this.changeFeature();
+                    }
+                });
+
+                this.cpanel = new Container();
+                this.texts = new ArrayList<>();
+                this.combos = new ArrayList<>();
+                this.add(BorderLayout.LINE_START, this.cpanel);
+
+                this.flistener = new FocusListener() {
+
+                    @Override
+                    public void focusGained(FocusEvent fe) {
+                    }
+
+                    @Override
+                    public void focusLost(FocusEvent fe) {
+                        try {
+                            Object source = fe.getSource();
+                            int index = FPCCContent.this.texts.indexOf(source);
+                            int select = FPCCContent.this.combos.get(index).getSelectedIndex();
+                            if (select < 1) {
+                                FPCCContent.this.texts.get(index).setText("0");
+                                return;
+                            }
+
+                            Resource r = ProjectManager.getCurrentProject().getResources().getResource(select - 1);
+                            Feature f = FPCCContent.this.dependency.getChange(Feature.class);
+                            JTextField tf = FPCCContent.this.texts.get(index);
+                            try {
+                                f.setConsumption(r, Integer.parseInt(tf.getText()));
+                            } catch (Exception e2) {
+                                Messenger.showError(e2, null);
+                            }
+                            tf.setText(Integer.toString(f.getConsumption(r)));
+                        } catch (Exception ex) {
+                            Messenger.showError(ex, null);
+                        }
+                    }
+                };
+                this.ilistener = new ItemListener() {
+
+                    @Override
+                    public void itemStateChanged(ItemEvent ie) {
+                        try {
+                            Object item = ie.getItem();
+                            if (ie.getStateChange() == ItemEvent.DESELECTED) {
+                                int sindex = FPCCContent.this.getSelectionIndex(item);
+                                if (sindex > 0) {
+                                    Resource r = ProjectManager.getCurrentProject().getResources().getResource(sindex - 1);
+                                    FPCCContent.this.dependency.getChange(Feature.class).setConsumption(r, 0);
+                                }
+                            } else if (ie.getStateChange() == ItemEvent.SELECTED) {
+                                int sindex = FPCCContent.this.getSelectionIndex(item);
+                                int index = FPCCContent.this.combos.indexOf(ie.getSource());
+                                if (sindex > 0) {
+                                    JComboBox cb = FPCCContent.this.combos.get(index);
+                                    for (JComboBox c : FPCCContent.this.combos) {
+                                        if (c != cb && c.getSelectedIndex() == sindex) {
+                                            cb.setSelectedIndex(0);
+
+                                            throw new Exception("Duplicate resource!");
+                                        }
+                                    }
+                                }
+
+                                JTextField tf = FPCCContent.this.texts.get(index);
+                                FocusEvent fe = new FocusEvent(tf, FocusEvent.FOCUS_LOST);
+                                FPCCContent.this.flistener.focusLost(fe);
+                            }
+                        } catch (Exception ex) {
+                            Messenger.showError(ex, null);
+                        }
+                    }
+                };
+
+                this.reinitializeElements();
+                if (this.texts.size() < 1) {
+                    this.addEmptyElement();
+                }
+
+                c = new Container();
+                c.setLayout(new FlowLayout(FlowLayout.CENTER, 0, 0));
+                this.add(BorderLayout.LINE_END, c);
+
+                JButton btn = new JButton("Add resource");
+                btn.addActionListener(new ActionListener() {
+
+                    @Override
+                    public void actionPerformed(ActionEvent ae) {
+                        try {
+                            FPCCContent.this.addEmptyElement();
+                        } catch (Throwable t) {
+                            t.printStackTrace();
+                        }
+                    }
+                });
+                c.add(btn);
+            }
+
+            private void reinitializeDependency() {
+                Project project = ProjectManager.getCurrentProject();
+                ModifyingInterdependency[] deps = project.getDependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CC);
+                Feature feat = FPContent.this.feature;
+
+                for (ModifyingInterdependency dep : deps) {
+                    if (dep.getSecondary() == feat) {
+                        this.dependency = dep;
+                        return;
+                    }
+                }
+
+                Feature f = Features.createStandaloneFeature();
+                Feature f1 = project.getFeatures().getFeature(0);
+                this.dependency = project.getDependencies().addModifyingInterdependency(f1, feat, f);
+            }
+
+            private void reinitializeElements() {
+                Resources rs = ProjectManager.getCurrentProject().getResources();
+                Feature f = FPCCContent.this.dependency.getChange(Feature.class);
+                int rcount = rs.getResourceCount();
+                int count = 0;
+
+                this.texts.clear();
+                this.combos.clear();
+                this.cpanel.removeAll();
+
+                this.selection = new String[rcount + 1];
+                this.selection[0] = new String();
+                for (int i = 0; i < rcount; i++) {
+                    this.selection[i + 1] = rs.getResource(i).getName();
+                }
+
+                for (int i = 0; i < rcount; i++) {
+                    Resource r = rs.getResource(i);
+                    if (f.getConsumption(r) > 0) {
+                        JTextField tf = new JTextField(Integer.toString(f.getConsumption(r)));
+                        tf.addFocusListener(this.flistener);
+                        this.texts.add(tf);
+                        this.cpanel.add(tf);
+
+                        JComboBox cb = new JComboBox(this.selection);
+                        cb.setSelectedIndex(i + 1); // Items are shifted, because the first on is empty
+                        cb.addItemListener(this.ilistener);
+                        this.combos.add(cb);
+                        this.cpanel.add(cb);
+
+                        count++;
+                    }
+                }
+
+                this.cpanel.setLayout(new GridLayout(count, 2, 10, 2));
+            }
+
+            private void addEmptyElement() {
+                JTextField tf = new JTextField("0");
+                tf.addFocusListener(this.flistener);
+                this.texts.add(tf);
+                this.cpanel.add(tf);
+
+                JComboBox cb = new JComboBox(this.selection);
+                cb.addItemListener(this.ilistener);
+                this.combos.add(cb);
+                this.cpanel.add(cb);
+
+                int count = this.texts.size();
+                this.cpanel.setLayout(new GridLayout(count, 2, 10, 2));
+            }
+
+            private void changeFeature() {
+                try {
+                    Project project = ProjectManager.getCurrentProject();
+                    Dependencies deps = project.getDependencies();
+                    Resources rsrcs = project.getResources();
+                    Features feats = project.getFeatures();
+                    
+                    Feature old = this.dependency.getChange(Feature.class);
+                    deps.removeInterdependency(this.dependency);
+                    
+                    int index = this.feature.getSelectedIndex();
+                    Feature f1 = feats.getFeature(index);
+                    
+                    Feature f = Features.createStandaloneFeature();
+                    int rcount = rsrcs.getResourceCount();
+                    for (int i = 0; i < rcount; i++) {
+                        Resource r = rsrcs.getResource(i);
+                        f.setConsumption(r, old.getConsumption(r));
+                    }
+                    this.dependency = deps.addModifyingInterdependency(f1, FPContent.this.feature, f);
+                } catch (Exception ex) {
+                    Messenger.showError(ex, null);
+                }
+            }
+
+            private int getSelectionIndex(Object object) {
+                for (int i = 0; i < this.selection.length; i++) {
+                    if (this.selection[i] == object) {
+                        return i;
+                    }
+                }
+
+                return -1;
             }
 
             @Override
             public void contentPanelClosed(ContentPanel source) {
+                Project project = ProjectManager.getCurrentProject();
+                project.getDependencies().removeInterdependency(this.dependency);
+
                 FPContent.this.cont2.remove(source);
                 FPContent.this.chcost.setEnabled(true);
                 FeaturesPanel.this.scrollable.contentUpdated();
@@ -776,6 +1008,18 @@ public final class FeaturesPanel extends JPanel {
 
             @Override
             public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
+            }
+
+            @Override
+            public void hierarchyChanged(HierarchyEvent he) {
+                int mask = HierarchyEvent.SHOWING_CHANGED;
+                if ((he.getChangeFlags() & mask) == mask && he.getChanged().isShowing()) {
+                    this.reinitializeDependency();
+                    this.reinitializeElements();
+                    if (this.texts.size() < 1) {
+                        this.addEmptyElement();
+                    }
+                }
             }
 
         }

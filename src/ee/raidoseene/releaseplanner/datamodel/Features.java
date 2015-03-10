@@ -47,4 +47,8 @@ public class Features extends ProjectElement implements Serializable {
         return this.featureContainer.indexOf(feature);
     }
     
+    public static Feature createStandaloneFeature() {
+        return new Feature();
+    }
+    
 }

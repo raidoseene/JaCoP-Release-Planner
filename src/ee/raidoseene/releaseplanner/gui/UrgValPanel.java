@@ -550,7 +550,7 @@ public final class UrgValPanel extends JPanel {
                     String val = (urg > 0) ? Integer.toString(urg) : "";
 
                     Container ge = new Container();
-                    ge.setLayout(new GridLayout(2, 1, 10, 10));
+                    ge.setLayout(new GridLayout(2, 1, 2, 2));
                     ge.add(this.vreleases[i] = new JTextField(val));
                     ge.add(new JLabel(str + Integer.toString(i + 1) + str, JLabel.CENTER));
                     this.vreleases[i].addFocusListener(listener);
@@ -562,7 +562,7 @@ public final class UrgValPanel extends JPanel {
                     String val = (urg > 0) ? Integer.toString(urg) : "";
 
                     Container ge = new Container();
-                    ge.setLayout(new GridLayout(2, 1, 10, 10));
+                    ge.setLayout(new GridLayout(2, 1, 2, 2));
                     ge.add(this.vpostpone = new JTextField(val));
                     ge.add(new JLabel("  postpone  ", JLabel.CENTER));
                     this.vpostpone.addFocusListener(listener);
@@ -849,7 +849,7 @@ public final class UrgValPanel extends JPanel {
                     }
 
                     if (this.dependency == null) {
-                        Urgency urg = new Urgency();
+                        Urgency urg = ValueAndUrgency.createStandaloneUrgency();
                         this.dependency = deps.addModifyingInterdependency(features.getFeature(0), ChangePanel.this.feature, urg);
                     }
 
@@ -926,7 +926,7 @@ public final class UrgValPanel extends JPanel {
                         String val = (urg > 0) ? Integer.toString(urg) : "";
 
                         c2 = new Container();
-                        c2.setLayout(new GridLayout(2, 1, 10, 10));
+                        c2.setLayout(new GridLayout(2, 1, 2, 2));
                         c2.add(this.vreleases[i] = new JTextField(val));
                         c2.add(new JLabel(str + Integer.toString(i + 1) + str, JLabel.CENTER));
                         this.vreleases[i].addFocusListener(listener);
@@ -938,7 +938,7 @@ public final class UrgValPanel extends JPanel {
                         String val = (urg > 0) ? Integer.toString(urg) : "";
 
                         c2 = new Container();
-                        c2.setLayout(new GridLayout(2, 1, 10, 10));
+                        c2.setLayout(new GridLayout(2, 1, 2, 2));
                         c2.add(this.vpostpone = new JTextField(val));
                         c2.add(new JLabel("  postpone  ", JLabel.CENTER));
                         this.vpostpone.addFocusListener(listener);
@@ -958,7 +958,7 @@ public final class UrgValPanel extends JPanel {
                         int index = this.feature.getSelectedIndex();
                         Feature f = feats.getFeature(index);
 
-                        Urgency urg = new Urgency();
+                        Urgency urg = ValueAndUrgency.createStandaloneUrgency();
                         for (int i = 0; i < this.vreleases.length; i++) {
                             String txt = this.vreleases[i].getText();
                             if (txt.length() > 0) {

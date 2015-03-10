@@ -27,7 +27,7 @@ public class Urgency implements Serializable {
     }
     */
     
-    public Urgency () {
+    Urgency () {
         this.urgencies = new HashMap<>();
     }
 

@@ -108,5 +108,9 @@ public class ValueAndUrgency implements Serializable {
         }
 
     }
+    
+    public static Urgency createStandaloneUrgency() {
+        return new Urgency();
+    }
 
 }

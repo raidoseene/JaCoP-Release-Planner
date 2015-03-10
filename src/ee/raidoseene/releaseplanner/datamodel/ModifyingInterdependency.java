@@ -5,8 +5,6 @@
 package ee.raidoseene.releaseplanner.datamodel;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 
 /**
  *
