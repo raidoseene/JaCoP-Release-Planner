@@ -14,7 +14,6 @@ import ee.raidoseene.releaseplanner.datamodel.Resources;
 import ee.raidoseene.releaseplanner.gui.utils.ContentListLayout;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanel;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanelListener;
-import ee.raidoseene.releaseplanner.gui.utils.ExtendableLayout;
 import ee.raidoseene.releaseplanner.gui.utils.ScrollablePanel;
 import java.awt.BorderLayout;
 import java.awt.Container;
@@ -110,14 +109,14 @@ public final class ReleasesPanel extends ScrollablePanel {
         private final JRadioButton hours, days;
 
         private RPContent(Release r) {
-            this.setLayout(new ExtendableLayout(ExtendableLayout.VERTICAL, 10));
+            this.setLayout(new BorderLayout(10, 10));
             this.setBorder(new EmptyBorder(10, 10, 10, 10));
 
             this.release = r;
             this.cont1 = new JPanel();
             this.cont1.setBorder(new EmptyBorder(0, 0, 0, 110));
             this.cont1.setLayout(new BorderLayout(25, 25));
-            this.add(this.cont1);
+            this.add(BorderLayout.CENTER, this.cont1);
 
             this.name = new JTextField(r.getName());
             this.name.addFocusListener(new FocusListener() {
@@ -206,7 +205,7 @@ public final class ReleasesPanel extends ScrollablePanel {
         @Override
         public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
             if (expanded && this.getComponentCount() == 1) {
-                this.add(this.cont2);
+                this.add(BorderLayout.PAGE_END, this.cont2);
             } else if (!expanded && this.getComponentCount() > 1) {
                 this.remove(this.cont2);
             }
