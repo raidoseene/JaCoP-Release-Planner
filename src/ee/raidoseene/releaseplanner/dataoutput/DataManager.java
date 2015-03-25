@@ -256,9 +256,9 @@ public final class DataManager {
                         + ", " + (project.getFeatures().getFeatureIndex(newReqDS[i].getSecondary()) + 1) + ", |");
             }
         } else {
-            printWriter.print(" 1, 1, ");
+            printWriter.print(" 1, 1, |");
         }
-        printWriter.println("|];");
+        printWriter.println("];");
 
         // PRECEDES dependency
         printWriter.println("PRE = " + PreDS.length + ";");
@@ -275,9 +275,9 @@ public final class DataManager {
                         + ", " + (project.getFeatures().getFeatureIndex(newPreDS[i].getSecondary()) + 1) + ", |");
             }
         } else {
-            printWriter.print(" 1, 1, ");
+            printWriter.print(" 1, 1, |");
         }
-        printWriter.println("|];");
+        printWriter.println("];");
 
         // XOR dependency
         printWriter.println("XOR = " + XorDS.length + ";");
@@ -295,9 +295,9 @@ public final class DataManager {
                         + project.getFeatures().getFeatureCount()) + ", |");
             }
         } else {
-            printWriter.println(" 1, 1, ");
+            printWriter.print(" 1, 1, |");
         }
-        printWriter.println("|];");
+        printWriter.println("];");
 
         printWriter.println("% =========================\n");
     }

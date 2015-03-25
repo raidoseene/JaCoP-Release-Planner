@@ -433,6 +433,7 @@ public final class FeaturesPanel extends JPanel {
                 public void actionPerformed(ActionEvent ae) {
                     try {
                         FPContent.this.panel.addEmptyElement();
+                        FeaturesPanel.this.scrollable.contentUpdated();
                     } catch (Throwable t) {
                         t.printStackTrace();
                     }
