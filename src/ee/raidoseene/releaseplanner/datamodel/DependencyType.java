@@ -10,7 +10,7 @@ package ee.raidoseene.releaseplanner.datamodel;
  * @author Raido Seene
  */
 public class DependencyType {
-    
+    /*
     public static final int TYPE_MASK = 0xf0;
     public static final int SUB_MASK = 0x0f;
     
@@ -27,5 +27,5 @@ public class DependencyType {
     public static final int CC = MODIF | 0x01;
     public static final int CV = MODIF | 0x02;
     public static final int CU = MODIF | 0x03;
-    
+    */
 }
