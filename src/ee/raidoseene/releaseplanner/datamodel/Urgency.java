@@ -14,17 +14,22 @@ import java.util.Map;
  */
 public class Urgency implements Serializable {
     
-    //private final Feature feature;
-    //private final Stakeholder stakeholder;
     private static final long serialVersionUID = 1;
     private final Map<Release, Integer> urgencies;
-    
     /*
-    Urgency(Feature feature, Stakeholder stakeholder) {
-        this.feature = feature;
-        this.stakeholder = stakeholder;
-        this.urgencies = new HashMap<>();
-    }
+    public static final int DEADLYNE_MASK = 0xf0;
+    public static final int CURVE_MASK = 0x0f;
+    
+    public static final int EXACT = 0x10;
+    public static final int EARLIEST = 0x20;
+    public static final int LATEST = 0x30;
+    
+    public static final int HARD = 0x01;
+    public static final int SOFT = 0x02;
+    
+    private Release release;
+    private int urgency;
+    private int deadlineCurve;
     */
     
     Urgency () {
@@ -38,6 +43,20 @@ public class Urgency implements Serializable {
             this.urgencies.remove(release);
         }
     }
+    /*
+    public void setUrgency(int urgency) {
+        this.urgency = urgency;
+    }
+    
+    public void setRelease(Release release) {
+        this.release = release;
+        
+    }
+    
+    public void setDeadlineCurve(int deadlineCurve) {
+        this.dealdineCurve = deadlineCurve;
+    }
+    */
 
     public int getUrgency(Release release) {
         Integer value = this.urgencies.get(release);
@@ -47,6 +66,20 @@ public class Urgency implements Serializable {
 
         return 0;
     }
+    
+    /*
+    public int getUrgency() {
+        return this.urgency;
+    }
+    
+    public Release getRelease() {
+        return this.release;
+    }
+    
+    public int getDeadlineCurve() {
+        return this.deadlineCurve;
+    }
+    */
 
     boolean removeUrgency(Release release) {
         return (this.urgencies.remove(release) != null);
@@ -55,15 +88,5 @@ public class Urgency implements Serializable {
     boolean hasUrgency(Release r) {
         return this.urgencies.containsKey(r);
     }
-    
-    /*
-    public Feature getFeature() {
-        return this.feature;
-    }
-    
-    public Stakeholder getStakeholder() {
-        return this.stakeholder;
-    }
-    */
     
 }

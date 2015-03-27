@@ -42,5 +42,5 @@ public class Value implements Serializable {
     public Stakeholder getStakeholder() {
         return this.stakeholder;
     }
-
+    
 }

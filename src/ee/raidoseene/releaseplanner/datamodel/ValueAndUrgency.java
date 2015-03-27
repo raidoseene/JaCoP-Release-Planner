@@ -44,6 +44,34 @@ public class ValueAndUrgency implements Serializable {
             throw new RuntimeException("Urgency cannot be set without value!");
         }
     }
+    /*
+    public void setUrgency(Stakeholder s, Feature f, int urgency) {
+        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (val != null) {
+            val.urgency.setUrgency(urgency);
+        } else {
+            throw new RuntimeException("Urgency cannot be set without value!");
+        }
+    }
+    
+    public void setRelease(Stakeholder s, Feature f, Release r) {
+        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (val != null) {
+            val.urgency.setRelease(r);
+        } else {
+            throw new RuntimeException("Urgency cannot be set without value!");
+        }
+    }
+    
+    public void setRelease(Stakeholder s, Feature f, int deadlineCurve) {
+        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (val != null) {
+            val.urgency.setDeadlineCurve(deadlineCurve);
+        } else {
+            throw new RuntimeException("Urgency cannot be set without value!");
+        }
+    }
+    */
 
     public int getValue(Stakeholder s, Feature f) {
         ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
@@ -60,6 +88,23 @@ public class ValueAndUrgency implements Serializable {
         }
         return 0;
     }
+    /*
+    public Release getRelease(Stakeholder s, Feature f) {
+        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (val != null) {
+            return val.urgency.getRelease();
+        }
+        return null;
+    }
+    
+    public Release getDeadlineCurve(Stakeholder s, Feature f) {
+        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (val != null) {
+            return val.urgency.getDeadlineCurve();
+        }
+        return null;
+    }
+    */
 
     public int getValueAndUrgencyCount() {
         return this.parameters.size();
