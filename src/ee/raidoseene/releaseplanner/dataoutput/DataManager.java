@@ -8,6 +8,7 @@ import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
 import ee.raidoseene.releaseplanner.datamodel.FixedDependency;
+import ee.raidoseene.releaseplanner.datamodel.Group;
 import ee.raidoseene.releaseplanner.datamodel.Interdependency;
 import ee.raidoseene.releaseplanner.datamodel.ModifyingInterdependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
@@ -426,6 +427,25 @@ public final class DataManager {
      printWriter.println("% =========================");
      }
      */
+    
+    private void printGroups(Project proj) {
+        printWriter.println("% Feature Groups (1..groups, 1..F)");
+        printWriter.print("nrOfGroups = " + project.getGroups().getGroupCount() + ";");
+        printWriter.print("groups = [");
+        for (int g = 0; g < project.getGroups().getGroupCount(); g++) {
+            printWriter.print("| ");
+            Group group = project.getGroups().getGroup(g);
+            for (int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
+                printWriter.print((group.contains(project.getFeatures().getFeature(f))) ?
+                        1 : 0 + ", ");
+            }
+            if (g < project.getGroups().getGroupCount() - 1) {
+                printWriter.print("\n");
+            }
+        }
+        printWriter.println("|];");
+    }
+    
     private void printStakeholders(Project ModDep) {
         printWriter.println("% Stakeholders value(1..9), urgency");
         printWriter.print("value = [");

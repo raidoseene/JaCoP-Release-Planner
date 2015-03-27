@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,8 +12,9 @@ import java.util.List;
  *
  * @author Raido Seene
  */
-public class Groups extends ProjectElement {
+public class Groups extends ProjectElement implements Serializable {
     
+    private static final long serialVersionUID = 1;
     private final List<Group> groupContainer;
     
     Groups(Project project) {

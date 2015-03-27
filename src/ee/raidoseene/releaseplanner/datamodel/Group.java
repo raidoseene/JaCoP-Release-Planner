@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,9 @@ import java.util.List;
  *
  * @author Raido
  */
-public class Group extends NamedObject {
+public class Group extends NamedObject implements Serializable {
+    
+    private static final long serialVersionUID = 1;
     private final List<Feature> featureContainer;
 
     Group() {
@@ -35,7 +38,7 @@ public class Group extends NamedObject {
         return featureContainer.size();
     }
 
-    boolean contains(Feature f) {
+    public boolean contains(Feature f) {
         return this.featureContainer.contains(f);
     }
     
