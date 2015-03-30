@@ -30,6 +30,11 @@ public abstract class Dependency implements Serializable {
     public static final int CV = MODIF | 0x02;
     public static final int CU = MODIF | 0x03;
     
+    public static final int GROUP = 0x40;
+    public static final int ATLEAST = GROUP | 0x01;
+    public static final int EXACTLY = GROUP | 0x02;
+    public static final int ATMOST = GROUP | 0x03;
+    
     public final int type;
     
     protected Dependency(int type) {

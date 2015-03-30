@@ -59,6 +59,24 @@ public class Dependencies extends ProjectElement implements Serializable {
         this.interdependenciesContainer.add(dependency);
         return dependency;
     }
+    
+    public GroupDependency addAtLeastGroupDependency(Group group, int featureCount) {
+        GroupDependency dependency = new GroupDependency(group, featureCount, Dependency.ATLEAST);
+        this.interdependenciesContainer.add(dependency);
+        return dependency;
+    }
+    
+    public GroupDependency addExactlyGroupDependency(Group group, int featureCount) {
+        GroupDependency dependency = new GroupDependency(group, featureCount, Dependency.EXACTLY);
+        this.interdependenciesContainer.add(dependency);
+        return dependency;
+    }
+    
+    public GroupDependency addAtMostGroupDependency(Group group, int featureCount) {
+        GroupDependency dependency = new GroupDependency(group, featureCount, Dependency.ATMOST);
+        this.interdependenciesContainer.add(dependency);
+        return dependency;
+    }
 
     public void removeInterdependency(Dependency dependency) {
         if (this.interdependenciesContainer.remove(dependency) && super.parent != null) {

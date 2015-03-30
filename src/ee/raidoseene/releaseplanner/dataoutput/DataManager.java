@@ -8,6 +8,7 @@ import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.FixedDependency;
 import ee.raidoseene.releaseplanner.datamodel.Group;
+import ee.raidoseene.releaseplanner.datamodel.GroupDependency;
 import ee.raidoseene.releaseplanner.datamodel.Interdependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
@@ -106,8 +107,12 @@ public final class DataManager {
         Interdependency[] ReqDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.REQ);
         Interdependency[] PreDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.PRE);
         Interdependency[] XorDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.XOR);
+        GroupDependency[] AtLeastDS = project.getDependencies().getTypedDependencies(GroupDependency.class, Dependency.ATLEAST);
+        GroupDependency[] ExactlyDS = project.getDependencies().getTypedDependencies(GroupDependency.class, Dependency.EXACTLY);
+        GroupDependency[] AtMostDS = project.getDependencies().getTypedDependencies(GroupDependency.class, Dependency.ATMOST);
 
         printWriter.println("% FIXED features / AND features / REQUIRED features / PRECEDING features / XOR features");
+         printWriter.println("% Group: AtLeast / Exactly / AtMost");
 
         // Fixed release
         printWriter.println("FIX = " + FixDS.length + ";");
@@ -192,8 +197,45 @@ public final class DataManager {
         } else {
             printWriter.print(" 0, 0, |");
         }
+        printWriter.println("];\n");
+        
+        
+        printWriter.println("ATLEAST = " + 0 + ";");
+        printWriter.print("atLeast = [|");
+        if(AtLeastDS.length > 0) {
+            for (int i = 0; i < AtLeastDS.length; i++) {
+                printWriter.print(" " + (project.getGroups().getGroupIndex(AtLeastDS[i].getGroup()) + 1)
+                        + ", " + (AtLeastDS[i].getFeatureCount()) + ", |");
+            }
+        } else {
+            printWriter.print(" 0, 0, |");
+        }
         printWriter.println("];");
-
+        
+        printWriter.println("EXACTLY = " + 0 + ";");
+        printWriter.print("exactly = [|");
+        if(ExactlyDS.length > 0) {
+            for (int i = 0; i < ExactlyDS.length; i++) {
+                printWriter.print(" " + (project.getGroups().getGroupIndex(ExactlyDS[i].getGroup()) + 1)
+                        + ", " + (ExactlyDS[i].getFeatureCount()) + ", |");
+            }
+        } else {
+            printWriter.print(" 0, 0, |");
+        }
+        printWriter.println("];");
+        
+        printWriter.println("ATMOST = " + 0 + ";");
+        printWriter.print("atMost = [|");
+        if(AtMostDS.length > 0) {
+            for (int i = 0; i < AtMostDS.length; i++) {
+                printWriter.print(" " + (project.getGroups().getGroupIndex(AtMostDS[i].getGroup()) + 1)
+                        + ", " + (AtMostDS[i].getFeatureCount()) + ", |");
+            }
+        } else {
+            printWriter.print(" 0, 0, |");
+        }
+        printWriter.println("];");
+        
         printWriter.println("% =========================\n");
     }
 
@@ -278,7 +320,7 @@ public final class DataManager {
                 Group group = project.getGroups().getGroup(g);
                 for (int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
                     printWriter.print((group.contains(project.getFeatures().getFeature(f)))
-                            ? 1 : 0 + ", ");
+                            ? 1 + ", " : 0 + ", ");
                 }
                 if (g < project.getGroups().getGroupCount() - 1) {
                     printWriter.print("\n");
