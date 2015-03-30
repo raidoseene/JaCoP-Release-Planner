@@ -33,4 +33,13 @@ public class GroupDependency extends Dependency implements Serializable {
     public int getType() {
         return this.type;
     }
+    
+    public void setFeatureCount(int fCount) {
+        this.fCount = fCount;
+    }
+    
+    public void setGroup(Group group) {
+        this.group = group;
+    }
+    
 }
