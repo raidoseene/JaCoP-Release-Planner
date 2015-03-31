@@ -63,7 +63,7 @@ public class ValueAndUrgency implements Serializable {
         }
     }
     
-    public void setRelease(Stakeholder s, Feature f, int deadlineCurve) {
+    public void setDeadlineCurve(Stakeholder s, Feature f, int deadlineCurve) {
         ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (val != null) {
             val.urgency.setDeadlineCurve(deadlineCurve);
@@ -90,7 +90,15 @@ public class ValueAndUrgency implements Serializable {
     }
     
     /*
-    public Release getRelease(Stakeholder s, Feature f) {
+    public int getUrgency(Stakeholder s, Feature f) {
+        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (val != null) {
+            return val.urgency.getUrgency();
+        }
+        return 0;
+    }
+    
+    public Release getUrgencyRelease(Stakeholder s, Feature f) {
         ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (val != null) {
             return val.urgency.getRelease();

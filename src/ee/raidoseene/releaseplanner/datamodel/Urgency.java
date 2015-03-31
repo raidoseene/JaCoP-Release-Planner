@@ -16,7 +16,7 @@ public class Urgency implements Serializable {
     
     private static final long serialVersionUID = 1;
     private final Map<Release, Integer> urgencies;
-    /*
+    
     public static final int DEADLYNE_MASK = 0xf0;
     public static final int CURVE_MASK = 0x0f;
     
@@ -30,7 +30,6 @@ public class Urgency implements Serializable {
     private Release release;
     private int urgency;
     private int deadlineCurve;
-    */
     
     Urgency () {
         this.urgencies = new HashMap<>();

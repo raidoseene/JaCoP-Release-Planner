@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Needs to be deprecated
+ * Deprecated
  * @author Raido Seene
  */
 public class Urgencies implements Serializable {
