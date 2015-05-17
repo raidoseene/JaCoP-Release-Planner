@@ -3,7 +3,10 @@ package ee.raidoseene.releaseplanner.gui;
 import ee.raidoseene.releaseplanner.backend.ProjectFileFilter;
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.backend.ResourceManager;
+import ee.raidoseene.releaseplanner.backend.Settings;
+import ee.raidoseene.releaseplanner.backend.SettingsManager;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
+import ee.raidoseene.releaseplanner.dataoutput.SolverCodeManager;
 import ee.raidoseene.releaseplanner.solverutils.Solver;
 import java.awt.Dimension;
 import java.awt.FileDialog;
@@ -273,7 +276,10 @@ public final class MainFrame extends JFrame {
                 throw new Exception(msg);
             }
             
-            DataManager.saveDataFile(ProjectManager.getCurrentProject());
+            //DataManager.saveDataFile(ProjectManager.getCurrentProject());
+            Settings settings = SettingsManager.getCurrentSettings();
+            DataManager.initiateDataOutput(ProjectManager.getCurrentProject(), settings.getCodeOutput());
+            //SolverCodeManager.saveSolverCodeFile(ProjectManager.getCurrentProject());
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
@@ -289,7 +295,8 @@ public final class MainFrame extends JFrame {
             }
             
             //Solver.runSolver();
-            Solver.executeSimulation();
+            Settings settings = SettingsManager.getCurrentSettings();
+            Solver.executeSimulation(ProjectManager.getCurrentProject(), settings.getCodeOutput());
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }

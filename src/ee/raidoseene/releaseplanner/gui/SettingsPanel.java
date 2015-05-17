@@ -18,8 +18,11 @@ import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -42,6 +45,7 @@ public final class SettingsPanel extends JPanel {
         this.setBorder(new EmptyBorder(20, 20, 20, 20));
         this.setLayout(new ContentListLayout(Component.class));
         Container c, e;
+        final Settings settings = SettingsManager.getCurrentSettings();
 
         Container proj = new Container();
         proj.setLayout(new BorderLayout(10, 10));
@@ -64,10 +68,9 @@ public final class SettingsPanel extends JPanel {
         def.setLayout(new BorderLayout(10, 10));
         def.add(BorderLayout.PAGE_START, new JLabel("<html><b><u>Default Settings</u></b></html>"));
         this.add(def);
-        
+
         JButton btn = new JButton("Set current project as default");
         btn.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -91,7 +94,7 @@ public final class SettingsPanel extends JPanel {
         solv.add(BorderLayout.LINE_START, c);
 
         e = new Container();
-        e.setLayout(new GridLayout(2, 1, 10, 10));
+        e.setLayout(new GridLayout(4, 1, 10, 10));
         c.add(BorderLayout.CENTER, e);
 
         this.paths = new JLabel[2];
@@ -103,12 +106,11 @@ public final class SettingsPanel extends JPanel {
         this.paths[1].setToolTipText("Path to JaCoP");
 
         e = new Container();
-        e.setLayout(new GridLayout(2, 1, 10, 10));
+        e.setLayout(new GridLayout(4, 1, 10, 10));
         c.add(BorderLayout.LINE_END, e);
 
         btn = new JButton("Modify");
         btn.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -122,7 +124,6 @@ public final class SettingsPanel extends JPanel {
 
         btn = new JButton("Modify");
         btn.addActionListener(new ActionListener() {
-
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
@@ -133,8 +134,55 @@ public final class SettingsPanel extends JPanel {
             }
         });
         e.add(btn);
+
+        final JCheckBox codeOutput = new JCheckBox("Create and use project specific solver code");
+        final JCheckBox resourceShifting = new JCheckBox("Allow using unused resources in next releases");
+        if (settings.getCodeOutput()) {
+            codeOutput.setSelected(true);
+        }
+        codeOutput.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    if (codeOutput.isSelected()) {
+                        settings.setCodeOutput(true);
+                        resourceShifting.setVisible(false);
+                    } else {
+                        settings.setCodeOutput(false);
+                        resourceShifting.setVisible(false);
+                    }
+
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        e.add(codeOutput);
+
+        if (settings.getResourceShifting()) {
+            resourceShifting.setSelected(true);
+        }
+        if (!settings.getCodeOutput()) {
+            resourceShifting.setVisible(false);
+        }
+        resourceShifting.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    if (resourceShifting.isSelected()) {
+                        settings.setResourceShifting(true);
+                    } else {
+                        settings.setResourceShifting(false);
+                    }
+
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        e.add(resourceShifting);
     }
-    
+
     private void setPath(String path, int target) {
         if (path != null) {
             this.paths[target].setText(path);
@@ -175,7 +223,7 @@ public final class SettingsPanel extends JPanel {
             try {
                 Settings settings = SettingsManager.getCurrentSettings();
                 String path = fc.getSelectedFile().getPath();
-                
+
                 if (target == 0) {
                     settings.setMiniZincPath(path);
                     path = settings.getMiniZincPath();
@@ -183,7 +231,7 @@ public final class SettingsPanel extends JPanel {
                     settings.setJaCoPPath(path);
                     path = settings.getJaCoPPath();
                 }
-                
+
                 this.setPath(path, target);
                 SettingsManager.saveCurrentSettings();
             } catch (Exception ex) {
@@ -191,11 +239,11 @@ public final class SettingsPanel extends JPanel {
             }
         }
     }
-    
+
     private void processDefaultProjectSet() {
         Project project = ProjectManager.getCurrentProject();
         String storage = project.getStorage();
-        
+
         try {
             String fname = "default" + ProjectFileFilter.FILE_EXTENSION;
             File file = new File(ResourceManager.getDirectory(), fname);
@@ -204,8 +252,7 @@ public final class SettingsPanel extends JPanel {
             String msg = "Failed to set the current project as default!";
             Messenger.showError(ex, msg);
         }
-        
+
         project.setStorage(storage);
     }
-
 }

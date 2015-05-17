@@ -15,10 +15,14 @@ public final class Settings implements Serializable {
     
     private static final long serialVersionUID = 1;
     private String pathMiniZinc, pathJaCoP;
+    private boolean codeOutput;
+    private boolean resourceShifting;
     
     Settings() {
         this.pathMiniZinc = null;
         this.pathJaCoP = null;
+        this.codeOutput = false;
+        this.resourceShifting = false;
     }
     
     public void setMiniZincPath(String path) throws Exception {
@@ -45,4 +49,19 @@ public final class Settings implements Serializable {
         return this.pathJaCoP;
     }
     
+    public void setCodeOutput(boolean codeOutput){
+        this.codeOutput = codeOutput;
+    }
+    
+    public boolean getCodeOutput() {
+        return this.codeOutput;
+    }
+    
+    public void setResourceShifting(boolean resourceShifting) {
+        this.resourceShifting = resourceShifting;
+    }
+    
+    public boolean getResourceShifting() {
+        return this.resourceShifting;
+    }
 }

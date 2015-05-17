@@ -44,6 +44,7 @@ public class ValueAndUrgency implements Serializable {
             throw new RuntimeException("Urgency cannot be set without value!");
         }
     }
+    
     /*
     public void setUrgency(Stakeholder s, Feature f, int urgency) {
         ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
@@ -106,12 +107,12 @@ public class ValueAndUrgency implements Serializable {
         return null;
     }
     
-    public Release getDeadlineCurve(Stakeholder s, Feature f) {
+    public int getDeadlineCurve(Stakeholder s, Feature f) {
         ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (val != null) {
             return val.urgency.getDeadlineCurve();
         }
-        return null;
+        return 0x00;
     }
     */
 

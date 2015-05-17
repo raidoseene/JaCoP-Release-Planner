@@ -42,6 +42,7 @@ public class Urgency implements Serializable {
             this.urgencies.remove(release);
         }
     }
+    
     /*
     public void setUrgency(int urgency) {
         this.urgency = urgency;
@@ -53,7 +54,7 @@ public class Urgency implements Serializable {
     }
     
     public void setDeadlineCurve(int deadlineCurve) {
-        this.dealdineCurve = deadlineCurve;
+        this.deadlineCurve = deadlineCurve;
     }
     */
 

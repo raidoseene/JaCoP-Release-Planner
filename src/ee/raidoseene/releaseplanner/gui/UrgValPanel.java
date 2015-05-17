@@ -35,10 +35,12 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
@@ -85,7 +87,6 @@ public final class UrgValPanel extends JPanel {
             this.type = type;
 
             this.listener = new ActionListener() {
-
                 @Override
                 public void actionPerformed(ActionEvent ae) {
                     try {
@@ -304,7 +305,6 @@ public final class UrgValPanel extends JPanel {
                     ValueAndUrgency vus = ProjectManager.getCurrentProject().getValueAndUrgency();
                     this.value = new JSpinner(new SpinnerNumberModel(vus.getValue(UVSContent.this.stakeholder, f), 0, 9, 1));
                     this.value.addChangeListener(new ChangeListener() {
-
                         @Override
                         public void stateChanged(ChangeEvent ce) {
                             ValueAndUrgency vus = ProjectManager.getCurrentProject().getValueAndUrgency();
@@ -343,9 +343,7 @@ public final class UrgValPanel extends JPanel {
                 @Override
                 public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
                 }
-
             }
-
         }
 
         private final class UVFContent extends JPanel implements ContentPanelListener, HierarchyListener {
@@ -434,7 +432,6 @@ public final class UrgValPanel extends JPanel {
                     ValueAndUrgency vus = ProjectManager.getCurrentProject().getValueAndUrgency();
                     this.value = new JSpinner(new SpinnerNumberModel(vus.getValue(s, UVFContent.this.feature), 0, 9, 1));
                     this.value.addChangeListener(new ChangeListener() {
-
                         @Override
                         public void stateChanged(ChangeEvent ce) {
                             ValueAndUrgency vus = ProjectManager.getCurrentProject().getValueAndUrgency();
@@ -473,9 +470,7 @@ public final class UrgValPanel extends JPanel {
                 @Override
                 public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
                 }
-
             }
-
         }
 
         private final class UrgencyPanel extends JPanel {
@@ -483,14 +478,19 @@ public final class UrgValPanel extends JPanel {
             private final Feature feature;
             private final Stakeholder stakeholder;
             private final JTextField[] vreleases;
-            private final JTextField vpostpone;
+            private final JTextField vpostpone; //Commented out for testing
+            // added for test
+            //private final JComboBox urgency, release; // added for test
+            //private final JRadioButton exact, earliest, latest, hard, soft; // added for test
+            //private final ActionListener listener;
+            // added for test
 
             private UrgencyPanel(Stakeholder s, Feature f) {
                 this.setBorder(new EmptyBorder(10, 0, 0, 0));
                 this.setLayout(new BorderLayout());
                 this.stakeholder = s;
                 this.feature = f;
-
+                
                 Container c = new Container();
                 c.setLayout(new BorderLayout(10, 10));
                 this.add(BorderLayout.CENTER, c);
@@ -502,8 +502,8 @@ public final class UrgValPanel extends JPanel {
                 Project project = ProjectManager.getCurrentProject();
                 ValueAndUrgency vus = project.getValueAndUrgency();
                 Releases releases = project.getReleases();
+                // Commented out for testing
                 FocusListener listener = new FocusListener() {
-
                     @Override
                     public void focusGained(FocusEvent fe) {
                     }
@@ -542,9 +542,38 @@ public final class UrgValPanel extends JPanel {
                         }
                     }
                 };
+                //*/
 
                 String str = "        ";
                 this.vreleases = new JTextField[releases.getReleaseCount()];
+
+                /* added for test
+                this.urgency = new JComboBox();
+                this.release = new JComboBox();
+                this.exact = new JRadioButton("exact");
+                this.earliest = new JRadioButton("earliest");
+                this.latest = new JRadioButton("latest");
+                this.hard = new JRadioButton("hard");
+                this.soft = new JRadioButton("soft");
+                this.updateUrgencySelections();
+                grid.add(this.urgency);
+                grid.add(this.release);
+                ButtonGroup deadline = new ButtonGroup();
+                ButtonGroup curve = new ButtonGroup();
+                grid.add(this.exact);
+                grid.add(this.earliest);
+                grid.add(this.latest);
+                grid.add(this.hard);
+                grid.add(this.soft);
+                deadline.add(this.exact);
+                deadline.add(this.earliest);
+                deadline.add(this.latest);
+                curve.add(this.hard);
+                curve.add(this.soft);
+
+                // added for test*/
+
+                // Commented out for testing
                 for (int i = 0; i < this.vreleases.length; i++) {
                     int urg = vus.getUrgency(s, f, releases.getRelease(i));
                     String val = (urg > 0) ? Integer.toString(urg) : "";
@@ -556,7 +585,9 @@ public final class UrgValPanel extends JPanel {
                     this.vreleases[i].addFocusListener(listener);
                     grid.add(ge);
                 }
+                //
 
+                // Commented out for testing
                 {
                     int urg = vus.getUrgency(s, f, null);
                     String val = (urg > 0) ? Integer.toString(urg) : "";
@@ -572,7 +603,6 @@ public final class UrgValPanel extends JPanel {
                     ce.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 10));
                     JButton btn = new JButton("Clear urgency");
                     btn.addActionListener(new ActionListener() {
-
                         @Override
                         public void actionPerformed(ActionEvent ae) {
                             try {
@@ -586,12 +616,14 @@ public final class UrgValPanel extends JPanel {
 
                     c.add(ce);
                 }
+                //
 
                 Container btns = new Container();
                 btns.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
                 c.add(BorderLayout.PAGE_END, btns);
             }
 
+            // Commented out for testing
             private void clearUrgency() {
                 Project project = ProjectManager.getCurrentProject();
                 ValueAndUrgency vus = project.getValueAndUrgency();
@@ -607,7 +639,34 @@ public final class UrgValPanel extends JPanel {
                 vus.setUrgency(this.stakeholder, this.feature, null, 0);
                 this.vpostpone.setText("");
             }
+            //
 
+            /* added for test
+            private void updateUrgencySelections() {
+                try {
+                    Releases releases = ProjectManager.getCurrentProject().getReleases();
+                    Release orelease = ProjectManager.getCurrentProject().getValueAndUrgency().getUrgencyRelease(stakeholder, feature);
+                    int count = releases.getReleaseCount();
+
+                    //this.release.removeActionListener(this.listener);
+                    this.release.removeAllItems();
+                    this.release.addItem("None");
+                    this.release.setSelectedIndex(0);
+
+                    for (int i = 0; i < count; i++) {
+                        Release r = releases.getRelease(i);
+                        this.release.addItem(r.getName());
+                        if (orelease == r) {
+                            this.release.setSelectedIndex(i + 1);
+                        }
+                    }
+
+                    //this.release.addActionListener(this.listener);
+                } catch (Exception ex) {
+                    Messenger.showError(ex, null);
+                }
+            }
+            // added for test */
         }
 
         private final class ChangePanel extends JPanel {
@@ -628,7 +687,6 @@ public final class UrgValPanel extends JPanel {
                 this.add(BorderLayout.CENTER, btns);
 
                 ActionListener listener = new ActionListener() {
-
                     @Override
                     public void actionPerformed(ActionEvent ae) {
                         try {
@@ -745,7 +803,6 @@ public final class UrgValPanel extends JPanel {
                         }
                     }
                     this.feature.addActionListener(new ActionListener() {
-
                         @Override
                         public void actionPerformed(ActionEvent ae) {
                             CPVContent.this.changeFeature();
@@ -760,7 +817,6 @@ public final class UrgValPanel extends JPanel {
                     int val = this.dependency.getChange(Value.class).getValue();
                     this.value = new JSpinner(new SpinnerNumberModel(val, 0, 9, 1));
                     this.value.addChangeListener(new ChangeListener() {
-
                         @Override
                         public void stateChanged(ChangeEvent ce) {
                             try {
@@ -811,11 +867,10 @@ public final class UrgValPanel extends JPanel {
                 @Override
                 public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
                 }
-
             }
 
             private class CPUContent extends JPanel implements ContentPanelListener {
-
+                // Commented out for testing
                 private ModifyingInterdependency dependency;
                 private final JComboBox feature;
                 private final JTextField[] vreleases;
@@ -865,7 +920,6 @@ public final class UrgValPanel extends JPanel {
                         }
                     }
                     this.feature.addActionListener(new ActionListener() {
-
                         @Override
                         public void actionPerformed(ActionEvent ae) {
                             CPUContent.this.changeFeature();
@@ -879,7 +933,6 @@ public final class UrgValPanel extends JPanel {
                     Releases releases = project.getReleases();
                     Urgency urgs = this.dependency.getChange(Urgency.class);
                     FocusListener listener = new FocusListener() {
-
                         @Override
                         public void focusGained(FocusEvent fe) {
                         }
@@ -906,12 +959,19 @@ public final class UrgValPanel extends JPanel {
                                 try {
                                     String txt = tf.getText();
                                     int val = (txt.length() > 0) ? Integer.parseInt(txt) : 0;
-                                    urgs.setUrgency(rel, val);
+                                    urgs.setUrgency(rel, val); // Commented out for testing
+                                    /* added for test
+                                    urgs.setUrgency(val);
+                                    urgs.setRelease(rel);
+                                    // added for test */
                                 } catch (Exception ex2) {
                                     Messenger.showError(ex2, null);
                                 }
 
-                                int val = urgs.getUrgency(rel);
+                                int val = urgs.getUrgency(rel); // Commented out for testing
+                                /* added for test
+                                int val = urgs.getUrgency();
+                                // added for test */
                                 tf.setText((val > 0) ? Integer.toString(val) : "");
                             } catch (Exception ex) {
                                 Messenger.showError(ex, null);
@@ -945,8 +1005,10 @@ public final class UrgValPanel extends JPanel {
                         c.add(c2);
                     }
                 }
+                //
 
                 private void changeFeature() {
+                    // Commented out for testing
                     try {
                         Project project = ProjectManager.getCurrentProject();
                         Dependencies deps = project.getDependencies();
@@ -965,6 +1027,7 @@ public final class UrgValPanel extends JPanel {
                                 try {
                                     int val = Integer.parseInt(txt);
                                     urg.setUrgency(rels.getRelease(i), val);
+                                    
                                 } catch (Exception ex) {
                                     this.vreleases[i].setText("");
                                 }
@@ -982,11 +1045,12 @@ public final class UrgValPanel extends JPanel {
                     } catch (Exception ex) {
                         Messenger.showError(ex, null);
                     }
+                    //
                 }
 
                 @Override
                 public void contentPanelClosed(ContentPanel source) {
-                    ProjectManager.getCurrentProject().getDependencies().removeInterdependency(this.dependency);
+                    ProjectManager.getCurrentProject().getDependencies().removeInterdependency(this.dependency); // Commented out for testing
                     ChangePanel.this.closeChangePanel(ChangePanel.this.churg, source);
                 }
 
@@ -997,11 +1061,7 @@ public final class UrgValPanel extends JPanel {
                 @Override
                 public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
                 }
-
             }
-
         }
-
     }
-
 }
