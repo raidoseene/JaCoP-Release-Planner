@@ -146,7 +146,7 @@ public final class SettingsPanel extends JPanel {
                 try {
                     if (codeOutput.isSelected()) {
                         settings.setCodeOutput(true);
-                        resourceShifting.setVisible(false);
+                        resourceShifting.setVisible(true);
                     } else {
                         settings.setCodeOutput(false);
                         resourceShifting.setVisible(false);
