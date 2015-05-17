@@ -146,10 +146,10 @@ public final class SettingsPanel extends JPanel {
                 try {
                     if (codeOutput.isSelected()) {
                         settings.setCodeOutput(true);
-                        resourceShifting.setVisible(true);
+                        resourceShifting.setEnabled(true);
                     } else {
                         settings.setCodeOutput(false);
-                        resourceShifting.setVisible(false);
+                        resourceShifting.setEnabled(false);
                     }
 
                 } catch (Throwable t) {
@@ -163,7 +163,7 @@ public final class SettingsPanel extends JPanel {
             resourceShifting.setSelected(true);
         }
         if (!settings.getCodeOutput()) {
-            resourceShifting.setVisible(false);
+            resourceShifting.setEnabled(false);
         }
         resourceShifting.addActionListener(new ActionListener() {
             @Override
