@@ -477,13 +477,9 @@ public final class UrgValPanel extends JPanel {
 
             private final Feature feature;
             private final Stakeholder stakeholder;
-            private final JTextField[] vreleases;
-            private final JTextField vpostpone; //Commented out for testing
-            // added for test
-            //private final JComboBox urgency, release; // added for test
-            //private final JRadioButton exact, earliest, latest, hard, soft; // added for test
+            private final JComboBox urgency, release;
+            private final JRadioButton exact, earliest, latest, hard, soft;
             //private final ActionListener listener;
-            // added for test
 
             private UrgencyPanel(Stakeholder s, Feature f) {
                 this.setBorder(new EmptyBorder(10, 0, 0, 0));
@@ -495,15 +491,14 @@ public final class UrgValPanel extends JPanel {
                 c.setLayout(new BorderLayout(10, 10));
                 this.add(BorderLayout.CENTER, c);
 
-                Container grid = new Container();
-                grid.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
-                c.add(BorderLayout.LINE_START, grid);
+                Container content = new Container();
+                content.setLayout(new GridLayout(2, 1, 10, 10));
+                c.add(BorderLayout.LINE_START, content);
 
                 Project project = ProjectManager.getCurrentProject();
                 ValueAndUrgency vus = project.getValueAndUrgency();
                 Releases releases = project.getReleases();
-                // Commented out for testing
-                FocusListener listener = new FocusListener() {
+                /* FocusListener listener = new FocusListener() {
                     @Override
                     public void focusGained(FocusEvent fe) {
                     }
@@ -541,40 +536,59 @@ public final class UrgValPanel extends JPanel {
                             Messenger.showError(ex, null);
                         }
                     }
-                };
-                //*/
+                };*/
+                
+                Container controls = new Container();
+                controls.setLayout(new BorderLayout(32, 32));
+                content.add(controls);
+                
+                Container combos = new Container();
+                combos.setLayout(new BorderLayout());
+                controls.add(BorderLayout.LINE_START, combos);
+                Container c2;
 
-                String str = "        ";
-                this.vreleases = new JTextField[releases.getReleaseCount()];
-
-                /* added for test
-                this.urgency = new JComboBox();
-                this.release = new JComboBox();
-                this.exact = new JRadioButton("exact");
-                this.earliest = new JRadioButton("earliest");
-                this.latest = new JRadioButton("latest");
-                this.hard = new JRadioButton("hard");
-                this.soft = new JRadioButton("soft");
-                this.updateUrgencySelections();
-                grid.add(this.urgency);
-                grid.add(this.release);
+                c2 = new Container();
+                c2.setLayout(new GridLayout(1, 2));
+                c2.add(new JLabel("Urgency"));
+                c2.add(this.urgency = new JComboBox());
+                combos.add(BorderLayout.PAGE_START, c2);
+                
+                c2 = new Container();
+                c2.setLayout(new GridLayout(1, 2));
+                c2.add(new JLabel("Release"));
+                c2.add(this.release = new JComboBox());
+                combos.add(BorderLayout.PAGE_END, c2);
+                
+                Container grid = new Container();
+                grid.setLayout(new GridLayout(3, 2, 32, 4));
+                controls.add(BorderLayout.CENTER, grid);
                 ButtonGroup deadline = new ButtonGroup();
                 ButtonGroup curve = new ButtonGroup();
-                grid.add(this.exact);
-                grid.add(this.earliest);
-                grid.add(this.latest);
-                grid.add(this.hard);
-                grid.add(this.soft);
+                
+                this.exact = new JRadioButton("exact");
                 deadline.add(this.exact);
+                grid.add(this.exact);
+                
+                grid.add(new JLabel());
+                
+                this.earliest = new JRadioButton("earliest");
                 deadline.add(this.earliest);
-                deadline.add(this.latest);
+                grid.add(this.earliest);
+                
+                this.hard = new JRadioButton("hard");
                 curve.add(this.hard);
+                grid.add(this.hard);
+                
+                this.latest = new JRadioButton("latest");
+                deadline.add(this.latest);
+                grid.add(this.latest);
+                
+                this.soft = new JRadioButton("soft");
                 curve.add(this.soft);
-
-                // added for test*/
-
-                // Commented out for testing
-                for (int i = 0; i < this.vreleases.length; i++) {
+                grid.add(this.soft);
+                
+                this.updateUrgencySelections();
+                /*for (int i = 0; i < this.vreleases.length; i++) {
                     int urg = vus.getUrgency(s, f, releases.getRelease(i));
                     String val = (urg > 0) ? Integer.toString(urg) : "";
 
@@ -585,9 +599,7 @@ public final class UrgValPanel extends JPanel {
                     this.vreleases[i].addFocusListener(listener);
                     grid.add(ge);
                 }
-                //
-
-                // Commented out for testing
+                
                 {
                     int urg = vus.getUrgency(s, f, null);
                     String val = (urg > 0) ? Integer.toString(urg) : "";
@@ -615,16 +627,14 @@ public final class UrgValPanel extends JPanel {
                     ce.add(BorderLayout.PAGE_START, btn);
 
                     c.add(ce);
-                }
-                //
+                }*/
 
                 Container btns = new Container();
                 btns.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
                 c.add(BorderLayout.PAGE_END, btns);
             }
 
-            // Commented out for testing
-            private void clearUrgency() {
+            /* private void clearUrgency() {
                 Project project = ProjectManager.getCurrentProject();
                 ValueAndUrgency vus = project.getValueAndUrgency();
                 Releases releases = project.getReleases();
@@ -638,14 +648,12 @@ public final class UrgValPanel extends JPanel {
 
                 vus.setUrgency(this.stakeholder, this.feature, null, 0);
                 this.vpostpone.setText("");
-            }
-            //
+            }*/
 
-            /* added for test
             private void updateUrgencySelections() {
                 try {
                     Releases releases = ProjectManager.getCurrentProject().getReleases();
-                    Release orelease = ProjectManager.getCurrentProject().getValueAndUrgency().getUrgencyRelease(stakeholder, feature);
+                    Release orelease = null;//ProjectManager.getCurrentProject().getValueAndUrgency().getUrgencyRelease(stakeholder, feature);
                     int count = releases.getReleaseCount();
 
                     //this.release.removeActionListener(this.listener);
@@ -666,7 +674,7 @@ public final class UrgValPanel extends JPanel {
                     Messenger.showError(ex, null);
                 }
             }
-            // added for test */
+            
         }
 
         private final class ChangePanel extends JPanel {
