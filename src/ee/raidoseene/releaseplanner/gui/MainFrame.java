@@ -6,13 +6,13 @@ import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.backend.Settings;
 import ee.raidoseene.releaseplanner.backend.SettingsManager;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
-import ee.raidoseene.releaseplanner.dataoutput.SolverCodeManager;
 import ee.raidoseene.releaseplanner.solverutils.Solver;
 import java.awt.Dimension;
 import java.awt.FileDialog;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -20,6 +20,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
@@ -52,9 +53,12 @@ public final class MainFrame extends JFrame {
 
         // File menu
         menu = new JMenu("File");
+        menu.setMnemonic(KeyEvent.VK_F);
         menubar.add(menu);
 
-        item = new JMenuItem("New Empty Project");
+        item = new JMenuItem("New Empty Project", KeyEvent.VK_E);
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK));
+        item.setDisplayedMnemonicIndex(item.getText().indexOf('E'));
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -67,7 +71,9 @@ public final class MainFrame extends JFrame {
         });
         menu.add(item);
 
-        item = new JMenuItem("New Default Project");
+        item = new JMenuItem("New Default Project", KeyEvent.VK_D);
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
+        item.setDisplayedMnemonicIndex(item.getText().indexOf('D'));
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -80,7 +86,8 @@ public final class MainFrame extends JFrame {
         });
         menu.add(item);
 
-        item = new JMenuItem("Open Project...");
+        item = new JMenuItem("Open Project...", KeyEvent.VK_O);
+        item.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -95,7 +102,8 @@ public final class MainFrame extends JFrame {
 
         menu.addSeparator();
 
-        this.save = new JMenuItem("Save Project");
+        this.save = new JMenuItem("Save Project", KeyEvent.VK_S);
+        this.save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
         this.save.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -108,7 +116,9 @@ public final class MainFrame extends JFrame {
         });
         menu.add(this.save);
 
-        this.saveas = new JMenuItem("Save Project As...");
+        this.saveas = new JMenuItem("Save Project As...", KeyEvent.VK_A);
+        this.saveas.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK));
+        this.saveas.setDisplayedMnemonicIndex(this.saveas.getText().indexOf('A'));
         this.saveas.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -123,7 +133,8 @@ public final class MainFrame extends JFrame {
 
         menu.addSeparator();
 
-        this.close = new JMenuItem("Close Project");
+        this.close = new JMenuItem("Close Project", KeyEvent.VK_C);
+        this.close.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, ActionEvent.CTRL_MASK));
         this.close.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
