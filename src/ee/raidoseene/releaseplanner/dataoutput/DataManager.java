@@ -15,6 +15,8 @@ import ee.raidoseene.releaseplanner.datamodel.GroupDependency;
 import ee.raidoseene.releaseplanner.datamodel.Interdependency;
 import ee.raidoseene.releaseplanner.datamodel.ModifyingInterdependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
+import ee.raidoseene.releaseplanner.datamodel.Release;
+import ee.raidoseene.releaseplanner.datamodel.Urgency;
 import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
 import java.io.File;
 import java.io.PrintWriter;
@@ -72,7 +74,7 @@ public final class DataManager {
                 dm.printResources();
                 dm.printFeatures(modDep);
                 dm.printGroups(true);
-                dm.printWAS();
+                dm.printWAS(modDep);
             } else {
                 dm.printFailHeader();
                 dm.printProjectParameters(modDep.getFeatures().getFeatureCount(), false);
@@ -102,7 +104,7 @@ public final class DataManager {
         printWriter.println("F = " + (project.getFeatures().getFeatureCount() + modDepFeatureCount) + ";");
         printWriter.println("Rel = " + project.getReleases().getReleaseCount() + ";");
         printWriter.println("Res = " + project.getResources().getResourceCount() + ";");
-        if(!codeOutput) {
+        if (!codeOutput) {
             printWriter.println("S = " + project.getStakeholders().getStakeholderCount() + ";");
         }
         printWriter.println("% =========================\n");
@@ -396,6 +398,7 @@ public final class DataManager {
         }
         printWriter.println("|];");
 
+        /*
         printWriter.println("urgency = array3d(1..S, 1..F, 1.." + (project.getReleases().getReleaseCount() + 1) + ", [");
         for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
             ValueAndUrgency valueAndUrgency = project.getValueAndUrgency();
@@ -428,30 +431,298 @@ public final class DataManager {
                 }
             }
         }
+        */
+        
+        // New Urgency and value
+        printWriter.println("urgency = array3d(1..S, 1..F, 1.." + (project.getReleases().getReleaseCount() + 1) + ", [");
+        ValueAndUrgency valueAndUrgency = project.getValueAndUrgency();
+        for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
+            printWriter.println("% stakeholder " + (s + 1));
+            for (int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
+                int urgency = valueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
+                        project.getFeatures().getFeature(f));
+                if (urgency == 0) {
+                    for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                        printWriter.print("0, ");
+                    }
+                } else {
+                    Release release = valueAndUrgency.getUrgencyRelease(project.getStakeholders().getStakeholder(s),
+                            project.getFeatures().getFeature(f));
+                    int releaseNr = project.getReleases().getReleaseIndex(release);
+                    int deadlineCurve = valueAndUrgency.getDeadlineCurve(project.getStakeholders().getStakeholder(s),
+                            project.getFeatures().getFeature(f));
+                    if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.EARLIEST)) {
+                        if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
+                            for (int r = 0; r < releaseNr - 2; r++) {
+                                printWriter.print("0, ");
+                            }
+                            for (int r = releaseNr - 1; r < project.getReleases().getReleaseCount(); r++) {
+                                printWriter.print(urgency + ", ");
+                            }
+                        } else {
+                            int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
+                            int tempUrgency = urgency;
+                            if ((project.getReleases().getReleaseCount() + 1) - releaseNr >= ((urgency > 3)
+                                    ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1))) {
+                                for (int i = (releaseNr - 1) + (int) Math.round(urgency / 2.5f); i >= releaseNr - 1; i--) {
+                                    urgencies[i] = tempUrgency;
+                                    tempUrgency = tempUrgency / 2;
+                                }
+                                for (int i = 0; i < releaseNr - 1; i++) {
+                                    urgencies[i] = 0;
+                                }
+                                if (releaseNr + ((urgency > 3)
+                                        ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)) < project.getReleases().getReleaseCount() + 1) {
+                                    for (int i = (releaseNr) + ((urgency > 3)
+                                            ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)); i <= project.getReleases().getReleaseCount(); i++) {
+                                        urgencies[i] = urgency;
+                                    }
+                                }
+                                for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
+                                    printWriter.print(urgencies[r] + ", ");
+                                }
+                            } else {
+                                for (int i = project.getReleases().getReleaseCount(); i >= releaseNr - 1; i--) {
+                                    urgencies[i] = tempUrgency;
+                                    tempUrgency = tempUrgency / 2;
+                                }
+                                for (int i = 0; i < releaseNr - 1; i++) {
+                                    urgencies[i] = 0;
+                                }
+                            }
+                        }
+                    } else if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.LATEST)) {
+                        if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
+                            for (int r = 0; r < releaseNr - 1; r++) {
+                                printWriter.print(urgency + ", ");
+                            }
+                            for (int r = releaseNr; r < project.getReleases().getReleaseCount(); r++) {
+                                printWriter.print("0, ");
+                            }
+                        } else {
+                            int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
+                            int tempUrgency = urgency;
+                            if (releaseNr - ((urgency > 3)
+                                    ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)) > 0) {
+                                for (int i = (releaseNr - 1) - ((urgency > 3)
+                                        ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)); i < releaseNr; i++) {
+                                    urgencies[i] = tempUrgency;
+                                    tempUrgency = tempUrgency / 2;
+                                }
+                                for (int i = releaseNr; i < project.getReleases().getReleaseCount(); i++) {
+                                    urgencies[i] = 0;
+                                }
+                                if (releaseNr - (int) ((urgency > 3)
+                                        ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)) > 0) {
+                                    for (int i = 0; i < (releaseNr - 1) - ((urgency > 3)
+                                            ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)); i++) {
+                                        urgencies[i] = urgency;
+                                    }
+                                }
+                                for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
+                                    printWriter.print(urgencies[r] + ", ");
+                                }
+                            } else {
+                                for (int i = project.getReleases().getReleaseCount(); i >= releaseNr - 1; i--) {
+                                    urgencies[i] = tempUrgency;
+                                    tempUrgency = tempUrgency / 2;
+                                }
+                                for (int i = 0; i < releaseNr - 1; i++) {
+                                    urgencies[i] = 0;
+                                }
+                            }
+                        }
+                    } else {
+                        if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
+                            for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                                if (r == urgency - 1) {
+                                    printWriter.print(urgency + ", ");
+                                } else {
+                                    printWriter.print("0, ");
+                                }
+                            }
+                        } else {
+                            int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
+                            urgencies[releaseNr - 1] = urgency;
+                            int tempUrgency = urgency;
+                            for (int r = releaseNr; r <= project.getReleases().getReleaseCount(); r++) {
+                                tempUrgency = tempUrgency / 2;
+                                urgencies[r] = tempUrgency;
+                            }
+                            tempUrgency = urgency;
+                            for (int r = 0; r < releaseNr - 1; r++) {
+                                tempUrgency = tempUrgency / 2;
+                                urgencies[r] = tempUrgency;
+                            }
+                            for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
+                                printWriter.print(urgencies[r] + ", ");
+                            }
+                        }
+                    }
+                }
+                printWriter.print(valueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
+                        project.getFeatures().getFeature(f)) + ", ");
+                printWriter.print("\n");
+            }
+
+            if (ModDep.getValueAndUrgency().getValueAndUrgencyCount() > 0) {
+                ValueAndUrgency newValueAndUrgency = ModDep.getValueAndUrgency();
+                for (int f = 0; f < ModDep.getFeatures().getFeatureCount(); f++) {
+                    int newUrgency = newValueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
+                            ModDep.getFeatures().getFeature(f));
+                    if (newUrgency == 0) {
+                        for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                            printWriter.print("0, ");
+                        }
+                    } else {
+                        Release release = newValueAndUrgency.getUrgencyRelease(project.getStakeholders().getStakeholder(s),
+                                ModDep.getFeatures().getFeature(f));
+                        int releaseNr = project.getReleases().getReleaseCount();
+                        int deadlineCurve = newValueAndUrgency.getDeadlineCurve(project.getStakeholders().getStakeholder(s),
+                                ModDep.getFeatures().getFeature(f));
+                        if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.EARLIEST)) {
+                            if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
+                                for (int r = 0; r < releaseNr - 2; r++) {
+                                    printWriter.print("0, ");
+                                }
+                                for (int r = releaseNr - 1; r < project.getReleases().getReleaseCount(); r++) {
+                                    printWriter.print(newUrgency + ", ");
+                                }
+                            } else {
+                                int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
+                                int tempUrgency = newUrgency;
+                                if ((project.getReleases().getReleaseCount() + 1) - releaseNr >= ((newUrgency > 3)
+                                        ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1))) {
+                                    for (int i = (releaseNr - 1) + (int) Math.round(newUrgency / 2.5f); i >= releaseNr - 1; i--) {
+                                        urgencies[i] = tempUrgency;
+                                        tempUrgency = tempUrgency / 2;
+                                    }
+                                    for (int i = 0; i < releaseNr - 1; i++) {
+                                        urgencies[i] = 0;
+                                    }
+                                    if (releaseNr + ((newUrgency > 3)
+                                            ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)) < project.getReleases().getReleaseCount() + 1) {
+                                        for (int i = (releaseNr) + ((newUrgency > 3)
+                                                ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)); i <= project.getReleases().getReleaseCount(); i++) {
+                                            urgencies[i] = newUrgency;
+                                        }
+                                    }
+                                    for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
+                                        printWriter.print(urgencies[r] + ", ");
+                                    }
+                                } else {
+                                    for (int i = project.getReleases().getReleaseCount(); i >= releaseNr - 1; i--) {
+                                        urgencies[i] = tempUrgency;
+                                        tempUrgency = tempUrgency / 2;
+                                    }
+                                    for (int i = 0; i < releaseNr - 1; i++) {
+                                        urgencies[i] = 0;
+                                    }
+                                }
+                            }
+                        } else if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.LATEST)) {
+                            if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
+                                for (int r = 0; r < releaseNr - 1; r++) {
+                                    printWriter.print(newUrgency + ", ");
+                                }
+                                for (int r = releaseNr; r < project.getReleases().getReleaseCount(); r++) {
+                                    printWriter.print("0, ");
+                                }
+                            } else {
+                                int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
+                                int tempUrgency = newUrgency;
+                                if (releaseNr - ((newUrgency > 3)
+                                        ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)) > 0) {
+                                    for (int i = (releaseNr - 1) - ((newUrgency > 3)
+                                            ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)); i < releaseNr; i++) {
+                                        urgencies[i] = tempUrgency;
+                                        tempUrgency = tempUrgency / 2;
+                                    }
+                                    for (int i = releaseNr; i < project.getReleases().getReleaseCount(); i++) {
+                                        urgencies[i] = 0;
+                                    }
+                                    if (releaseNr - (int) ((newUrgency > 3)
+                                            ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)) > 0) {
+                                        for (int i = 0; i < (releaseNr - 1) - ((newUrgency > 3)
+                                                ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)); i++) {
+                                            urgencies[i] = newUrgency;
+                                        }
+                                    }
+                                    for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
+                                        printWriter.print(urgencies[r] + ", ");
+                                    }
+                                } else {
+                                    for (int i = project.getReleases().getReleaseCount(); i >= releaseNr - 1; i--) {
+                                        urgencies[i] = tempUrgency;
+                                        tempUrgency = tempUrgency / 2;
+                                    }
+                                    for (int i = 0; i < releaseNr - 1; i++) {
+                                        urgencies[i] = 0;
+                                    }
+                                }
+                            }
+                        } else {
+                            if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
+                                for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                                    if (r == newUrgency - 1) {
+                                        printWriter.print(newUrgency + ", ");
+                                    } else {
+                                        printWriter.print("0, ");
+                                    }
+                                }
+                            } else {
+                                int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
+                                urgencies[releaseNr - 1] = newUrgency;
+                                int tempUrgency = newUrgency;
+                                for (int r = releaseNr; r <= project.getReleases().getReleaseCount(); r++) {
+                                    tempUrgency = tempUrgency / 2;
+                                    urgencies[r] = tempUrgency;
+                                }
+                                tempUrgency = newUrgency;
+                                for (int r = 0; r < releaseNr - 1; r++) {
+                                    tempUrgency = tempUrgency / 2;
+                                    urgencies[r] = tempUrgency;
+                                }
+                                for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
+                                    printWriter.print(urgencies[r] + ", ");
+                                }
+                            }
+                        }
+                    }
+                    printWriter.print(valueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
+                            project.getFeatures().getFeature(f)) + ", ");
+                    printWriter.print("\n");
+                }
+            }
+        }
+        // End of new urgendy and value
+        
         printWriter.println("]);");
     }
 
-    private void printWAS() { // Missing change in extra features WAS
+    private void printWAS(Project modDep) { // Missing modDep WAS, ADD THEM!!! Check now it may be there
+        int[][] urgencies = UrgencyManager.calculateUrgencies(project, modDep);
+        int featureCount = project.getStakeholders().getStakeholderCount() * (project.getFeatures().getFeatureCount()
+                + modDep.getFeatures().getFeatureCount());
         printWriter.print("WAS = [");
-        for (int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
+        for (int f = 0; f < /*project.getFeatures().getFeatureCount()*/featureCount; f++) {
             printWriter.print("| 0, ");
             for (int rel = 0; rel < project.getReleases().getReleaseCount(); rel++) {
-                /*printWriter.print(project.getReleases().getRelease(rel).getImportance() *
-                 project.getStakeholders().getStakeholder(0).getImportance() *
-                 project.getValueAndUrgency().getValue(project.getStakeholders().getStakeholder(0),
-                 project.getFeatures().getFeature(f)) * project.getValueAndUrgency().getUrgency(
-                 project.getStakeholders().getStakeholder(0),
-                 project.getFeatures().getFeature(f), project.getReleases().getRelease(rel)) + ", ");*/
                 int temp = 0;
                 for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
                     temp += project.getStakeholders().getStakeholder(s).getImportance()
-                            * project.getValueAndUrgency().getValue(
+                            * (f < project.getFeatures().getFeatureCount() ?
+                            project.getValueAndUrgency().getValue(
                             project.getStakeholders().getStakeholder(s),
-                            project.getFeatures().getFeature(f))
-                            * project.getValueAndUrgency().getUrgency(
+                            project.getFeatures().getFeature(f)) :
+                            modDep.getValueAndUrgency().getValue(
+                            project.getStakeholders().getStakeholder(s),
+                            project.getFeatures().getFeature(f - modDep.getFeatures().getFeatureCount())) )
+                            * urgencies[(s * featureCount) + f][rel];
+                            /** project.getValueAndUrgency().getUrgency(
                             project.getStakeholders().getStakeholder(s),
                             project.getFeatures().getFeature(f),
-                            project.getReleases().getRelease(rel));
+                            project.getReleases().getRelease(rel))*/;
                 }
                 printWriter.print((project.getReleases().getRelease(rel).getImportance() * temp) + ", ");
                 if (rel == project.getReleases().getReleaseCount() - 1) {
@@ -460,268 +731,7 @@ public final class DataManager {
             }
         }
 
-        /*
-         printWriter.println("urgency = array3d(1..S, 1..F, 1.." + (project.getReleases().getReleaseCount() + 1) + ", [");
-         ValueAndUrgency valueAndUrgency = project.getValueAndUrgency();
-         for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
-         printWriter.println("% stakeholder " + (s + 1));
-         for (int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
-         int urgency = valueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
-         project.getFeatures().getFeature(f));
-         if (urgency == 0) {
-         for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
-         printWriter.print("0, ");
-         }
-         } else {
-         int release = valueAndUrgency.getUrgencyRelease(project.getStakeholders().getStakeholder(s),
-         project.getFeatures().getFeature(f));
-         int deadlineCurve = valueAndUrgency.getDeadlineCurve(project.getStakeholders().getStakeholder(s),
-         project.getFeatures().getFeature(f));
-         if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.EARLIEST)) {
-         if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
-         for (int r = 0; r < release - 2; r++) {
-         printWriter.print("0, ");
-         }
-         for (int r = release - 1; r < project.getReleases().getReleaseCount(); r++) {
-         printWriter.print(urgency + ", ");
-         }
-         } else {
-         int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
-         int tempUrgency = urgency;
-         if ((project.getReleases().getReleaseCount() + 1) - release >= ((urgency > 3)
-         ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1))) {
-         for (int i = (release - 1) + (int) Math.round(urgency / 2.5f); i >= release - 1; i--) {
-         urgencies[i] = tempUrgency;
-         tempUrgency = tempUrgency / 2;
-         }
-         for (int i = 0; i < release - 1; i++) {
-         urgencies[i] = 0;
-         }
-         if (release + ((urgency > 3)
-         ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)) < project.getReleases().getReleaseCount() + 1) {
-         for (int i = (release) + ((urgency > 3)
-         ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)); i <= project.getReleases().getReleaseCount(); i++) {
-         urgencies[i] = urgency;
-         }
-         }
-         for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
-         printWriter.print(urgencies[r] + ", ");
-         }
-         } else {
-         for (int i = project.getReleases().getReleaseCount(); i >= release - 1; i--) {
-         urgencies[i] = tempUrgency;
-         tempUrgency = tempUrgency / 2;
-         }
-         for (int i = 0; i < release - 1; i++) {
-         urgencies[i] = 0;
-         }
-         }
-         }
-         } else if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.LATEST)) {
-         if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
-         for (int r = 0; r < release - 1; r++) {
-         printWriter.print(urgency + ", ");
-         }
-         for (int r = release; r < project.getReleases().getReleaseCount(); r++) {
-         printWriter.print("0, ");
-         }
-         } else {
-         int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
-         int tempUrgency = urgency;
-         if (release - ((urgency > 3)
-         ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)) > 0) {
-         for (int i = (release - 1) - ((urgency > 3)
-         ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)); i < release; i++) {
-         urgencies[i] = tempUrgency;
-         tempUrgency = tempUrgency / 2;
-         }
-         for (int i = release; i < project.getReleases().getReleaseCount(); i++) {
-         urgencies[i] = 0;
-         }
-         if (release - (int) ((urgency > 3)
-         ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)) > 0) {
-         for (int i = 0; i < (release - 1) - ((urgency > 3)
-         ? (int) (Math.round(urgency / 2.5f)) : ((urgency == 3) ? 2 : 1)); i++) {
-         urgencies[i] = urgency;
-         }
-         }
-         for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
-         printWriter.print(urgencies[r] + ", ");
-         }
-         } else {
-         for (int i = project.getReleases().getReleaseCount(); i >= release - 1; i--) {
-         urgencies[i] = tempUrgency;
-         tempUrgency = tempUrgency / 2;
-         }
-         for (int i = 0; i < release - 1; i++) {
-         urgencies[i] = 0;
-         }
-         }
-         }
-         } else {
-         if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
-         for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
-         if (r == urgency - 1) {
-         printWriter.print(urgency + ", ");
-         } else {
-         printWriter.print("0, ");
-         }
-         }
-         } else {
-         int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
-         urgencies[release - 1] = urgency;
-         int tempUrgency = urgency;
-         for (int r = release; r <= project.getReleases().getReleaseCount(); r++) {
-         tempUrgency = tempUrgency / 2;
-         urgencies[r] = tempUrgency;
-         }
-         tempUrgency = urgency;
-         for (int r = 0; r < release - 1; r++) {
-         tempUrgency = tempUrgency / 2;
-         urgencies[r] = tempUrgency;
-         }
-         for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
-         printWriter.print(urgencies[r] + ", ");
-         }
-         }
-         }
-         }
-         printWriter.print(valueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
-         project.getFeatures().getFeature(f),
-         null) + ", ");
-         printWriter.print("\n");
-         }
-            
-         if (ModDep.getValueAndUrgency().getValueAndUrgencyCount() > 0) {
-         ValueAndUrgency newValueAndUrgency = ModDep.getValueAndUrgency();
-         for (int f = 0; f < ModDep.getFeatures().getFeatureCount(); f++) {
-         int newUrgency = newValueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
-         project.getFeatures().getFeature(f));
-         if (newUrgency == 0) {
-         for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
-         printWriter.print("0, ");
-         }
-         } else {
-         int release = valueAndUrgency.getUrgencyRelease(project.getStakeholders().getStakeholder(s),
-         project.getFeatures().getFeature(f));
-         int deadlineCurve = valueAndUrgency.getDeadlineCurve(project.getStakeholders().getStakeholder(s),
-         project.getFeatures().getFeature(f));
-         if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.EARLIEST)) {
-         if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
-         for (int r = 0; r < release - 2; r++) {
-         printWriter.print("0, ");
-         }
-         for (int r = release - 1; r < project.getReleases().getReleaseCount(); r++) {
-         printWriter.print(newUrgency + ", ");
-         }
-         } else {
-         int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
-         int tempUrgency = newUrgency;
-         if ((project.getReleases().getReleaseCount() + 1) - release >= ((newUrgency > 3)
-         ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1))) {
-         for (int i = (release - 1) + (int) Math.round(newUrgency / 2.5f); i >= release - 1; i--) {
-         urgencies[i] = tempUrgency;
-         tempUrgency = tempUrgency / 2;
-         }
-         for (int i = 0; i < release - 1; i++) {
-         urgencies[i] = 0;
-         }
-         if (release + ((newUrgency > 3)
-         ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)) < project.getReleases().getReleaseCount() + 1) {
-         for (int i = (release) + ((newUrgency > 3)
-         ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)); i <= project.getReleases().getReleaseCount(); i++) {
-         urgencies[i] = newUrgency;
-         }
-         }
-         for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
-         printWriter.print(urgencies[r] + ", ");
-         }
-         } else {
-         for (int i = project.getReleases().getReleaseCount(); i >= release - 1; i--) {
-         urgencies[i] = tempUrgency;
-         tempUrgency = tempUrgency / 2;
-         }
-         for (int i = 0; i < release - 1; i++) {
-         urgencies[i] = 0;
-         }
-         }
-         }
-         } else if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.LATEST)) {
-         if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
-         for (int r = 0; r < release - 1; r++) {
-         printWriter.print(newUrgency + ", ");
-         }
-         for (int r = release; r < project.getReleases().getReleaseCount(); r++) {
-         printWriter.print("0, ");
-         }
-         } else {
-         int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
-         int tempUrgency = newUrgency;
-         if (release - ((newUrgency > 3)
-         ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)) > 0) {
-         for (int i = (release - 1) - ((newUrgency > 3)
-         ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)); i < release; i++) {
-         urgencies[i] = tempUrgency;
-         tempUrgency = tempUrgency / 2;
-         }
-         for (int i = release; i < project.getReleases().getReleaseCount(); i++) {
-         urgencies[i] = 0;
-         }
-         if (release - (int) ((newUrgency > 3)
-         ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)) > 0) {
-         for (int i = 0; i < (release - 1) - ((newUrgency > 3)
-         ? (int) (Math.round(newUrgency / 2.5f)) : ((newUrgency == 3) ? 2 : 1)); i++) {
-         urgencies[i] = newUrgency;
-         }
-         }
-         for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
-         printWriter.print(urgencies[r] + ", ");
-         }
-         } else {
-         for (int i = project.getReleases().getReleaseCount(); i >= release - 1; i--) {
-         urgencies[i] = tempUrgency;
-         tempUrgency = tempUrgency / 2;
-         }
-         for (int i = 0; i < release - 1; i++) {
-         urgencies[i] = 0;
-         }
-         }
-         }
-         } else {
-         if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
-         for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
-         if (r == newUrgency - 1) {
-         printWriter.print(newUrgency + ", ");
-         } else {
-         printWriter.print("0, ");
-         }
-         }
-         } else {
-         int[] urgencies = new int[project.getReleases().getReleaseCount() + 1];
-         urgencies[release - 1] = newUrgency;
-         int tempUrgency = newUrgency;
-         for (int r = release; r <= project.getReleases().getReleaseCount(); r++) {
-         tempUrgency = tempUrgency / 2;
-         urgencies[r] = tempUrgency;
-         }
-         tempUrgency = newUrgency;
-         for (int r = 0; r < release - 1; r++) {
-         tempUrgency = tempUrgency / 2;
-         urgencies[r] = tempUrgency;
-         }
-         for (int r = 0; r <= project.getReleases().getReleaseCount(); r++) {
-         printWriter.print(urgencies[r] + ", ");
-         }
-         }
-         }
-         }
-         printWriter.print(valueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
-         project.getFeatures().getFeature(f),
-         null) + ", ");
-         printWriter.print("\n");
-         }
-         }
-         }*/
+        
 
         printWriter.println("|];");
     }
@@ -745,12 +755,12 @@ public final class DataManager {
                     int value = project.getValueAndUrgency().getValue(project.getStakeholders().getStakeholder(s), f);
                     if (value > 0) {
                         ModDep.getValueAndUrgency().setValue(project.getStakeholders().getStakeholder(s), f, value);
-                        for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                        //for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
                             ModDep.getValueAndUrgency().setUrgency(project.getStakeholders().getStakeholder(s), f,
-                                    project.getReleases().getRelease(r),
-                                    project.getValueAndUrgency().getUrgency(project.getStakeholders().getStakeholder(s), f,
-                                    project.getReleases().getRelease(r)));
-                        }
+                                    //project.getReleases().getRelease(r),
+                                    project.getValueAndUrgency().getUrgency(project.getStakeholders().getStakeholder(s), f/*,
+                                    project.getReleases().getRelease(r)*/));
+                        //}
                     }
                 }
 
@@ -778,12 +788,12 @@ public final class DataManager {
                     if (values.getValue(project.getStakeholders().getStakeholder(s), f) > 0) {
                         ModDep.getValueAndUrgency().setValue(project.getStakeholders().getStakeholder(s), f,
                                 values.getValue(project.getStakeholders().getStakeholder(s), f));
-                        for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                        //for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
                             ModDep.getValueAndUrgency().setUrgency(project.getStakeholders().getStakeholder(s), f,
-                                    project.getReleases().getRelease(r),
-                                    project.getValueAndUrgency().getUrgency(project.getStakeholders().getStakeholder(s), f,
-                                    project.getReleases().getRelease(r)));
-                        }
+                                    //project.getReleases().getRelease(r),
+                                    project.getValueAndUrgency().getUrgency(project.getStakeholders().getStakeholder(s), f/*,
+                                    project.getReleases().getRelease(r)*/));
+                        //}
                     }
                 }
 
@@ -811,12 +821,12 @@ public final class DataManager {
                     int value = project.getValueAndUrgency().getValue(project.getStakeholders().getStakeholder(s), f);
                     if (value > 0) {
                         ModDep.getValueAndUrgency().setValue(project.getStakeholders().getStakeholder(s), f, value);
-                        for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
+                        //for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
                             ModDep.getValueAndUrgency().setUrgency(project.getStakeholders().getStakeholder(s), f,
-                                    project.getReleases().getRelease(r),
-                                    urgencies.getUrgency(project.getStakeholders().getStakeholder(s), f,
-                                    project.getReleases().getRelease(r)));
-                        }
+                                    //project.getReleases().getRelease(r),
+                                    urgencies.getUrgency(project.getStakeholders().getStakeholder(s), f/*,
+                                    project.getReleases().getRelease(r)*/));
+                        //}
                     }
                 }
 

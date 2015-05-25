@@ -35,6 +35,7 @@ public class Urgency implements Serializable {
         this.urgencies = new HashMap<>();
     }
 
+    /*
     public void setUrgency(Release release, int urgency) {
         if (urgency > 0) {
             this.urgencies.put(release, urgency);
@@ -42,8 +43,8 @@ public class Urgency implements Serializable {
             this.urgencies.remove(release);
         }
     }
+    */
     
-    /*
     public void setUrgency(int urgency) {
         this.urgency = urgency;
     }
@@ -56,8 +57,8 @@ public class Urgency implements Serializable {
     public void setDeadlineCurve(int deadlineCurve) {
         this.deadlineCurve = deadlineCurve;
     }
-    */
-
+    
+    /*
     public int getUrgency(Release release) {
         Integer value = this.urgencies.get(release);
         if (value != null) {
@@ -66,8 +67,8 @@ public class Urgency implements Serializable {
 
         return 0;
     }
+    */
     
-    /*
     public int getUrgency() {
         return this.urgency;
     }
@@ -79,7 +80,7 @@ public class Urgency implements Serializable {
     public int getDeadlineCurve() {
         return this.deadlineCurve;
     }
-    */
+    
 
     boolean removeUrgency(Release release) {
         return (this.urgencies.remove(release) != null);
