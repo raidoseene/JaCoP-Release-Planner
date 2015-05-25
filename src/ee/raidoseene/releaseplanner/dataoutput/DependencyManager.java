@@ -16,6 +16,14 @@ import ee.raidoseene.releaseplanner.datamodel.Project;
  * @author Raido Seene
  */
 public class DependencyManager {
+    public static final int EXIST_MASK = 0xf0;
+    
+    public static final int TRUE = 0x10;
+    public static final int FALSE = 0x00;
+    
+    public static final int BOTH = 0x10;
+    public static final int PRIMARY = 0x11;
+    public static final int SECONDARY = 0x12;
 
     private static class DataPackage {
 
@@ -84,8 +92,20 @@ public class DependencyManager {
                             + "\n");
                 }
             }
+            for (int i = 0; i < dp.modDep.getFeatures().getFeatureCount(); i++) {
+                boolean xor = false;
+                xor = xor || isXOR(dp.modDep.getFeatures().getFeature(i), dp.XorDS);
+                xor = xor || isXOR(dp.modDep.getFeatures().getFeature(i), dp.MXorDS);
+                if (!xor) {
+                    sb.append("constraint x["
+                            + (dp.project.getFeatures().getFeatureCount() + i + 1) + "] > 0;"
+                            + "\n");
+                }
+            }
         } else {
-            for (int i = 0; i < dp.project.getFeatures().getFeatureCount(); i++) {
+            int featureCount = dp.project.getFeatures().getFeatureCount() +
+                    dp.modDep.getFeatures().getFeatureCount();
+            for (int i = 0; i < featureCount; i++) {
                 sb.append("constraint x["
                         + (i + 1) + "] > 0;"
                         + "\n");
@@ -103,12 +123,13 @@ public class DependencyManager {
                 if (!xor) {
                     sb.append("constraint x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.FixDS[i].getFeature()) + 1) + "] = "
-                            + (dp.project.getReleases().getReleaseIndex(dp.FixDS[i].getRelease()) + 1) + "];"
+                            + (dp.project.getReleases().getReleaseIndex(dp.FixDS[i].getRelease()) + 1) + ";"
                             + "\n");
                 } else {
+                    // Is the following part needed?
                     sb.append("constraint x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.FixDS[i].getFeature()) + 1) + "] = "
-                            + (dp.project.getReleases().getReleaseIndex(dp.FixDS[i].getRelease()) + 1) + "] \\/ x["
+                            + (dp.project.getReleases().getReleaseIndex(dp.FixDS[i].getRelease()) + 1) + " \\/ x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.FixDS[i].getFeature()) + 1) + " = 0;"
                             + "\n");
                 }
@@ -119,14 +140,17 @@ public class DependencyManager {
         sb.append("% AND dependencies" + "\n");
         if (dp.AndDS.length > 0) {
             for (int i = 0; i < dp.AndDS.length; i++) {
+                /* AND seems to be close enough dependency to leave out both features if one is in XOR dependency
                 boolean xor = false;
                 xor = xor || isXOR(dp.AndDS[i], dp.XorDS);
                 xor = xor || isXOR(dp.AndDS[i], dp.MXorDS);
                 if (!xor) {
+                */
                     sb.append("constraint x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getPrimary()) + 1) + "] = x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getSecondary()) + 1) + "];"
                             + "\n");
+                /* AND seems to be close enough dependency to leave out both features if one is in XOR dependency
                 } else {
                     sb.append("constraint x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getPrimary()) + 1) + "] = x["
@@ -135,6 +159,8 @@ public class DependencyManager {
                             + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getSecondary()) + 1) + "] = 0;"
                             + "\n");
                 }
+                */
+                // Add if one of features from AND is in ChangeIn... xor then it has to work with the other XOR feature also
             }
         }
 
@@ -316,7 +342,7 @@ public class DependencyManager {
         }
         return exists;
     }
-
+    
     private static boolean isXOR(FixedDependency dep, Interdependency[] xor) {
         boolean exists = false;
         for (int i = 0; i < xor.length; i++) {
@@ -340,11 +366,46 @@ public class DependencyManager {
         }
         return exists;
     }
+    
+    /*
+    private static int isXOR(Interdependency dep, Interdependency[] xor) {
+        int exists = 0;
+        int primary = 0;
+        int secondary = 0;
+        for (int i = 0; i < xor.length; i++) {
+            if (dep.getPrimary() == xor[i].getPrimary()
+                    || dep.getPrimary() == xor[i].getSecondary()) {
+                exists++;
+                primary++;
+            }
+            if (dep.getSecondary() == xor[i].getPrimary()
+                    || dep.getSecondary() == xor[i].getSecondary()) {
+                exists++;
+                secondary++;
+            }
+        }
+        if (exists == 0) {
+            return DependencyManager.FALSE;
+        } else {
+            if (primary > 0 && secondary == 0) {
+                return DependencyManager.PRIMARY;
+            } else if (primary == 0 && secondary > 0) {
+                return DependencyManager.SECONDARY;
+            } else {
+                return DependencyManager.BOTH;
+            }
+        }
+    }
+    */
 
     private static void getREQCode(StringBuilder sb, DataPackage dp) {
         if (dp.ReqDS.length > 0) {
             for (int i = 0; i < dp.ReqDS.length; i++) {
+                //int xorExists = isXOR(dp.ReqDS[i], dp.XorDS);
+                //int mXorExists = isXOR(dp.ReqDS[i], dp.MXorDS);
                 boolean xor = false;
+                //xor = xor || ((xorExists & DependencyManager.EXIST_MASK) > 0);
+                //xor = xor || ((mXorExists & DependencyManager.EXIST_MASK) > 0);
                 xor = xor || isXOR(dp.ReqDS[i], dp.XorDS);
                 xor = xor || isXOR(dp.ReqDS[i], dp.MXorDS);
                 if (!xor) {
@@ -359,6 +420,27 @@ public class DependencyManager {
                             + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getSecondary()) + 1) + " = 0 \\/ x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getPrimary()) + 1) + " = 0;"
                             + "\n");
+                    /*
+                    sb.append("constraint x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getSecondary()) + 1) + "] <= x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getPrimary()) + 1) + "]");
+                    if ((((xorExists & DependencyManager.EXIST_MASK) > 0 && (xorExists == DependencyManager.SECONDARY
+                            || xorExists == DependencyManager.BOTH)) || (xorExists & DependencyManager.EXIST_MASK) == 0)
+                            &&
+                            (((mXorExists & DependencyManager.EXIST_MASK) > 0 && (mXorExists == DependencyManager.SECONDARY
+                            || mXorExists == DependencyManager.BOTH)) || (mXorExists & DependencyManager.EXIST_MASK) == 0)) {
+                        sb.append(" \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getSecondary()) + 1) + " = 0 ");
+                    } else if ((((xorExists & DependencyManager.EXIST_MASK) > 0 && (xorExists == DependencyManager.PRIMARY
+                            || xorExists == DependencyManager.BOTH)) || (xorExists & DependencyManager.EXIST_MASK) == 0)
+                            &&
+                            (((mXorExists & DependencyManager.EXIST_MASK) > 0 && (mXorExists == DependencyManager.PRIMARY
+                            || mXorExists == DependencyManager.BOTH)) || (mXorExists & DependencyManager.EXIST_MASK) == 0)) {
+                        sb.append(" \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getPrimary()) + 1) + " = 0");
+                    }
+                    sb.append(";" + "\n");
+                    */
                 }
             }
         }
@@ -394,14 +476,14 @@ public class DependencyManager {
                 if (!xor) {
                     sb.append("constraint x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getSecondary()) + 1) + "] <= "
-                            + (dp.project.getReleases().getReleaseCount()) + " -> "
+                            + (dp.project.getReleases().getReleaseCount()) + " -> x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getPrimary()) + 1) + "] < x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getSecondary()) + 1) + "];"
                             + "\n");
                 } else {
                     sb.append("constraint (x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getSecondary()) + 1) + "] <= "
-                            + (dp.project.getReleases().getReleaseCount()) + " -> "
+                            + (dp.project.getReleases().getReleaseCount()) + " -> x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getPrimary()) + 1) + "] < x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getSecondary()) + 1) + "]) \\/ x["
                             + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getPrimary()) + 1) + " = 0 \\/ x["
@@ -414,7 +496,7 @@ public class DependencyManager {
             for (int i = 0; i < dp.MPreDS.length; i++) {
                 sb.append("constraint (x["
                         + (dp.project.getFeatures().getFeatureIndex(dp.MPreDS[i].getSecondary()) + 1) + "] <= "
-                        + (dp.project.getReleases().getReleaseCount()) + " -> "
+                        + (dp.project.getReleases().getReleaseCount()) + " -> x["
                         + (dp.project.getFeatures().getFeatureIndex(dp.MPreDS[i].getPrimary()) + 1) + "] < x["
                         + (dp.project.getFeatures().getFeatureIndex(dp.MPreDS[i].getSecondary()) + 1) + "]) \\/ x["
                         + (dp.project.getFeatures().getFeatureIndex(dp.MPreDS[i].getPrimary()) + 1) + " = 0 \\/ x["

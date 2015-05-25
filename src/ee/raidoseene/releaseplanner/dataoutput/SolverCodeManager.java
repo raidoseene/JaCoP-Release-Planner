@@ -40,7 +40,7 @@ public class SolverCodeManager {
         Path Par2_1Path = Paths.get(path, "SolverCode_Par2.1_Declarations.par");
         Path Par2_2Path = Paths.get(path, "SolverCode_Par2.2_Declarations.par");
         Path Par3Path = Paths.get(path, "SolverCode_Par3_Variables.par");
-        Path Par4Path = Paths.get(path, "SolverCode_Par4_Constraints.par");
+        //Path Par4Path = Paths.get(path, "SolverCode_Par4_Constraints.par");
         Path Par5Path = Paths.get(path, "SolverCode_Par5_GroupDep.par");
         Path Par6_1Path = Paths.get(path, "SolverCode_Par6.1_NonCumResConstraint.par");
         Path Par6_2Path = Paths.get(path, "SolverCode_Par6.2_CumResConstraint.par");
