@@ -21,7 +21,7 @@ public final class Settings implements Serializable {
     Settings() {
         this.pathMiniZinc = null;
         this.pathJaCoP = null;
-        this.codeOutput = false;
+        this.codeOutput = true;
         this.resourceShifting = false;
     }
     

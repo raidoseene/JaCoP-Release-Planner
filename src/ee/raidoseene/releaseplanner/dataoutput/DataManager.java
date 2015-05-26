@@ -701,13 +701,25 @@ public final class DataManager {
     }
 
     private void printWAS(Project modDep) { // Missing modDep WAS, ADD THEM!!! Check now it may be there
-        int[][] urgencies = UrgencyManager.calculateUrgencies(project, modDep);
-        int featureCount = project.getStakeholders().getStakeholderCount() * (project.getFeatures().getFeatureCount()
-                + modDep.getFeatures().getFeatureCount());
+        int[][] urgencies = UrgencyManager.getUrgencies(project, modDep);
+        int featureCount = project.getFeatures().getFeatureCount() + modDep.getFeatures().getFeatureCount();
+        
+        printWriter.print("Urgencies = [");
+        for(int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
+            for(int f = 0; f < featureCount; f++) {
+                printWriter.print("0, ");
+                for(int r = 0; r < project.getReleases().getReleaseCount() + 1; r++) {
+                    printWriter.print(urgencies[(s * featureCount) + f][r] + ", ");
+                }
+                printWriter.println("");
+            }
+        }
+        printWriter.println("]");
+        
         printWriter.print("WAS = [");
         for (int f = 0; f < /*project.getFeatures().getFeatureCount()*/featureCount; f++) {
             printWriter.print("| 0, ");
-            for (int rel = 0; rel < project.getReleases().getReleaseCount(); rel++) {
+            for (int rel = 0; rel < project.getReleases().getReleaseCount() + 1; rel++) {
                 int temp = 0;
                 for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
                     temp += project.getStakeholders().getStakeholder(s).getImportance()
@@ -724,9 +736,10 @@ public final class DataManager {
                             project.getFeatures().getFeature(f),
                             project.getReleases().getRelease(rel))*/;
                 }
-                printWriter.print((project.getReleases().getRelease(rel).getImportance() * temp) + ", ");
-                if (rel == project.getReleases().getReleaseCount() - 1) {
-                    printWriter.print("1, \n");
+                if (rel == project.getReleases().getReleaseCount()) {
+                    printWriter.print((project.getReleases().getRelease(rel - 1).getImportance() * temp) + ", \n");
+                } else {
+                    printWriter.print((project.getReleases().getRelease(rel).getImportance() * temp) + ", ");
                 }
             }
         }
