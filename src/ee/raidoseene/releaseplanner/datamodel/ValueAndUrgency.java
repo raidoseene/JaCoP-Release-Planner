@@ -99,6 +99,14 @@ public class ValueAndUrgency implements Serializable {
         return 0;
     }
     
+    public Urgency getUrgencyObject(Stakeholder s, Feature f) {
+        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (val != null) {
+            return val.urgency;
+        }
+        return null;
+    }
+    
     public Release getUrgencyRelease(Stakeholder s, Feature f) {
         ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (val != null) {
