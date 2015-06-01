@@ -559,6 +559,7 @@ public final class DataManager {
         int[][] urgencies = UrgencyManager.getUrgencies(project, modDep);
         int featureCount = project.getFeatures().getFeatureCount() + modDep.getFeatures().getFeatureCount();
         
+        /*
         printWriter.print("Urgencies = [");
         for(int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
             for(int f = 0; f < featureCount; f++) {
@@ -570,6 +571,7 @@ public final class DataManager {
             }
         }
         printWriter.println("]");
+        */
         
         printWriter.print("WAS = [");
         for (int f = 0; f < /*project.getFeatures().getFeatureCount()*/featureCount; f++) {

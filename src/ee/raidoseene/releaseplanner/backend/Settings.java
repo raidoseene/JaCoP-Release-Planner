@@ -15,9 +15,7 @@ public final class Settings implements Serializable {
     
     private static final long serialVersionUID = 1;
     private String pathMiniZinc, pathJaCoP;
-    private boolean codeOutput;
-    private boolean resourceShifting;
-    private boolean postponedUrgency;
+    private boolean codeOutput, resourceShifting, postponedUrgency;
     
     Settings() {
         this.pathMiniZinc = null;
