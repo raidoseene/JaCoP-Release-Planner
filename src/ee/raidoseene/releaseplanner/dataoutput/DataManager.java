@@ -9,10 +9,8 @@ import ee.raidoseene.releaseplanner.backend.Settings;
 import ee.raidoseene.releaseplanner.backend.SettingsManager;
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
-import ee.raidoseene.releaseplanner.datamodel.FixedDependency;
 import ee.raidoseene.releaseplanner.datamodel.Group;
 import ee.raidoseene.releaseplanner.datamodel.GroupDependency;
-import ee.raidoseene.releaseplanner.datamodel.Interdependency;
 import ee.raidoseene.releaseplanner.datamodel.ModifyingInterdependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Release;
@@ -37,13 +35,9 @@ public final class DataManager {
         // TO DO: append input into the log file
     }
 
-    public static void jacopOutput(String input) {
-        // TO DO: create or write over project named jacop output file
-    }
-
-    public static File[] initiateDataOutput(Project project, boolean codeOutput) throws Exception {
+    public static File[] initiateDataOutput(Project project, boolean codeOutput, boolean postponedUrgency) throws Exception {
         File[] files = new File[2];
-        File data = saveDataFile(project, codeOutput);
+        File data = saveDataFile(project, codeOutput, postponedUrgency);
         files[0] = data;
         if (codeOutput) {
             // export solver code file with dependencies
@@ -56,7 +50,7 @@ public final class DataManager {
         return files;
     }
 
-    private static File saveDataFile(Project project, boolean codeOutput) throws Exception {
+    private static File saveDataFile(Project project, boolean codeOutput, boolean postponedUrgency) throws Exception {
         File dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage()));
         File file = new File(dir, "data.dzn");
 
@@ -74,7 +68,7 @@ public final class DataManager {
                 dm.printResources();
                 dm.printFeatures(modDep);
                 dm.printGroups(true);
-                dm.printWAS(modDep);
+                dm.printWAS(modDep, postponedUrgency);
             } else {
                 dm.printFailHeader();
                 dm.printProjectParameters(modDep.getFeatures().getFeatureCount(), false);
@@ -136,145 +130,6 @@ public final class DataManager {
         printWriter.println("% =========================\n");
     }
 
-    /*
-     private void printDependencies(Project proj) {
-
-     FixedDependency[] FixDS = project.getDependencies().getTypedDependencies(FixedDependency.class, Dependency.FIXED);
-     Interdependency[] AndDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.AND);
-     Interdependency[] ReqDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.REQ);
-     Interdependency[] PreDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.PRE);
-     Interdependency[] XorDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.XOR);
-     GroupDependency[] AtLeastDS = project.getDependencies().getTypedDependencies(GroupDependency.class, Dependency.ATLEAST);
-     GroupDependency[] ExactlyDS = project.getDependencies().getTypedDependencies(GroupDependency.class, Dependency.EXACTLY);
-     GroupDependency[] AtMostDS = project.getDependencies().getTypedDependencies(GroupDependency.class, Dependency.ATMOST);
-
-     printWriter.println("% FIXED features / AND features / REQUIRED features / PRECEDING features / XOR features");
-     printWriter.println("% Group: AtLeast / Exactly / AtMost");
-
-     // Fixed release
-     printWriter.println("FIX = " + FixDS.length + ";");
-     printWriter.print("fx = [|");
-     if (FixDS.length > 0) {
-     for (int i = 0; i < FixDS.length; i++) {
-     printWriter.print(" " + (project.getFeatures().getFeatureIndex(FixDS[i].getFeature()) + 1)
-     + ", " + (project.getReleases().getReleaseIndex(FixDS[i].getRelease()) + 1) + ", |");
-     }
-     printWriter.println("];");
-     } else {
-     printWriter.println(" 0, 0, |];");
-     }
-
-     // AND dependency
-     printWriter.println("AND = " + AndDS.length + ";");
-     printWriter.print("and = [|");
-     if (AndDS.length > 0) {
-     for (int i = 0; i < AndDS.length; i++) {
-     printWriter.print(" " + (project.getFeatures().getFeatureIndex(AndDS[i].getPrimary()) + 1)
-     + ", " + (project.getFeatures().getFeatureIndex(AndDS[i].getSecondary()) + 1) + ", |");
-     }
-     printWriter.println("];");
-     } else {
-     printWriter.println(" 0, 0, |];");
-     }
-
-     // REQUIRES dependency
-     printWriter.println("REQ = " + ReqDS.length + ";");
-     printWriter.print("req = [|");
-     if (ReqDS.length > 0) {
-     for (int i = 0; i < ReqDS.length; i++) {
-     printWriter.print(" " + (project.getFeatures().getFeatureIndex(ReqDS[i].getPrimary()) + 1)
-     + ", " + (project.getFeatures().getFeatureIndex(ReqDS[i].getSecondary()) + 1) + ", |");
-     }
-     } else if (proj.getDependencies().getDependencyCount() > 0) {
-     Interdependency[] newReqDS = proj.getDependencies().getTypedDependencies(Interdependency.class, Dependency.REQ);
-     for (int i = 0; i < newReqDS.length; i++) {
-     printWriter.print(" " + (proj.getFeatures().getFeatureIndex(newReqDS[i].getPrimary()) + 1
-     + project.getFeatures().getFeatureCount())
-     + ", " + (project.getFeatures().getFeatureIndex(newReqDS[i].getSecondary()) + 1) + ", |");
-     }
-     } else {
-     printWriter.print(" 0, 0, |");
-     }
-     printWriter.println("];");
-
-     // PRECEDES dependency
-     printWriter.println("PRE = " + PreDS.length + ";");
-     printWriter.print("pre = [|");
-     if (PreDS.length > 0) {
-     for (int i = 0; i < PreDS.length; i++) {
-     printWriter.print(" " + (project.getFeatures().getFeatureIndex(PreDS[i].getPrimary()) + 1)
-     + ", " + (project.getFeatures().getFeatureIndex(PreDS[i].getSecondary()) + 1) + ", |");
-     }
-     } else if (proj.getDependencies().getDependencyCount() > 0) {
-     Interdependency[] newPreDS = proj.getDependencies().getTypedDependencies(Interdependency.class, Dependency.PRE);
-     for (int i = 0; i < newPreDS.length; i++) {
-     printWriter.print(" " + (project.getFeatures().getFeatureIndex(newPreDS[i].getPrimary()) + 1)
-     + ", " + (project.getFeatures().getFeatureIndex(newPreDS[i].getSecondary()) + 1) + ", |");
-     }
-     } else {
-     printWriter.print(" 0, 0, |");
-     }
-     printWriter.println("];");
-
-     // XOR dependency
-     printWriter.println("XOR = " + XorDS.length + ";");
-     printWriter.print("xr = [|");
-     if (XorDS.length > 0) {
-     for (int i = 0; i < XorDS.length; i++) {
-     printWriter.print(" " + (project.getFeatures().getFeatureIndex(XorDS[i].getPrimary()) + 1)
-     + ", " + (project.getFeatures().getFeatureIndex(XorDS[i].getSecondary()) + 1) + ", |");
-     }
-     } else if (proj.getDependencies().getDependencyCount() > 0) {
-     Interdependency[] newXorDS = proj.getDependencies().getTypedDependencies(Interdependency.class, Dependency.XOR);
-     for (int i = 0; i < newXorDS.length; i++) {
-     printWriter.print(" " + (project.getFeatures().getFeatureIndex(newXorDS[i].getPrimary()) + 1)
-     + ", " + ((proj.getFeatures().getFeatureIndex(newXorDS[i].getSecondary()) + 1)
-     + project.getFeatures().getFeatureCount()) + ", |");
-     }
-     } else {
-     printWriter.print(" 0, 0, |");
-     }
-     printWriter.println("];\n");
-
-     printWriter.println("ATLEAST = " + 0 + ";");
-     printWriter.print("atLeast = [|");
-     if (AtLeastDS.length > 0) {
-     for (int i = 0; i < AtLeastDS.length; i++) {
-     printWriter.print(" " + (project.getGroups().getGroupIndex(AtLeastDS[i].getGroup()) + 1)
-     + ", " + (AtLeastDS[i].getFeatureCount()) + ", |");
-     }
-     } else {
-     printWriter.print(" 0, 0, |");
-     }
-     printWriter.println("];");
-
-     printWriter.println("EXACTLY = " + 0 + ";");
-     printWriter.print("exactly = [|");
-     if (ExactlyDS.length > 0) {
-     for (int i = 0; i < ExactlyDS.length; i++) {
-     printWriter.print(" " + (project.getGroups().getGroupIndex(ExactlyDS[i].getGroup()) + 1)
-     + ", " + (ExactlyDS[i].getFeatureCount()) + ", |");
-     }
-     } else {
-     printWriter.print(" 0, 0, |");
-     }
-     printWriter.println("];");
-
-     printWriter.println("ATMOST = " + 0 + ";");
-     printWriter.print("atMost = [|");
-     if (AtMostDS.length > 0) {
-     for (int i = 0; i < AtMostDS.length; i++) {
-     printWriter.print(" " + (project.getGroups().getGroupIndex(AtMostDS[i].getGroup()) + 1)
-     + ", " + (AtMostDS[i].getFeatureCount()) + ", |");
-     }
-     } else {
-     printWriter.print(" 0, 0, |");
-     }
-     printWriter.println("];");
-
-     printWriter.println("% =========================\n");
-     }
-     */
     private void printResources() {
         printWriter.println("% Resources (buffer/id/capacity)");
         printWriter.println("B = " + "0" + ";" + " % Missing Buffer!");
@@ -451,7 +306,7 @@ public final class DataManager {
                     int releaseNr = project.getReleases().getReleaseIndex(release);
                     int deadlineCurve = valueAndUrgency.getDeadlineCurve(project.getStakeholders().getStakeholder(s),
                             project.getFeatures().getFeature(f));
-                    if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.EARLIEST)) {
+                    if (deadlineCurve == (Urgency.DEADLINE_MASK & Urgency.EARLIEST)) {
                         if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
                             for (int r = 0; r < releaseNr - 2; r++) {
                                 printWriter.print("0, ");
@@ -491,7 +346,7 @@ public final class DataManager {
                                 }
                             }
                         }
-                    } else if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.LATEST)) {
+                    } else if (deadlineCurve == (Urgency.DEADLINE_MASK & Urgency.LATEST)) {
                         if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
                             for (int r = 0; r < releaseNr - 1; r++) {
                                 printWriter.print(urgency + ", ");
@@ -580,7 +435,7 @@ public final class DataManager {
                         int releaseNr = project.getReleases().getReleaseCount();
                         int deadlineCurve = newValueAndUrgency.getDeadlineCurve(project.getStakeholders().getStakeholder(s),
                                 ModDep.getFeatures().getFeature(f));
-                        if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.EARLIEST)) {
+                        if (deadlineCurve == (Urgency.DEADLINE_MASK & Urgency.EARLIEST)) {
                             if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
                                 for (int r = 0; r < releaseNr - 2; r++) {
                                     printWriter.print("0, ");
@@ -620,7 +475,7 @@ public final class DataManager {
                                     }
                                 }
                             }
-                        } else if (deadlineCurve == (Urgency.DEADLYNE_MASK & Urgency.LATEST)) {
+                        } else if (deadlineCurve == (Urgency.DEADLINE_MASK & Urgency.LATEST)) {
                             if (deadlineCurve == (Urgency.CURVE_MASK & Urgency.HARD)) {
                                 for (int r = 0; r < releaseNr - 1; r++) {
                                     printWriter.print(newUrgency + ", ");
@@ -700,7 +555,7 @@ public final class DataManager {
         printWriter.println("]);");
     }
 
-    private void printWAS(Project modDep) { // Missing modDep WAS, ADD THEM!!! Check now it may be there
+    private void printWAS(Project modDep, boolean postponedUrgency) { // Missing modDep WAS, ADD THEM!!! Check now it may be there
         int[][] urgencies = UrgencyManager.getUrgencies(project, modDep);
         int featureCount = project.getFeatures().getFeatureCount() + modDep.getFeatures().getFeatureCount();
         
@@ -737,7 +592,9 @@ public final class DataManager {
                             project.getReleases().getRelease(rel))*/;
                 }
                 if (rel == project.getReleases().getReleaseCount()) {
-                    printWriter.print((project.getReleases().getRelease(rel - 1).getImportance() * temp) + ", \n");
+                    if(postponedUrgency) {
+                        printWriter.print((project.getReleases().getRelease(rel - 1).getImportance() * temp) + ", \n");
+                    }
                 } else {
                     printWriter.print((project.getReleases().getRelease(rel).getImportance() * temp) + ", ");
                 }

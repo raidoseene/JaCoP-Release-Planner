@@ -5,6 +5,7 @@ import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.backend.Settings;
 import ee.raidoseene.releaseplanner.backend.SettingsManager;
+import ee.raidoseene.releaseplanner.dataimport.ImportManager;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import ee.raidoseene.releaseplanner.solverutils.Solver;
 import java.awt.Dimension;
@@ -146,7 +147,7 @@ public final class MainFrame extends JFrame {
             }
         });
         menu.add(this.close);
-        
+
         // Temporary menu
         menu = new JMenu("Temporary");
         menubar.add(menu);
@@ -163,6 +164,7 @@ public final class MainFrame extends JFrame {
             }
         });
         menu.add(this.dataDump);
+
         this.solver = new JMenuItem("Simulate");
         this.solver.addActionListener(new ActionListener() {
             @Override
@@ -175,6 +177,23 @@ public final class MainFrame extends JFrame {
             }
         });
         menu.add(this.solver);
+
+        //Import menu
+        menu = new JMenu("Import");
+        menubar.add(menu);
+
+        item = new JMenuItem("Import Project");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    MainFrame.this.importProject();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        menu.add(item);
     }
 
     private void createNewProject(boolean def) {
@@ -277,40 +296,65 @@ public final class MainFrame extends JFrame {
 
         this.updateEnablity();
     }
-    
+
     private void dumpData() {
         this.saveCurrentProject(false);
-        
+
         try {
             if (ProjectManager.getCurrentProject().getStorage() == null) {
                 String msg = "Project is not saved!\nUnable to determine dump location!";
                 throw new Exception(msg);
             }
-            
+
             //DataManager.saveDataFile(ProjectManager.getCurrentProject());
             Settings settings = SettingsManager.getCurrentSettings();
-            DataManager.initiateDataOutput(ProjectManager.getCurrentProject(), settings.getCodeOutput());
+            DataManager.initiateDataOutput(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency());
             //SolverCodeManager.saveSolverCodeFile(ProjectManager.getCurrentProject());
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
     }
-    
+
     private void runSolver() {
         this.saveCurrentProject(false);
-        
+
         try {
             if (ProjectManager.getCurrentProject().getStorage() == null) {
                 String msg = "Project is not saved!\nUnable to determine dump location!";
                 throw new Exception(msg);
             }
-            
+
             //Solver.runSolver();
             Settings settings = SettingsManager.getCurrentSettings();
-            Solver.executeSimulation(ProjectManager.getCurrentProject(), settings.getCodeOutput());
+            Solver.executeSimulation(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency());
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
+    }
+
+    private void importProject() {
+        try {
+            FileDialog fd = new FileDialog(this, "Import Project", FileDialog.LOAD);
+            fd.setVisible(true);
+
+            String dir = fd.getDirectory();
+            String fil = fd.getFile();
+
+            if (dir != null && fil != null) {
+                File file = new File(dir, fil);
+                ProjectManager.createNewProject("");
+                ImportManager.importProject(ProjectManager.getCurrentProject(), file);
+            }
+        } catch (Exception ex) {
+            Messenger.showError(ex, null);
+        }
+
+        if (ProjectManager.getCurrentProject() != null) {
+            this.setContentPane(new TabbedView());
+        } else {
+            this.setContentPane(new JPanel());
+        }
+        this.updateEnablity();
     }
 
     private void updateEnablity() {

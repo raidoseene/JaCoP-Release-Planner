@@ -17,12 +17,14 @@ public final class Settings implements Serializable {
     private String pathMiniZinc, pathJaCoP;
     private boolean codeOutput;
     private boolean resourceShifting;
+    private boolean postponedUrgency;
     
     Settings() {
         this.pathMiniZinc = null;
         this.pathJaCoP = null;
         this.codeOutput = true;
         this.resourceShifting = false;
+        this.postponedUrgency = true;
     }
     
     public void setMiniZincPath(String path) throws Exception {
@@ -63,5 +65,13 @@ public final class Settings implements Serializable {
     
     public boolean getResourceShifting() {
         return this.resourceShifting;
+    }
+    
+    public void setPostponedUrgency(boolean postponedUrgency) {
+        this.postponedUrgency = postponedUrgency;
+    }
+    
+    public boolean getPostponedUrgency() {
+        return this.postponedUrgency;
     }
 }

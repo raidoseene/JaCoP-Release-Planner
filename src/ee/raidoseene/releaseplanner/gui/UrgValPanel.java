@@ -595,14 +595,14 @@ public final class UrgValPanel extends JPanel {
 
                 };
 
-                this.exact = new JRadioButton("exact", (vus.getDeadlineCurve(s, f) & Urgency.DEADLYNE_MASK) == Urgency.EXACT);
+                this.exact = new JRadioButton("exact", (vus.getDeadlineCurve(s, f) & Urgency.DEADLINE_MASK) == Urgency.EXACT);
                 this.exact.addActionListener(alistener);
                 deadline.add(this.exact);
                 grid.add(this.exact);
 
                 grid.add(new JLabel());
 
-                this.earliest = new JRadioButton("earliest", (vus.getDeadlineCurve(s, f) & Urgency.DEADLYNE_MASK) == Urgency.EARLIEST);
+                this.earliest = new JRadioButton("earliest", (vus.getDeadlineCurve(s, f) & Urgency.DEADLINE_MASK) == Urgency.EARLIEST);
                 this.earliest.addActionListener(alistener);
                 deadline.add(this.earliest);
                 grid.add(this.earliest);
@@ -612,7 +612,7 @@ public final class UrgValPanel extends JPanel {
                 curve.add(this.hard);
                 grid.add(this.hard);
 
-                this.latest = new JRadioButton("latest", (vus.getDeadlineCurve(s, f) & Urgency.DEADLYNE_MASK) == Urgency.LATEST);
+                this.latest = new JRadioButton("latest", (vus.getDeadlineCurve(s, f) & Urgency.DEADLINE_MASK) == Urgency.LATEST);
                 this.latest.addActionListener(alistener);
                 deadline.add(this.latest);
                 grid.add(this.latest);
@@ -700,7 +700,7 @@ public final class UrgValPanel extends JPanel {
                     }
 
                     int curve = vus.getDeadlineCurve(this.stakeholder, this.feature);
-                    int deadline = curve & Urgency.DEADLYNE_MASK;
+                    int deadline = curve & Urgency.DEADLINE_MASK;
                     int falloff = curve & Urgency.CURVE_MASK;
                     if (deadline == 0 || falloff == 0) {
                         return;

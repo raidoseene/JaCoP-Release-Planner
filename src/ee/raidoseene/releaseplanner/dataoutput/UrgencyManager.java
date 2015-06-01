@@ -294,7 +294,7 @@ public class UrgencyManager {
                 int releaseNr = releases.getReleaseIndex(release);
                 int deadlineCurve = valueAndUrgency.getDeadlineCurve(stakeholder,
                         proj.getFeatures().getFeature(f));
-                if ((deadlineCurve & Urgency.DEADLYNE_MASK) == Urgency.EARLIEST) {
+                if ((deadlineCurve & Urgency.DEADLINE_MASK) == Urgency.EARLIEST) {
                     if ((deadlineCurve & Urgency.CURVE_MASK) == Urgency.HARD) {
                         for (int r = 0; r < releaseNr; r++) {
                             urgencies[(s * featureCount) + featureStep + f][r] = 0;
@@ -332,7 +332,7 @@ public class UrgencyManager {
                         }
                         System.arraycopy(tempUrgencies, 0, urgencies[(s * featureCount) + featureStep + f], 0, releaseCount + 1);
                     }
-                } else if ((deadlineCurve & Urgency.DEADLYNE_MASK) == Urgency.LATEST) {
+                } else if ((deadlineCurve & Urgency.DEADLINE_MASK) == Urgency.LATEST) {
                     if ((deadlineCurve & Urgency.CURVE_MASK) == Urgency.HARD) {
                         for (int r = 0; r <= releaseNr; r++) {
                             urgencies[(s * featureCount) + featureStep + f][r] = urgency;

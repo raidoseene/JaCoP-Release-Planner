@@ -27,14 +27,14 @@ import org.jacop.fz.Fz2jacop;
  */
 public class Solver {
 
-    public static void executeSimulation(Project project, boolean codeOutput) throws IOException {
+    public static void executeSimulation(Project project, boolean codeOutput, boolean postponedUrgency) throws IOException {
         // TO DO: check if all needed elements are filled in the project
         if (project.getFeatures().getFeatureCount() > 0 & project.getReleases().getReleaseCount() > 0 &
                 project.getResources().getResourceCount() > 0 & project.getStakeholders().getStakeholderCount() > 0) {
             File[] files;
             try {
                 //file = DataManager.saveDataFile(ProjectManager.getCurrentProject());
-                files = DataManager.initiateDataOutput(project, codeOutput);
+                files = DataManager.initiateDataOutput(project, codeOutput, postponedUrgency);
                 runSolver(files, codeOutput);
             } catch (Exception ex) {
                 Messenger.showError(ex, null);
