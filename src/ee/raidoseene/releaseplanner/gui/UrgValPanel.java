@@ -37,8 +37,6 @@ import java.awt.GridLayout;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.geom.QuadCurve2D;
@@ -51,7 +49,6 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
@@ -648,7 +645,8 @@ public final class UrgValPanel extends JPanel {
                 curve.add(this.soft);
                 grid.add(this.soft);
 
-                content.add(this.graph = new UVTab.UrgencyGraph(null));
+                this.graph = new UVTab.UrgencyGraph(vus.getUrgencyObject(s, f));
+                content.add(this.graph);
             }
 
         }
@@ -1151,7 +1149,7 @@ public final class UrgValPanel extends JPanel {
                     curve.add(this.soft);
                     grid.add(this.soft);
 
-                    this.graph = new UVTab.UrgencyGraph(null);
+                    this.graph = new UVTab.UrgencyGraph(urg);
                     content.add(this.graph);
                 }
 
