@@ -488,7 +488,6 @@ public final class UrgValPanel extends JPanel {
             private final JComboBox release;
             private final JRadioButton exact, earliest, latest, hard, soft;
             private final UVTab.UrgencyGraph graph;
-            private final ActionListener listener;
 
             private UrgencyPanel(Stakeholder s, Feature f) {
                 this.setBorder(new EmptyBorder(10, 0, 0, 0));
@@ -501,10 +500,12 @@ public final class UrgValPanel extends JPanel {
                 this.add(BorderLayout.LINE_START, content);
 
                 Container controls = new Container();
-                Project project = ProjectManager.getCurrentProject();
-                ValueAndUrgency vus = project.getValueAndUrgency();
                 controls.setLayout(new BorderLayout(32, 32));
                 content.add(controls);
+
+                Project project = ProjectManager.getCurrentProject();
+                ValueAndUrgency vus = project.getValueAndUrgency();
+                Releases releases = project.getReleases();
 
                 Container combos = new Container();
                 combos.setLayout(new BorderLayout());
@@ -542,7 +543,23 @@ public final class UrgValPanel extends JPanel {
                 c2.setLayout(new BorderLayout(5, 5));
                 c2.add(BorderLayout.CENTER, new JLabel("Release"));
                 c2.add(BorderLayout.LINE_END, this.release = new JComboBox());
-                this.listener = new ActionListener() {
+                combos.add(BorderLayout.PAGE_END, c2);
+
+                this.release.addItem("None");
+                this.release.setSelectedIndex(0);
+                Release urel = vus.getUrgencyRelease(s, f);
+                int rcount = releases.getReleaseCount();
+
+                for (int i = 0; i < rcount; i++) {
+                    Release r = releases.getRelease(i);
+                    this.release.addItem(r.getName());
+
+                    if (urel == r) {
+                        this.release.setSelectedIndex(i + 1);
+                    }
+                }
+
+                this.release.addActionListener(new ActionListener() {
 
                     @Override
                     public void actionPerformed(ActionEvent ae) {
@@ -561,11 +578,15 @@ public final class UrgValPanel extends JPanel {
                         } catch (Exception ex) {
                             Messenger.showError(ex, null);
                         }
-                        UrgencyPanel.this.graph.repaint();
+                        try {
+                            ValueAndUrgency vus = ProjectManager.getCurrentProject().getValueAndUrgency();
+                            UrgencyPanel.this.graph.setUrgency(vus.getUrgencyObject(UrgencyPanel.this.stakeholder, UrgencyPanel.this.feature));
+                        } catch (Exception ex) {
+                            UrgencyPanel.this.graph.setUrgency(null);
+                        }
                     }
 
-                };
-                combos.add(BorderLayout.PAGE_END, c2);
+                });
 
                 Container grid = new Container();
                 grid.setLayout(new GridLayout(3, 2, 32, 4));
@@ -590,7 +611,12 @@ public final class UrgValPanel extends JPanel {
                         } catch (Exception ex) {
                             Messenger.showError(ex, null);
                         }
-                        UrgencyPanel.this.graph.repaint();
+                        try {
+                            ValueAndUrgency vus = ProjectManager.getCurrentProject().getValueAndUrgency();
+                            UrgencyPanel.this.graph.setUrgency(vus.getUrgencyObject(UrgencyPanel.this.stakeholder, UrgencyPanel.this.feature));
+                        } catch (Exception ex) {
+                            UrgencyPanel.this.graph.setUrgency(null);
+                        }
                     }
 
                 };
@@ -622,46 +648,22 @@ public final class UrgValPanel extends JPanel {
                 curve.add(this.soft);
                 grid.add(this.soft);
 
-                content.add(this.graph = new UVTab.UrgencyGraph(s, f));
-                this.updateUrgencySelections();
-            }
-
-            private void updateUrgencySelections() {
-                try {
-                    Project proj = ProjectManager.getCurrentProject();
-                    Release orelease = proj.getValueAndUrgency().getUrgencyRelease(this.stakeholder, this.feature);
-                    Releases releases = proj.getReleases();
-                    int count = releases.getReleaseCount();
-
-                    this.release.removeActionListener(this.listener);
-                    this.release.removeAllItems();
-                    this.release.addItem("None");
-                    this.release.setSelectedIndex(0);
-
-                    for (int i = 0; i < count; i++) {
-                        Release r = releases.getRelease(i);
-                        this.release.addItem(r.getName());
-                        if (orelease == r) {
-                            this.release.setSelectedIndex(i + 1);
-                        }
-                    }
-
-                    this.release.addActionListener(this.listener);
-                } catch (Exception ex) {
-                    Messenger.showError(ex, null);
-                }
+                content.add(this.graph = new UVTab.UrgencyGraph(null));
             }
 
         }
 
         private final class UrgencyGraph extends JPanel {
 
-            private final Stakeholder stakeholder;
-            private final Feature feature;
+            private Urgency urgency;
 
-            private UrgencyGraph(Stakeholder s, Feature f) {
-                this.stakeholder = s;
-                this.feature = f;
+            private UrgencyGraph(Urgency u) {
+                this.urgency = u;
+            }
+
+            public void setUrgency(Urgency u) {
+                this.urgency = u;
+                this.repaint();
             }
 
             @Override
@@ -681,12 +683,17 @@ public final class UrgValPanel extends JPanel {
 
                 try {
                     Project project = ProjectManager.getCurrentProject();
-                    ValueAndUrgency vus = project.getValueAndUrgency();
-                    Release rel = vus.getUrgencyRelease(this.stakeholder, this.feature);
                     Releases releases = project.getReleases();
                     int rcount = releases.getReleaseCount();
-                    int index = 0;
+                    Release rel = null;
+                    int curve = 0;
 
+                    if (this.urgency != null) {
+                        curve = this.urgency.getDeadlineCurve();
+                        rel = this.urgency.getRelease();
+                    }
+
+                    int index = 0;
                     int segm = width / (rcount + 1);
                     for (int i = 0; i < rcount; i++) {
                         String str = Integer.toString(i + 1);
@@ -695,12 +702,12 @@ public final class UrgValPanel extends JPanel {
                             index = i;
                         }
                     }
+
                     if (rel == null) {
                         return;
                     }
 
-                    int curve = vus.getDeadlineCurve(this.stakeholder, this.feature);
-                    int deadline = curve & Urgency.DEADLINE_MASK;
+                    int deadline = curve & Urgency.DEADLYNE_MASK;
                     int falloff = curve & Urgency.CURVE_MASK;
                     if (deadline == 0 || falloff == 0) {
                         return;
@@ -717,8 +724,8 @@ public final class UrgValPanel extends JPanel {
                     } else if (deadline == Urgency.LATEST) {
                         int x = segm * (index + 1);
                         if (falloff == Urgency.HARD) {
-                            int[] xs = new int[] {1, x, x};
-                            int[] ys = new int[] {1, 1, height - fheight};
+                            int[] xs = new int[]{1, x, x};
+                            int[] ys = new int[]{1, 1, height - fheight};
                             g.drawPolyline(xs, ys, 3);
                         } else if (falloff == Urgency.SOFT) {
                             g.draw(new QuadCurve2D.Float(1f, 1f, x, 1f, x, height - fheight));
@@ -726,8 +733,8 @@ public final class UrgValPanel extends JPanel {
                     } else if (deadline == Urgency.EARLIEST) {
                         int x = segm * (index + 1);
                         if (falloff == Urgency.HARD) {
-                            int[] xs = new int[] {x, x, width - 1};
-                            int[] ys = new int[] {height - fheight, 1, 1};
+                            int[] xs = new int[]{x, x, width - 1};
+                            int[] ys = new int[]{height - fheight, 1, 1};
                             g.drawPolyline(xs, ys, 3);
                         } else if (falloff == Urgency.SOFT) {
                             g.draw(new QuadCurve2D.Float(x, height - fheight, x, 1f, width - 1f, 1f));
@@ -942,11 +949,12 @@ public final class UrgValPanel extends JPanel {
 
             private class CPUContent extends JPanel implements ContentPanelListener {
 
-                // Commented out for testing
                 private ModifyingInterdependency dependency;
                 private final JComboBox feature;
-                private final JTextField[] vreleases;
-                private final JTextField vpostpone;
+                private final JSpinner urgency;
+                private final JComboBox release;
+                private final JRadioButton exact, earliest, latest, hard, soft;
+                private final UVTab.UrgencyGraph graph;
 
                 private CPUContent() {
                     this.setBorder(new EmptyBorder(5, 10, 10, 80));
@@ -966,6 +974,7 @@ public final class UrgValPanel extends JPanel {
                     Project project = ProjectManager.getCurrentProject();
                     Dependencies deps = project.getDependencies();
                     Features features = project.getFeatures();
+                    Urgency urg;
 
                     ModifyingInterdependency[] mds = deps.getTypedDependencies(ModifyingInterdependency.class, Dependency.CU);
                     for (ModifyingInterdependency md : mds) {
@@ -976,8 +985,10 @@ public final class UrgValPanel extends JPanel {
                     }
 
                     if (this.dependency == null) {
-                        Urgency urg = ValueAndUrgency.createStandaloneUrgency();
+                        urg = ValueAndUrgency.createStandaloneUrgency();
                         this.dependency = deps.addModifyingInterdependency(features.getFeature(0), ChangePanel.this.feature, urg);
+                    } else {
+                        urg = this.dependency.getChange(Urgency.class);
                     }
 
                     this.feature = new JComboBox();
@@ -998,89 +1009,153 @@ public final class UrgValPanel extends JPanel {
                         }
                     });
 
-                    c = new Container();
-                    c.setLayout(new FlowLayout(FlowLayout.LEFT, 10, 0));
-                    this.add(BorderLayout.CENTER, c);
+                    Container content = new Container();
+                    content.setLayout(new GridLayout(2, 1, 10, 10));
+                    this.add(BorderLayout.LINE_START, content);
 
-                    Releases releases = project.getReleases();
-                    Urgency urgs = this.dependency.getChange(Urgency.class);
-                    FocusListener listener = new FocusListener() {
-                        @Override
-                        public void focusGained(FocusEvent fe) {
-                        }
+                    Container controls = new Container();
+                    controls.setLayout(new BorderLayout(32, 32));
+                    content.add(controls);
+
+                    Container combos = new Container();
+                    combos.setLayout(new BorderLayout());
+                    controls.add(BorderLayout.LINE_START, combos);
+
+                    c2 = new Container();
+                    c2.setLayout(new BorderLayout(5, 5));
+                    c2.add(BorderLayout.CENTER, new JLabel("Urgency"));
+                    c2.add(BorderLayout.LINE_END, this.urgency = new JSpinner(new SpinnerNumberModel(urg.getUrgency(), 0, 9, 1)));
+                    this.urgency.addChangeListener(new ChangeListener() {
 
                         @Override
-                        public void focusLost(FocusEvent fe) {
+                        public void stateChanged(ChangeEvent ce) {
                             try {
-                                JTextField tf = (JTextField) fe.getSource();
-                                Project proj = ProjectManager.getCurrentProject();
-                                Release rel = null;
-
-                                if (tf != CPUContent.this.vpostpone) {
-                                    JTextField[] tfs = CPUContent.this.vreleases;
-                                    Releases releases = proj.getReleases();
-                                    for (int i = 0; i < tfs.length; i++) {
-                                        if (tf == tfs[i]) {
-                                            rel = releases.getRelease(i);
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                Urgency urgs = CPUContent.this.dependency.getChange(Urgency.class);
+                                int urg = (Integer) CPUContent.this.urgency.getValue();
+                                CPUContent.this.dependency.getChange(Urgency.class).setUrgency(urg);
+                            } catch (Exception ex) {
+                                Messenger.showError(ex, null);
                                 try {
-                                    String txt = tf.getText();
-                                    int val = (txt.length() > 0) ? Integer.parseInt(txt) : 0;
-                                    //urgs.setUrgency(rel, val); // Commented out for testing
-                                    /* added for test
-                                     urgs.setUrgency(val);
-                                     urgs.setRelease(rel);
-                                     // added for test */
+                                    Urgency urg = CPUContent.this.dependency.getChange(Urgency.class);
+                                    CPUContent.this.urgency.setValue((Integer) urg.getUrgency());
                                 } catch (Exception ex2) {
                                     Messenger.showError(ex2, null);
                                 }
+                            }
+                        }
+                    });
+                    combos.add(BorderLayout.PAGE_START, c2);
 
-                                //int val = urgs.getUrgency(rel); // Commented out for testing
-                                /* added for test
-                                 int val = urgs.getUrgency();
-                                 // added for test */
-                                //tf.setText((val > 0) ? Integer.toString(val) : "");
+                    c2 = new Container();
+                    c2.setLayout(new BorderLayout(5, 5));
+                    c2.add(BorderLayout.CENTER, new JLabel("Release"));
+                    c2.add(BorderLayout.LINE_END, this.release = new JComboBox());
+                    combos.add(BorderLayout.PAGE_END, c2);
+
+                    this.release.addItem("None");
+                    this.release.setSelectedIndex(0);
+                    Releases releases = project.getReleases();
+                    int rcount = releases.getReleaseCount();
+                    Release urel = urg.getRelease();
+
+                    for (int i = 0; i < rcount; i++) {
+                        Release r = releases.getRelease(i);
+                        this.release.addItem(r.getName());
+
+                        if (urel == r) {
+                            this.release.setSelectedIndex(i + 1);
+                        }
+                    }
+
+                    this.release.addActionListener(new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent ae) {
+                            try {
+                                int index = CPUContent.this.release.getSelectedIndex();
+                                Project proj = ProjectManager.getCurrentProject();
+                                Releases releases = proj.getReleases();
+                                Release r = null;
+
+                                if (index > 0) {
+                                    r = releases.getRelease(index - 1);
+                                }
+
+                                Urgency urg = CPUContent.this.dependency.getChange(Urgency.class);
+                                urg.setRelease(r);
                             } catch (Exception ex) {
                                 Messenger.showError(ex, null);
                             }
+                            try {
+                                CPUContent.this.graph.setUrgency(CPUContent.this.dependency.getChange(Urgency.class));
+                            } catch (Exception ex) {
+                                CPUContent.this.graph.setUrgency(null);
+                            }
                         }
+
+                    });
+
+                    Container grid = new Container();
+                    grid.setLayout(new GridLayout(3, 2, 32, 4));
+                    controls.add(BorderLayout.CENTER, grid);
+                    ButtonGroup deadline = new ButtonGroup();
+                    ButtonGroup curve = new ButtonGroup();
+
+                    ActionListener alistener = new ActionListener() {
+
+                        @Override
+                        public void actionPerformed(ActionEvent ae) {
+                            try {
+                                int bits = CPUContent.this.exact.isSelected() ? Urgency.EXACT : 0;
+                                bits |= CPUContent.this.earliest.isSelected() ? Urgency.EARLIEST : 0;
+                                bits |= CPUContent.this.latest.isSelected() ? Urgency.LATEST : 0;
+                                bits |= CPUContent.this.hard.isSelected() ? Urgency.HARD : 0;
+                                bits |= CPUContent.this.soft.isSelected() ? Urgency.SOFT : 0;
+
+                                CPUContent.this.dependency.getChange(Urgency.class).setDeadlineCurve(bits);
+                            } catch (Exception ex) {
+                                Messenger.showError(ex, null);
+                            }
+                            try {
+                                CPUContent.this.graph.setUrgency(CPUContent.this.dependency.getChange(Urgency.class));
+                            } catch (Exception ex) {
+                                CPUContent.this.graph.setUrgency(null);
+                            }
+                        }
+
                     };
 
-                    String str = "        ";
-                    this.vreleases = new JTextField[releases.getReleaseCount()];
-                    for (int i = 0; i < this.vreleases.length; i++) {
-                        int urg = 0;//urgs.getUrgency(releases.getRelease(i));
-                        String val = (urg > 0) ? Integer.toString(urg) : "";
+                    this.exact = new JRadioButton("exact", (urg.getDeadlineCurve() & Urgency.DEADLYNE_MASK) == Urgency.EXACT);
+                    this.exact.addActionListener(alistener);
+                    deadline.add(this.exact);
+                    grid.add(this.exact);
 
-                        c2 = new Container();
-                        c2.setLayout(new GridLayout(2, 1, 2, 2));
-                        c2.add(this.vreleases[i] = new JTextField(val));
-                        c2.add(new JLabel(str + Integer.toString(i + 1) + str, JLabel.CENTER));
-                        this.vreleases[i].addFocusListener(listener);
-                        c.add(c2);
-                    }
+                    grid.add(new JLabel());
 
-                    {
-                        int urg = 0;//urgs.getUrgency(null);
-                        String val = (urg > 0) ? Integer.toString(urg) : "";
+                    this.earliest = new JRadioButton("earliest", (urg.getDeadlineCurve() & Urgency.DEADLYNE_MASK) == Urgency.EARLIEST);
+                    this.earliest.addActionListener(alistener);
+                    deadline.add(this.earliest);
+                    grid.add(this.earliest);
 
-                        c2 = new Container();
-                        c2.setLayout(new GridLayout(2, 1, 2, 2));
-                        c2.add(this.vpostpone = new JTextField(val));
-                        c2.add(new JLabel("  postpone  ", JLabel.CENTER));
-                        this.vpostpone.addFocusListener(listener);
-                        c.add(c2);
-                    }
+                    this.hard = new JRadioButton("hard", (urg.getDeadlineCurve() & Urgency.CURVE_MASK) == Urgency.HARD);
+                    this.hard.addActionListener(alistener);
+                    curve.add(this.hard);
+                    grid.add(this.hard);
+
+                    this.latest = new JRadioButton("latest", (urg.getDeadlineCurve() & Urgency.DEADLYNE_MASK) == Urgency.LATEST);
+                    this.latest.addActionListener(alistener);
+                    deadline.add(this.latest);
+                    grid.add(this.latest);
+
+                    this.soft = new JRadioButton("soft", (urg.getDeadlineCurve() & Urgency.CURVE_MASK) == Urgency.SOFT);
+                    this.soft.addActionListener(alistener);
+                    curve.add(this.soft);
+                    grid.add(this.soft);
+
+                    this.graph = new UVTab.UrgencyGraph(null);
+                    content.add(this.graph);
                 }
-                //
 
                 private void changeFeature() {
-                    // Commented out for testing
                     try {
                         Project project = ProjectManager.getCurrentProject();
                         Dependencies deps = project.getDependencies();
@@ -1092,37 +1167,18 @@ public final class UrgValPanel extends JPanel {
                         int index = this.feature.getSelectedIndex();
                         Feature f = feats.getFeature(index);
 
-                        Urgency urg = ValueAndUrgency.createStandaloneUrgency();
-                        for (int i = 0; i < this.vreleases.length; i++) {
-                            String txt = this.vreleases[i].getText();
-                            if (txt.length() > 0) {
-                                try {
-                                    int val = Integer.parseInt(txt);
-                                    //urg.setUrgency(rels.getRelease(i), val);
-
-                                } catch (Exception ex) {
-                                    this.vreleases[i].setText("");
-                                }
-                            }
-                        }
-                        if (this.vpostpone.getText().length() > 0) {
-                            try {
-                                int val = Integer.parseInt(this.vpostpone.getText());
-                                //urg.setUrgency(null, val);
-                            } catch (Exception ex) {
-                                this.vpostpone.setText("");
-                            }
-                        }
+                        Urgency urg = this.dependency.getChange(Urgency.class);
                         this.dependency = deps.addModifyingInterdependency(f, ChangePanel.this.feature, urg);
+                        this.graph.setUrgency(urg);
                     } catch (Exception ex) {
                         Messenger.showError(ex, null);
                     }
-                    //
+
                 }
 
                 @Override
                 public void contentPanelClosed(ContentPanel source) {
-                    ProjectManager.getCurrentProject().getDependencies().removeInterdependency(this.dependency); // Commented out for testing
+                    ProjectManager.getCurrentProject().getDependencies().removeInterdependency(this.dependency);
                     ChangePanel.this.closeChangePanel(ChangePanel.this.churg, source);
                 }
 
