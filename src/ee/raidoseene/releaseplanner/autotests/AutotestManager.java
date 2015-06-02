@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.autotests;
 
+import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.gui.Messenger;
 
@@ -22,5 +23,6 @@ public class AutotestManager {
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
+        //ProjectManager.closeCurrentProject();
     }
 }

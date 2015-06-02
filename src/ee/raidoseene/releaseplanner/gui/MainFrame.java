@@ -1,5 +1,6 @@
 package ee.raidoseene.releaseplanner.gui;
 
+import ee.raidoseene.releaseplanner.autotests.AutotestManager;
 import ee.raidoseene.releaseplanner.backend.ProjectFileFilter;
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.backend.ResourceManager;
@@ -194,6 +195,23 @@ public final class MainFrame extends JFrame {
             }
         });
         menu.add(item);
+        
+        //Autotests menu
+        menu = new JMenu("Autotests");
+        menubar.add(menu);
+
+        item = new JMenuItem("Test Project");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    MainFrame.this.testProject();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        menu.add(item);
     }
 
     private void createNewProject(boolean def) {
@@ -345,6 +363,21 @@ public final class MainFrame extends JFrame {
                 ProjectManager.createNewProject("");
                 ImportManager.importProject(ProjectManager.getCurrentProject(), file);
             }
+        } catch (Exception ex) {
+            Messenger.showError(ex, null);
+        }
+
+        if (ProjectManager.getCurrentProject() != null) {
+            this.setContentPane(new TabbedView());
+        } else {
+            this.setContentPane(new JPanel());
+        }
+        this.updateEnablity();
+    }
+    
+    private void testProject() {
+        try {
+            AutotestManager am = new AutotestManager();
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
