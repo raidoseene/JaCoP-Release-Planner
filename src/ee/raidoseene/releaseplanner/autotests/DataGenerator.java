@@ -21,33 +21,34 @@ import java.util.Random;
  * @author Raido Seene
  */
 public class DataGenerator {
-    
+
     public static Project generateProject(String name, AutotestSettings settings, int iterator) throws Exception {
         ProjectManager.createNewProject(name);
         Project project = ProjectManager.getCurrentProject();
-        
+
         generateResources(project.getResources(), settings, iterator);
         generateFeatures(project, settings, iterator);
         generateReleases(project, settings, iterator);
         generateStakeholders(project, settings, iterator);
+        generateValueAndUrgency(project, settings);
         generateDependencies(project, settings, iterator);
-        
+
         return project;
     }
-    
+
     private static void generateResources(Resources resources, AutotestSettings settings, int iterator) {
         int resNo = settings.getResourceNo();
-        
-        if(settings.getResourceInterval()) {
+
+        if (settings.getResourceInterval()) {
             resNo += iterator;
         }
-        
-        for(int r = 0; r < resNo; r++) {
+
+        for (int r = 0; r < resNo; r++) {
             Resource resource = resources.addResource();
             resource.setName("Res" + numberGenerator(r, resNo));
         }
     }
-    
+
     private static void generateFeatures(Project project, AutotestSettings settings, int iterator) {
         int resNo = settings.getResourceNo();
         int featNo = settings.getFeatureNo();
@@ -56,17 +57,17 @@ public class DataGenerator {
         Features features = project.getFeatures();
         Resources resources = project.getResources();
         Random random = new Random();
-        
-        if(settings.getFeatureInterval()) {
+
+        if (settings.getFeatureInterval()) {
             featNo += iterator;
         }
-        
-        for(int f = 0; f < featNo; f++) {
+
+        for (int f = 0; f < featNo; f++) {
             Feature feature = features.addFeature();
             feature.setName("F" + numberGenerator(f, featNo));
-            
-            for(int r = 0; r < resNo; r++) {
-                if((Math.random() > 0.4)) {
+
+            for (int r = 0; r < resNo; r++) {
+                if ((Math.random() > 0.4)) {
                     int consumption = random.nextInt(maxCons - minCons + 1) + minCons;
                     feature.setConsumption(resources.getResource(r), consumption);
                     settings.addResConsumption(r, consumption);
@@ -74,14 +75,14 @@ public class DataGenerator {
             }
             int randResId = random.nextInt(resNo);
             Resource randRes = resources.getResource(randResId);
-            if(!feature.hasConsumption(randRes)) {
+            if (!feature.hasConsumption(randRes)) {
                 int consumption = random.nextInt(maxCons - minCons) + minCons;
                 feature.setConsumption(randRes, consumption);
                 settings.addResConsumption(randResId, consumption);
             }
         }
     }
-    
+
     private static void generateReleases(Project project, AutotestSettings settings, int iterator) {
         int relNo = settings.getReleaseNo();
         int resNo = settings.getResourceNo();
@@ -89,55 +90,57 @@ public class DataGenerator {
         Releases releases = project.getReleases();
         Resources resources = project.getResources();
         Random random = new Random();
-        
-        if(settings.getReleaseInterval()) {
+
+        if (settings.getReleaseInterval()) {
             relNo += iterator;
         }
-        
-        for(int r = 0; r < relNo; r++) {
+
+        for (int r = 0; r < relNo; r++) {
             Release release = releases.addRelease();
             release.setName("Rel" + numberGenerator(r, relNo));
             release.setImportance(random.nextInt(9) + 1);
-            
-            for(int res = 0; res < resNo; res++) {
+
+            for (int res = 0; res < resNo; res++) {
                 int totalResConsumption = settings.getTotalResConsumption(res);
-                int capacity = (int)((float)totalResConsumption / (tightness * (float)relNo));
+                int capacity = (int) ((float) totalResConsumption / (tightness * (float) relNo));
                 release.setCapacity(resources.getResource(res), capacity);
             }
         }
     }
-    
+
     private static void generateStakeholders(Project project, AutotestSettings settings, int iterator) {
         int stkNo = settings.getStakeholderNo();
         Stakeholders stakeholders = project.getStakeholders();
         Random random = new Random();
-        
-        if(settings.getStakeholderInterval()) {
+
+        if (settings.getStakeholderInterval()) {
             stkNo += iterator;
         }
-        
-        for(int s = 0; s < stkNo; s++) {
+
+        for (int s = 0; s < stkNo; s++) {
             Stakeholder stakeholder = stakeholders.addStakeholder();
             stakeholder.setName("Stk" + numberGenerator(s, stkNo));
             stakeholder.setImportance(random.nextInt(9) + 1);
         }
     }
-    
-    private static void generateDependencies(Project project, AutotestSettings settings, int iterator) {
-        
+
+    private static void generateValueAndUrgency(Project project, AutotestSettings settings) {
     }
-    
+
+    private static void generateDependencies(Project project, AutotestSettings settings, int iterator) {
+    }
+
     public static String numberGenerator(int n, int amount) {
         String nString = Integer.toString(n + 1);
         int nLen = nString.length();
         int amountLen = Integer.toString(amount).length();
         int diff = amountLen - nLen;
-        
+
         char[] zeros = new char[diff];
         for (int i = 0; i < diff; i++) {
             zeros[i] = '0';
         }
-        
+
         return (new String(zeros) + nString);
     }
 }

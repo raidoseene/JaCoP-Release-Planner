@@ -229,6 +229,6 @@ public class AutotestSettings {
     }
     
     private void setProjectNo(int min, int max) {
-        this.projNo = max - min;
+        this.projNo = max - min + 1;
     }
 }

@@ -49,6 +49,16 @@ public final class DataManager {
         }
         return files;
     }
+    
+    public static void fileOutput(Project project, String content) throws Exception {
+        //File dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage()));
+        String dir = ResourceManager.getDirectory().toString();
+        File file = new File(dir, "result.txt");
+        
+        try (PrintWriter pw = new PrintWriter(file)) {
+            pw.append(content);
+        }
+    }
 
     private static File saveDataFile(Project project, boolean codeOutput, boolean postponedUrgency) throws Exception {
         File dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage()));

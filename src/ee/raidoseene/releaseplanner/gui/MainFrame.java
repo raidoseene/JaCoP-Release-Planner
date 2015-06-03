@@ -346,7 +346,7 @@ public final class MainFrame extends JFrame {
 
             //Solver.runSolver();
             Settings settings = SettingsManager.getCurrentSettings();
-            Solver.executeSimulation(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency());
+            Solver.executeSimulation(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency(), false);
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
@@ -379,9 +379,12 @@ public final class MainFrame extends JFrame {
     
     private void testProject() {
         try {
-            AutotestSettings ats = new AutotestSettings();
-            if (AutotestDialog.showAutotestDialog(ats)) {
-                DataGenerator.generateProject("name", ats);
+            AutotestManager am = new AutotestManager();
+            AutotestSettings settings = am.getSettings();
+            //AutotestSettings ats = new AutotestSettings();
+            if (AutotestDialog.showAutotestDialog(settings)) {
+                //DataGenerator.generateProject("name", ats);
+                am.startTesting();
             }
         } catch (Exception ex) {
             Messenger.showError(ex, null);

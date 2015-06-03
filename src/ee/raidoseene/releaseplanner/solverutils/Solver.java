@@ -6,7 +6,6 @@ package ee.raidoseene.releaseplanner.solverutils;
 
 import ee.raidoseene.releaseplanner.backend.InputListener;
 import ee.raidoseene.releaseplanner.backend.InputReader;
-import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import ee.raidoseene.releaseplanner.gui.Messenger;
@@ -27,7 +26,8 @@ import org.jacop.fz.Fz2jacop;
  */
 public class Solver {
 
-    public static void executeSimulation(Project project, boolean codeOutput, boolean postponedUrgency) throws IOException {
+    public static String executeSimulation(Project project, boolean codeOutput, boolean postponedUrgency, boolean saveOutput) throws IOException {
+        String output = "";
         // TO DO: check if all needed elements are filled in the project
         if (project.getFeatures().getFeatureCount() > 0 & project.getReleases().getReleaseCount() > 0 &
                 project.getResources().getResourceCount() > 0 & project.getStakeholders().getStakeholderCount() > 0) {
@@ -35,16 +35,17 @@ public class Solver {
             try {
                 //file = DataManager.saveDataFile(ProjectManager.getCurrentProject());
                 files = DataManager.initiateDataOutput(project, codeOutput, postponedUrgency);
-                runSolver(files, codeOutput);
+                output = runSolver(files, codeOutput, saveOutput);
             } catch (Exception ex) {
                 Messenger.showError(ex, null);
             }
         } else {
             Messenger.showError(null, "For simulation, features, releases, resources and stakeholder need to be defined!");
         }
+        return output;
     }
 
-    public static void runSolver(File[] files, boolean codeOutput) throws IOException {
+    public static String runSolver(File[] files, boolean codeOutput, boolean saveOutput) throws IOException {
         String minizincLocation = "C:/Program Files (x86)/MiniZinc 1.6/bin/mzn2fzn.bat";
         String outputFile = "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn";
         String solverCode;
@@ -145,7 +146,12 @@ public class Solver {
         sb.append("\nSolver Time: ");
         sb.append(end - start);
         sb.append("ms");
-        SolverOutputFrame.showSolverOutputFrame(sb.toString());
+        
+        String output = sb.toString();
+        if(!saveOutput) {
+            SolverOutputFrame.showSolverOutputFrame(output);
+        }
+        return output;
     }
 
     private static class Interceptor extends PrintStream {
