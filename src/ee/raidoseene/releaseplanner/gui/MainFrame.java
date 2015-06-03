@@ -1,6 +1,8 @@
 package ee.raidoseene.releaseplanner.gui;
 
 import ee.raidoseene.releaseplanner.autotests.AutotestManager;
+import ee.raidoseene.releaseplanner.autotests.AutotestSettings;
+import ee.raidoseene.releaseplanner.autotests.DataGenerator;
 import ee.raidoseene.releaseplanner.backend.ProjectFileFilter;
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.backend.ResourceManager;
@@ -377,7 +379,10 @@ public final class MainFrame extends JFrame {
     
     private void testProject() {
         try {
-            AutotestManager am = new AutotestManager();
+            AutotestSettings ats = new AutotestSettings();
+            if (AutotestDialog.showAutotestDialog(ats)) {
+                DataGenerator.generateProject("name", ats);
+            }
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }

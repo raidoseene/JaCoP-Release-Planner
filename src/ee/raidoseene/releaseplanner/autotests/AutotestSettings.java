@@ -16,7 +16,7 @@ public class AutotestSettings {
     private boolean projInterval, featInterval, relInterval, resInterval, stkInterval, tightnessInterval;
     private int[] totalResUsage;
 
-    AutotestSettings() {
+    public AutotestSettings() {
         
         this.projNo = 0;
         this.projInterval = false;
