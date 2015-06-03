@@ -22,27 +22,33 @@ import java.util.Random;
  */
 public class DataGenerator {
     
-    public static Project generateProject(String name, AutotestSettings settings) throws Exception {
+    public static Project generateProject(String name, AutotestSettings settings, int iterator) throws Exception {
         ProjectManager.createNewProject(name);
         Project project = ProjectManager.getCurrentProject();
         
-        generateResources(project.getResources(), settings);
-        generateFeatures(project, settings);
-        generateReleases(project, settings);
-        generateStakeholders(project, settings);
+        generateResources(project.getResources(), settings, iterator);
+        generateFeatures(project, settings, iterator);
+        generateReleases(project, settings, iterator);
+        generateStakeholders(project, settings, iterator);
+        generateDependencies(project, settings, iterator);
         
         return project;
     }
     
-    private static void generateResources(Resources resources, AutotestSettings settings) {
+    private static void generateResources(Resources resources, AutotestSettings settings, int iterator) {
         int resNo = settings.getResourceNo();
+        
+        if(settings.getResourceInterval()) {
+            resNo += iterator;
+        }
+        
         for(int r = 0; r < resNo; r++) {
             Resource resource = resources.addResource();
             resource.setName("Res" + numberGenerator(r, resNo));
         }
     }
     
-    private static void generateFeatures(Project project, AutotestSettings settings) {
+    private static void generateFeatures(Project project, AutotestSettings settings, int iterator) {
         int resNo = settings.getResourceNo();
         int featNo = settings.getFeatureNo();
         int minCons = settings.getMinConsumption();
@@ -50,6 +56,10 @@ public class DataGenerator {
         Features features = project.getFeatures();
         Resources resources = project.getResources();
         Random random = new Random();
+        
+        if(settings.getFeatureInterval()) {
+            featNo += iterator;
+        }
         
         for(int f = 0; f < featNo; f++) {
             Feature feature = features.addFeature();
@@ -72,13 +82,17 @@ public class DataGenerator {
         }
     }
     
-    private static void generateReleases(Project project, AutotestSettings settings) {
+    private static void generateReleases(Project project, AutotestSettings settings, int iterator) {
         int relNo = settings.getReleaseNo();
         int resNo = settings.getResourceNo();
         float tightness = settings.getTightness();
         Releases releases = project.getReleases();
         Resources resources = project.getResources();
         Random random = new Random();
+        
+        if(settings.getReleaseInterval()) {
+            relNo += iterator;
+        }
         
         for(int r = 0; r < relNo; r++) {
             Release release = releases.addRelease();
@@ -93,10 +107,14 @@ public class DataGenerator {
         }
     }
     
-    private static void generateStakeholders(Project project, AutotestSettings settings) {
+    private static void generateStakeholders(Project project, AutotestSettings settings, int iterator) {
         int stkNo = settings.getStakeholderNo();
         Stakeholders stakeholders = project.getStakeholders();
         Random random = new Random();
+        
+        if(settings.getStakeholderInterval()) {
+            stkNo += iterator;
+        }
         
         for(int s = 0; s < stkNo; s++) {
             Stakeholder stakeholder = stakeholders.addStakeholder();
@@ -105,7 +123,11 @@ public class DataGenerator {
         }
     }
     
-    private static String numberGenerator(int n, int amount) {
+    private static void generateDependencies(Project project, AutotestSettings settings, int iterator) {
+        
+    }
+    
+    public static String numberGenerator(int n, int amount) {
         String nString = Integer.toString(n + 1);
         int nLen = nString.length();
         int amountLen = Integer.toString(amount).length();

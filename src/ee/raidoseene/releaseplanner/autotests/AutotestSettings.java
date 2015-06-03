@@ -65,6 +65,9 @@ public class AutotestSettings {
 
     public void setFeatureNo(int featNo) {
         this.featNo = featNo;
+        if(this.featInterval) {
+            setProjectNo(featNo, this.featTo);
+        }
     }
 
     public int getFeatureNo() {
@@ -81,6 +84,7 @@ public class AutotestSettings {
     
     public void setFeatureTo(int featTo) {
         this.featTo = featTo;
+        setProjectNo(this.featNo, featTo);
     }
 
     public int getFeatureTo() {
@@ -89,6 +93,9 @@ public class AutotestSettings {
     
     public void setReleaseNo(int relNo) {
         this.relNo = relNo;
+        if(this.relInterval) {
+            setProjectNo(relNo, this.relTo);
+        }
     }
     
     public int getReleaseNo() {
@@ -105,6 +112,7 @@ public class AutotestSettings {
     
     public void setReleaseTo(int relTo) {
         this.relTo = relTo;
+        setProjectNo(this.relNo, relTo);
     }
     
     public int getReleaseTo() {
@@ -113,6 +121,9 @@ public class AutotestSettings {
     
     public void setResourceNo(int resNo) {
         this.resNo = resNo;
+        if(this.resInterval) {
+            setProjectNo(resNo, this.resTo);
+        }
     }
     
     public int getResourceNo() {
@@ -129,6 +140,7 @@ public class AutotestSettings {
     
     public void setResourceTo(int resTo) {
         this.resNo = resTo;
+        setProjectNo(this.resNo, resTo);
     }
     
     public int getResourceTo() {
@@ -137,6 +149,9 @@ public class AutotestSettings {
     
     public void setStakeholderNo(int stkNo) {
         this.stkNo = stkNo;
+        if(this.stkInterval) {
+            setProjectNo(stkNo, this.stkTo);
+        }
     }
     
     public int getStakeholderNo() {
@@ -153,6 +168,7 @@ public class AutotestSettings {
     
     public void setStakeholderTo(int stkTo) {
         this.stkTo = stkTo;
+        setProjectNo(this.stkNo, stkTo);
     }
     
     public int getStakeholderTo() {
@@ -161,6 +177,7 @@ public class AutotestSettings {
     
     public void setTightness(float tightness) {
         this.tightness = tightness;
+        // Add setting ProjectNo
     }
     
     public float getTightness() {
@@ -177,6 +194,7 @@ public class AutotestSettings {
     
     public void setTightnessTo(float tightnessTo) {
         this.tightnessTo = tightnessTo;
+        // Add setting ProjectNo
     }
     
     public float getTightnessTo() {
@@ -208,5 +226,9 @@ public class AutotestSettings {
     
     public int getTotalResConsumption(int id) {
         return this.totalResUsage[id];
+    }
+    
+    private void setProjectNo(int min, int max) {
+        this.projNo = max - min;
     }
 }
