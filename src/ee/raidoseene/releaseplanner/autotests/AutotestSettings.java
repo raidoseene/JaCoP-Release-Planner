@@ -217,10 +217,11 @@ public class AutotestSettings {
         return this.maxCons;
     }
     
+    public void initializeResConsumption() {
+        this.totalResUsage = new int[this.resNo];
+    }
+    
     public void addResConsumption(int id, int consumption) {
-        if(this.totalResUsage == null) {
-            this.totalResUsage = new int[this.resNo];
-        }
         this.totalResUsage[id] += consumption;
     }
     

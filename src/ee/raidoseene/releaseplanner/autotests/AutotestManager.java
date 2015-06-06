@@ -4,7 +4,6 @@
  */
 package ee.raidoseene.releaseplanner.autotests;
 
-import ee.raidoseene.releaseplanner.backend.ProjectFileFilter;
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.backend.Settings;
@@ -13,7 +12,7 @@ import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import ee.raidoseene.releaseplanner.gui.Messenger;
 import ee.raidoseene.releaseplanner.solverutils.Solver;
-import java.awt.FileDialog;
+import ee.raidoseene.releaseplanner.solverutils.SolverResult;
 import java.io.File;
 
 /**
@@ -34,20 +33,34 @@ public class AutotestManager {
 
     public void startTesting() {
         Project project;
-        String output = "";
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sbTimes = new StringBuilder();
         int projNo = this.settings.getProjectNo();
+        SolverResult sr = null;
 
         for (int i = 0; i < projNo; i++) {
             try {
                 String projName = "Project " + DataGenerator.numberGenerator(i, projNo);
                 project = DataGenerator.generateProject(projName, this.settings, i);
+                StringBuilder sbProject = new StringBuilder();
+                StringBuilder sbResult = new StringBuilder();
+                StringBuilder sbTime = new StringBuilder();
 
                 saveProject(project);
-                sb.append(projName + " simulation result\n");
-                sb.append(runSolver());
-                sb.append("********************************************\n\n");
-                testingResultsFile(project, sb.toString());
+                sr = runSolver();
+                
+                sbProject.append(projName + " simulation result:\n");
+                sbTime.append("Solver Time: " + sr.getTime() + "ms");
+                
+                sbResult.append(sbProject);
+                sbResult.append(sr.getResult() + "\n\n");
+                sbResult.append("\n\n********************************************\n\n");
+                
+                sbTimes.append(sbProject);
+                sbTimes.append(sbTime);
+                sbTimes.append("\n********************************************\n\n");
+                
+                testingResultsFile(project, sbTimes.toString());
+                projectResultFile(project, sbResult.toString());
             } catch (Exception ex) {
                 Messenger.showError(ex, null);
             }
@@ -73,8 +86,8 @@ public class AutotestManager {
         }
     }
     
-    private String runSolver() {
-        String output = "";
+    private SolverResult runSolver() {
+        SolverResult sr = null;
         
         try {
             if (ProjectManager.getCurrentProject().getStorage() == null) {
@@ -83,16 +96,22 @@ public class AutotestManager {
             }
 
             Settings s = SettingsManager.getCurrentSettings();
-            output = Solver.executeSimulation(ProjectManager.getCurrentProject(), s.getCodeOutput(), s.getPostponedUrgency(), true);
+            sr = Solver.executeSimulation(ProjectManager.getCurrentProject(), s.getCodeOutput(), s.getPostponedUrgency(), true);
             //DataManager.fileOutput(project, output);
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
         
-        return output;
+        return sr;
     }
     
     private void testingResultsFile(Project project, String output) throws Exception {
-        DataManager.fileOutput(project, output);
+        String dir = ResourceManager.getDirectory().toString();
+        DataManager.fileOutput(project, output, dir);
+    }
+    
+    private void projectResultFile(Project project, String output) throws Exception {
+        String dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage())).getAbsolutePath();
+        DataManager.fileOutput(project, output, dir);
     }
 }

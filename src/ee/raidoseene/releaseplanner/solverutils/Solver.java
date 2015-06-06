@@ -26,8 +26,8 @@ import org.jacop.fz.Fz2jacop;
  */
 public class Solver {
 
-    public static String executeSimulation(Project project, boolean codeOutput, boolean postponedUrgency, boolean saveOutput) throws IOException {
-        String output = "";
+    public static SolverResult executeSimulation(Project project, boolean codeOutput, boolean postponedUrgency, boolean saveOutput) throws IOException {
+        SolverResult sr = null;
         // TO DO: check if all needed elements are filled in the project
         if (project.getFeatures().getFeatureCount() > 0 & project.getReleases().getReleaseCount() > 0 &
                 project.getResources().getResourceCount() > 0 & project.getStakeholders().getStakeholderCount() > 0) {
@@ -35,17 +35,17 @@ public class Solver {
             try {
                 //file = DataManager.saveDataFile(ProjectManager.getCurrentProject());
                 files = DataManager.initiateDataOutput(project, codeOutput, postponedUrgency);
-                output = runSolver(files, codeOutput, saveOutput);
+                sr = runSolver(files, codeOutput, saveOutput);
             } catch (Exception ex) {
                 Messenger.showError(ex, null);
             }
         } else {
             Messenger.showError(null, "For simulation, features, releases, resources and stakeholder need to be defined!");
         }
-        return output;
+        return sr;
     }
 
-    public static String runSolver(File[] files, boolean codeOutput, boolean saveOutput) throws IOException {
+    public static SolverResult runSolver(File[] files, boolean codeOutput, boolean saveOutput) throws IOException {
         String minizincLocation = "C:/Program Files (x86)/MiniZinc 1.6/bin/mzn2fzn.bat";
         String outputFile = "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn";
         String solverCode;
@@ -110,7 +110,7 @@ public class Solver {
 
             @Override
             public void finishedReading() {
-                System.out.println("Done!");
+                //System.out.println("Done!");
             }
         };
 
@@ -144,14 +144,17 @@ public class Solver {
         System.out.println("Solver Time: " + (end - start) + "ms");
         
         sb.append("\nSolver Time: ");
-        sb.append(end - start);
+        long time = end - start;
+        sb.append(time);
         sb.append("ms");
         
-        String output = sb.toString();
+        String result = sb.toString();
+        SolverResult sr = new SolverResult(result, time);
         if(!saveOutput) {
-            SolverOutputFrame.showSolverOutputFrame(output);
+            SolverOutputFrame.showSolverOutputFrame(result);
         }
-        return output;
+        //return output;
+        return sr;
     }
 
     private static class Interceptor extends PrintStream {

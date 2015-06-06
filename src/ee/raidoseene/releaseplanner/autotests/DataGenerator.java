@@ -14,6 +14,8 @@ import ee.raidoseene.releaseplanner.datamodel.Resource;
 import ee.raidoseene.releaseplanner.datamodel.Resources;
 import ee.raidoseene.releaseplanner.datamodel.Stakeholder;
 import ee.raidoseene.releaseplanner.datamodel.Stakeholders;
+import ee.raidoseene.releaseplanner.datamodel.Urgency;
+import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
 import java.util.Random;
 
 /**
@@ -21,6 +23,9 @@ import java.util.Random;
  * @author Raido Seene
  */
 public class DataGenerator {
+
+    private static int[] urgCurve = new int[]{0x10, 0x21, 0x22, 0x31, 0x32};
+    private static int urgCurveLen = urgCurve.length;
 
     public static Project generateProject(String name, AutotestSettings settings, int iterator) throws Exception {
         ProjectManager.createNewProject(name);
@@ -54,8 +59,11 @@ public class DataGenerator {
         int featNo = settings.getFeatureNo();
         int minCons = settings.getMinConsumption();
         int maxCons = settings.getMaxConsumption();
-        Features features = project.getFeatures();
+        int midCons = (int) ((maxCons - minCons + 1) * 0.6);
+
         Resources resources = project.getResources();
+        Features features = project.getFeatures();
+        settings.initializeResConsumption();
         Random random = new Random();
 
         if (settings.getFeatureInterval()) {
@@ -67,8 +75,15 @@ public class DataGenerator {
             feature.setName("F" + numberGenerator(f, featNo));
 
             for (int r = 0; r < resNo; r++) {
-                if ((Math.random() > 0.4)) {
-                    int consumption = random.nextInt(maxCons - minCons + 1) + minCons;
+                if (Math.random() > 0.4) {
+                    int consumption = generateRandCons(random, minCons, midCons, maxCons);
+                    /*
+                    if (Math.random() > 0.3) {
+                        consumption = random.nextInt(midCons - minCons + 1) + minCons;
+                    } else {
+                        consumption = random.nextInt(maxCons - midCons + 1) + minCons;
+                    }
+                    */
                     feature.setConsumption(resources.getResource(r), consumption);
                     settings.addResConsumption(r, consumption);
                 }
@@ -76,11 +91,24 @@ public class DataGenerator {
             int randResId = random.nextInt(resNo);
             Resource randRes = resources.getResource(randResId);
             if (!feature.hasConsumption(randRes)) {
-                int consumption = random.nextInt(maxCons - minCons) + minCons;
+                int consumption = generateRandCons(random, minCons, midCons, maxCons);
+                //int consumption = random.nextInt(maxCons - minCons) + minCons;
                 feature.setConsumption(randRes, consumption);
                 settings.addResConsumption(randResId, consumption);
             }
         }
+    }
+
+    private static int generateRandCons(Random random, int minCons, int midCons, int maxCons) {
+        int consumption;
+        
+        if (Math.random() > 0.4) {
+            consumption = random.nextInt(midCons - minCons + 1) + minCons;
+        } else {
+            consumption = random.nextInt(maxCons - minCons + 1) + minCons;
+        }
+
+        return consumption;
     }
 
     private static void generateReleases(Project project, AutotestSettings settings, int iterator) {
@@ -125,6 +153,50 @@ public class DataGenerator {
     }
 
     private static void generateValueAndUrgency(Project project, AutotestSettings settings) {
+        int stkNo = settings.getStakeholderNo();
+        int featNo = settings.getFeatureNo();
+        int relNo = settings.getReleaseNo();
+        Random random = new Random();
+
+        for (int f = 0; f < featNo; f++) {
+            int valCounter = 0;
+            for (int s = 0; s < stkNo; s++) {
+                if (Math.random() > 0.5) {
+                    valCounter++;
+
+                    randValAndUrg(project, relNo, f, s);
+                }
+            }
+            if (valCounter == 0) {
+                int s = random.nextInt(stkNo);
+                randValAndUrg(project, relNo, f, s);
+            }
+        }
+    }
+
+    private static void randValAndUrg(Project project, int relNo, int f, int s) {
+        ValueAndUrgency valueAndUrgency = project.getValueAndUrgency();
+        Stakeholders stakeholders = project.getStakeholders();
+        Features features = project.getFeatures();
+        Releases releases = project.getReleases();
+
+        Random random = new Random();
+        Stakeholder stk;
+        Feature feat;
+        Urgency urg;
+
+        feat = features.getFeature(f);
+        stk = stakeholders.getStakeholder(s);
+        int randVal = random.nextInt(9) + 1;
+        int randUrg = random.nextInt(9) + 1;
+        int randRel = random.nextInt(relNo);
+        int randUrgCurve = random.nextInt(urgCurveLen);
+
+        valueAndUrgency.setValue(stk, feat, randVal);
+        urg = valueAndUrgency.getUrgencyObject(stk, feat);
+        urg.setUrgency(randUrg);
+        urg.setRelease(releases.getRelease(randRel));
+        urg.setDeadlineCurve(urgCurve[randUrgCurve]);
     }
 
     private static void generateDependencies(Project project, AutotestSettings settings, int iterator) {
