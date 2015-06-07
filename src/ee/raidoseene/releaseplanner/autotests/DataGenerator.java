@@ -24,8 +24,13 @@ import java.util.Random;
  */
 public class DataGenerator {
 
-    private static int[] urgCurve = new int[]{0x10, 0x21, 0x22, 0x31, 0x32};
-    private static int urgCurveLen = urgCurve.length;
+    private static final int[] urgCurve = new int[]{
+        Urgency.EXACT,
+        Urgency.EARLIEST | Urgency.HARD,
+        Urgency.EARLIEST | Urgency.SOFT,
+        Urgency.LATEST | Urgency.HARD,
+        Urgency.LATEST | Urgency.SOFT};
+    private static final int urgCurveLen = urgCurve.length;
 
     public static Project generateProject(String name, AutotestSettings settings, int iterator) throws Exception {
         ProjectManager.createNewProject(name);
@@ -77,13 +82,6 @@ public class DataGenerator {
             for (int r = 0; r < resNo; r++) {
                 if (Math.random() > 0.4) {
                     int consumption = generateRandCons(random, minCons, midCons, maxCons);
-                    /*
-                    if (Math.random() > 0.3) {
-                        consumption = random.nextInt(midCons - minCons + 1) + minCons;
-                    } else {
-                        consumption = random.nextInt(maxCons - midCons + 1) + minCons;
-                    }
-                    */
                     feature.setConsumption(resources.getResource(r), consumption);
                     settings.addResConsumption(r, consumption);
                 }
@@ -92,7 +90,6 @@ public class DataGenerator {
             Resource randRes = resources.getResource(randResId);
             if (!feature.hasConsumption(randRes)) {
                 int consumption = generateRandCons(random, minCons, midCons, maxCons);
-                //int consumption = random.nextInt(maxCons - minCons) + minCons;
                 feature.setConsumption(randRes, consumption);
                 settings.addResConsumption(randResId, consumption);
             }
@@ -200,6 +197,7 @@ public class DataGenerator {
     }
 
     private static void generateDependencies(Project project, AutotestSettings settings, int iterator) {
+        
     }
 
     public static String numberGenerator(int n, int amount) {
