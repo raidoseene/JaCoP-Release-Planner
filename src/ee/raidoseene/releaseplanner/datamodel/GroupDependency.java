@@ -13,11 +13,12 @@ import java.io.Serializable;
 public class GroupDependency extends Dependency implements Serializable {
 
     private static final long serialVersionUID = 1;
+    
     private Group group;
     private int fCount;
 
-    GroupDependency(Group group, int fCount, int subType) {
-        super(subType);
+    GroupDependency(Group group, int fCount, int type) {
+        super(type);
         this.group = group;
         this.fCount = fCount;
     }
@@ -33,13 +34,12 @@ public class GroupDependency extends Dependency implements Serializable {
     public int getType() {
         return this.type;
     }
-    
+
     public void setFeatureCount(int fCount) {
         this.fCount = fCount;
     }
-    
+
     public void setGroup(Group group) {
         this.group = group;
     }
-    
 }

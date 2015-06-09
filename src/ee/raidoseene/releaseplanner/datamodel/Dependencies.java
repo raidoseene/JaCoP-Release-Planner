@@ -4,7 +4,6 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
-import ee.raidoseene.releaseplanner.gui.Messenger;
 import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -17,123 +16,92 @@ import java.util.List;
 public class Dependencies extends ProjectElement implements Serializable {
 
     private static final long serialVersionUID = 1;
-    private final List<Dependency> interdependenciesContainer;
+    private final List<Dependency> dependenciesContainer;
 
     Dependencies(Project project) {
         super(project);
 
-        this.interdependenciesContainer = new ArrayList<>();
+        this.dependenciesContainer = new ArrayList<>();
     }
 
-    public FixedDependency addFixedDependency(Feature feature, Release release) {
-        if (capacityCheck(feature, release)) {
-            FixedDependency dependency = new FixedDependency(feature, release);
-            this.interdependenciesContainer.add(dependency);
-            return dependency;
+    public ReleaseDependency addReleaseDependency(Feature feature, Release release, int type) {
+        if (capacityCheck(feature, release, type)) {
+            ReleaseDependency dep = new ReleaseDependency(feature, release, type);
+            this.dependenciesContainer.add(dep);
+            return dep;
         } else {
             throw new RuntimeException("Adding another FIXED dependency to release " + release.getName()
                     + " will violate release capacity!");
         }
     }
 
-    public Interdependency addInterdependency(Feature feature1, Feature feature2, int type) {
-        Interdependency dependency = new Interdependency(feature1, feature2, type);
-        this.interdependenciesContainer.add(dependency);
-        return dependency;
-    }
-
-    public ModifyingInterdependency addModifyingInterdependency(Feature feature1, Feature feature2, Feature feature) {
-        ModifyingInterdependency dependency = new ModifyingInterdependency(feature1, feature2, feature);
-        this.interdependenciesContainer.add(dependency);
-        return dependency;
-    }
-
-    public ModifyingInterdependency addModifyingInterdependency(Feature feature1, Feature feature2, Value value) {
-        ModifyingInterdependency dependency = new ModifyingInterdependency(feature1, feature2, value);
-        this.interdependenciesContainer.add(dependency);
-        return dependency;
-    }
-
-    public ModifyingInterdependency addModifyingInterdependency(Feature feature1, Feature feature2, Urgency urgency) {
-        ModifyingInterdependency dependency = new ModifyingInterdependency(feature1, feature2, urgency);
-        this.interdependenciesContainer.add(dependency);
+    public OrderDependency addOrderDependency(Feature feature1, Feature feature2, int type) {
+        OrderDependency dependency = new OrderDependency(feature1, feature2, type);
+        this.dependenciesContainer.add(dependency);
         return dependency;
     }
     
+    public ExistanceDependency addExistanceDependency(Feature feature1, Feature feature2, int type) {
+        ExistanceDependency dependency = new ExistanceDependency(feature1, feature2, type);
+        this.dependenciesContainer.add(dependency);
+        return dependency;
+    }
+
+    public ModifyingParameterDependency addModifyingParameterDependency(Feature feature1, Feature feature2, Feature feature) {
+        ModifyingParameterDependency dependency = new ModifyingParameterDependency(feature1, feature2, feature);
+        this.dependenciesContainer.add(dependency);
+        return dependency;
+    }
+
+    public ModifyingParameterDependency addModifyingParameterDependency(Feature feature1, Feature feature2, Value value) {
+        ModifyingParameterDependency dependency = new ModifyingParameterDependency(feature1, feature2, value);
+        this.dependenciesContainer.add(dependency);
+        return dependency;
+    }
+
+    public ModifyingParameterDependency addModifyingParameterDependency(Feature feature1, Feature feature2, Urgency urgency) {
+        ModifyingParameterDependency dependency = new ModifyingParameterDependency(feature1, feature2, urgency);
+        this.dependenciesContainer.add(dependency);
+        return dependency;
+    }
+
     public GroupDependency addAtLeastGroupDependency(Group group, int featureCount) {
         GroupDependency dependency = new GroupDependency(group, featureCount, Dependency.ATLEAST);
-        this.interdependenciesContainer.add(dependency);
+        this.dependenciesContainer.add(dependency);
         return dependency;
     }
-    
+
     public GroupDependency addExactlyGroupDependency(Group group, int featureCount) {
         GroupDependency dependency = new GroupDependency(group, featureCount, Dependency.EXACTLY);
-        this.interdependenciesContainer.add(dependency);
+        this.dependenciesContainer.add(dependency);
         return dependency;
     }
-    
+
     public GroupDependency addAtMostGroupDependency(Group group, int featureCount) {
         GroupDependency dependency = new GroupDependency(group, featureCount, Dependency.ATMOST);
-        this.interdependenciesContainer.add(dependency);
+        this.dependenciesContainer.add(dependency);
         return dependency;
     }
 
     public void removeInterdependency(Dependency dependency) {
-        if (this.interdependenciesContainer.remove(dependency) && super.parent != null) {
+        if (this.dependenciesContainer.remove(dependency) && super.parent != null) {
             super.parent.dependencyRemoved(dependency);
         }
     }
 
     public Dependency getInterdependency(int index) {
-        return this.interdependenciesContainer.get(index);
+        return this.dependenciesContainer.get(index);
     }
 
     public int getDependencyCount() {
-        return this.interdependenciesContainer.size();
+        return this.dependenciesContainer.size();
     }
 
-    /*
-     public int getDependencyCount(DependencyType type) {
-     int counter = 0;
-     for(int i = 0; i < getDependencyCount(); i++) {
-     if(getInterdependency(i).getType() == type) {
-     counter ++;
-     }
-     }
-     return counter;
-     }
-     */
-    /*
-     public List<Dependency> getDependencyList(DependencyType type) {
-     List<Dependency> list = new ArrayList<>();
-        
-     for(int i = 0; i < getDependencyCount(); i++) {
-     if(getInterdependency(i).getType() == type) {
-     list.add(getInterdependency(i));
-     }
-     }
-     return list;
-     }
-     */
-    /*
-     public List<Dependency> getInterdependencyList(DependencyType type, int subType) {
-     List<Dependency> dList = getDependencyList(type);
-     List<Dependency> list = new ArrayList<>();
-        
-     for(int i = 0; i < dList.size(); i++) {
-     Interdependency id = ((Interdependency)dList.get(i));
-     if(id.getDependencySubType() == subType) {
-     list.add(id);
-     }
-     }
-     return list;
-     }
-     */
     /**
      * Query only certain types of dependencies. For example, to get all
      * instances of
-     * <code>FixedDependancy</code>: FixedDependency[] fds =
-     * dependencies.getTypedDependencies(FixedDependency.class, null);
+     * <code>FixedDependancy</code>: ReleaseDependency[] fds =
+     * dependencies.getTypedDependencies(ReleaseDependency.class, null);
      *
      * @param <T> type of dependencies to query
      * @param cls class that represents the type T
@@ -142,8 +110,8 @@ public class Dependencies extends ProjectElement implements Serializable {
      */
     @SuppressWarnings("unchecked")
     public <T extends Dependency> T[] getTypedDependencies(Class<T> cls, Integer criterium) {
-        ArrayList<T> list = new ArrayList<>(this.interdependenciesContainer.size());
-        for (Dependency d : this.interdependenciesContainer) {
+        ArrayList<T> list = new ArrayList<>(this.dependenciesContainer.size());
+        for (Dependency d : this.dependenciesContainer) {
             if (cls.isInstance(d) && (criterium == null || d.type == criterium)) {
                 list.add((T) d);
             }
@@ -155,7 +123,7 @@ public class Dependencies extends ProjectElement implements Serializable {
     public int getTypedDependancyCount(Class<? extends Dependency> cls, Integer criterium) {
         int count = 0;
 
-        for (Dependency d : this.interdependenciesContainer) {
+        for (Dependency d : this.dependenciesContainer) {
             if (cls.isInstance(d) && (criterium == null || d.type == criterium)) {
                 count++;
             }
@@ -164,24 +132,29 @@ public class Dependencies extends ProjectElement implements Serializable {
         return count;
     }
 
-    private boolean capacityCheck(Feature feature, Release release) {
-        Resources resources = super.getProject().getResources();
-        FixedDependency[] fixed = getTypedDependencies(FixedDependency.class, Dependency.FIXED);
-        int sum;
-        boolean check = true;
+    private boolean capacityCheck(Feature feature, Release release, int type) {
+        // add support for LATER and EARLIER release dependencies
+        if (type == Dependency.FIXED) {
+            Resources resources = super.getProject().getResources();
+            ReleaseDependency[] fixed = getTypedDependencies(ReleaseDependency.class, Dependency.FIXED);
+            int sum;
+            boolean check = true;
 
-        for (int res = 0; res < resources.getResourceCount(); res++) {
-            sum = feature.getConsumption(resources.getResource(res));
-            for (FixedDependency f : fixed) {
-                sum += (f.getRelease() == release ? f.getFeature().getConsumption(resources.getResource(res)) : 0);
+            for (int res = 0; res < resources.getResourceCount(); res++) {
+                sum = feature.getConsumption(resources.getResource(res));
+                for (ReleaseDependency f : fixed) {
+                    sum += (f.getRelease() == release ? f.getFeature().getConsumption(resources.getResource(res)) : 0);
+                }
+                if (sum <= release.getCapacity(resources.getResource(res))) {
+                    check = check && true;
+                } else {
+                    check = false;
+                }
             }
-            if (sum <= release.getCapacity(resources.getResource(res))) {
-                check = check && true;
-            } else {
-                check = false;
-            }
+
+            return check;
+        } else {
+            return true;
         }
-
-        return check;
     }
 }

@@ -12,7 +12,7 @@ import ee.raidoseene.releaseplanner.datamodel.Features;
 import ee.raidoseene.releaseplanner.datamodel.Group;
 import ee.raidoseene.releaseplanner.datamodel.Groups;
 import ee.raidoseene.releaseplanner.datamodel.Dependencies;
-import ee.raidoseene.releaseplanner.datamodel.ModifyingInterdependency;
+import ee.raidoseene.releaseplanner.datamodel.ModifyingParameterDependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Resource;
 import ee.raidoseene.releaseplanner.datamodel.Resources;
@@ -119,9 +119,9 @@ public final class FeaturesPanel extends JPanel {
             public void layoutContainer(Container cntnr) {
                 Component[] comps = cntnr.getComponents();
                 int height = cntnr.getHeight();
-                int x = 300;
+                int x = 850;
 
-                comps[0].setBounds(0, 0, 300, height);
+                comps[0].setBounds(0, 0, 850, height);
                 for (int i = 1; i < comps.length; i++) {
                     int w = comps[i].getPreferredSize().width;
                     comps[i].setBounds(x + 10, 0, w, height);
@@ -215,7 +215,7 @@ public final class FeaturesPanel extends JPanel {
 
     private final class DepHandler extends JPanel {
 
-        private final JToggleButton fixed, and, req, pre, xor;
+        private final JToggleButton fixed, excluded, earlier, later, softPrecedence, hardPrecedence, coupling, separation, and, xor;
         private final ArrayList<FPContent> selections;
         private final ActionListener listener;
 
@@ -230,33 +230,123 @@ public final class FeaturesPanel extends JPanel {
                         Object source = ae.getSource();
                         if (source == DepHandler.this.fixed) {
                             boolean state = DepHandler.this.fixed.isSelected();
-                            DepHandler.this.req.setEnabled(!state);
-                            DepHandler.this.pre.setEnabled(!state);
+                            
+                            DepHandler.this.excluded.setEnabled(!state);
+                            DepHandler.this.earlier.setEnabled(!state);
+                            DepHandler.this.later.setEnabled(!state);
+                            DepHandler.this.softPrecedence.setEnabled(!state);
+                            DepHandler.this.hardPrecedence.setEnabled(!state);
+                            DepHandler.this.coupling.setEnabled(!state);
+                            DepHandler.this.separation.setEnabled(!state);
                             DepHandler.this.and.setEnabled(!state);
                             DepHandler.this.xor.setEnabled(!state);
-                        } else if (source == DepHandler.this.req) {
-                            boolean state = DepHandler.this.req.isSelected();
+                        } else if (source == DepHandler.this.excluded) {
+                            boolean state = DepHandler.this.excluded.isSelected();
+                            
                             DepHandler.this.fixed.setEnabled(!state);
-                            DepHandler.this.pre.setEnabled(!state);
+                            DepHandler.this.earlier.setEnabled(!state);
+                            DepHandler.this.later.setEnabled(!state);
+                            DepHandler.this.softPrecedence.setEnabled(!state);
+                            DepHandler.this.hardPrecedence.setEnabled(!state);
+                            DepHandler.this.coupling.setEnabled(!state);
+                            DepHandler.this.separation.setEnabled(!state);
                             DepHandler.this.and.setEnabled(!state);
                             DepHandler.this.xor.setEnabled(!state);
-                        } else if (source == DepHandler.this.pre) {
-                            boolean state = DepHandler.this.pre.isSelected();
+                        } else if (source == DepHandler.this.earlier) {
+                            boolean state = DepHandler.this.earlier.isSelected();
+                            
                             DepHandler.this.fixed.setEnabled(!state);
-                            DepHandler.this.req.setEnabled(!state);
+                            DepHandler.this.excluded.setEnabled(!state);
+                            DepHandler.this.later.setEnabled(!state);
+                            DepHandler.this.softPrecedence.setEnabled(!state);
+                            DepHandler.this.hardPrecedence.setEnabled(!state);
+                            DepHandler.this.coupling.setEnabled(!state);
+                            DepHandler.this.separation.setEnabled(!state);
+                            DepHandler.this.and.setEnabled(!state);
+                            DepHandler.this.xor.setEnabled(!state);
+                        } else if (source == DepHandler.this.later) {
+                            boolean state = DepHandler.this.later.isSelected();
+                            
+                            DepHandler.this.fixed.setEnabled(!state);
+                            DepHandler.this.excluded.setEnabled(!state);
+                            DepHandler.this.earlier.setEnabled(!state);
+                            DepHandler.this.softPrecedence.setEnabled(!state);
+                            DepHandler.this.hardPrecedence.setEnabled(!state);
+                            DepHandler.this.coupling.setEnabled(!state);
+                            DepHandler.this.separation.setEnabled(!state);
+                            DepHandler.this.and.setEnabled(!state);
+                            DepHandler.this.xor.setEnabled(!state);
+                        } else if (source == DepHandler.this.softPrecedence) {
+                            boolean state = DepHandler.this.softPrecedence.isSelected();
+                            
+                            DepHandler.this.fixed.setEnabled(!state);
+                            DepHandler.this.excluded.setEnabled(!state);
+                            DepHandler.this.earlier.setEnabled(!state);
+                            DepHandler.this.later.setEnabled(!state);
+                            DepHandler.this.hardPrecedence.setEnabled(!state);
+                            DepHandler.this.coupling.setEnabled(!state);
+                            DepHandler.this.separation.setEnabled(!state);
+                            DepHandler.this.and.setEnabled(!state);
+                            DepHandler.this.xor.setEnabled(!state);
+                        } else if (source == DepHandler.this.hardPrecedence) {
+                            boolean state = DepHandler.this.hardPrecedence.isSelected();
+                            
+                            DepHandler.this.fixed.setEnabled(!state);
+                            DepHandler.this.excluded.setEnabled(!state);
+                            DepHandler.this.earlier.setEnabled(!state);
+                            DepHandler.this.later.setEnabled(!state);
+                            DepHandler.this.softPrecedence.setEnabled(!state);
+                            DepHandler.this.coupling.setEnabled(!state);
+                            DepHandler.this.separation.setEnabled(!state);
+                            DepHandler.this.and.setEnabled(!state);
+                            DepHandler.this.xor.setEnabled(!state);
+                        } else if (source == DepHandler.this.coupling) {
+                            boolean state = DepHandler.this.coupling.isSelected();
+                            
+                            DepHandler.this.fixed.setEnabled(!state);
+                            DepHandler.this.excluded.setEnabled(!state);
+                            DepHandler.this.earlier.setEnabled(!state);
+                            DepHandler.this.later.setEnabled(!state);
+                            DepHandler.this.softPrecedence.setEnabled(!state);
+                            DepHandler.this.hardPrecedence.setEnabled(!state);
+                            DepHandler.this.separation.setEnabled(!state);
+                            DepHandler.this.and.setEnabled(!state);
+                            DepHandler.this.xor.setEnabled(!state);
+                        } else if (source == DepHandler.this.separation) {
+                            boolean state = DepHandler.this.separation.isSelected();
+                            
+                            DepHandler.this.fixed.setEnabled(!state);
+                            DepHandler.this.excluded.setEnabled(!state);
+                            DepHandler.this.earlier.setEnabled(!state);
+                            DepHandler.this.later.setEnabled(!state);
+                            DepHandler.this.softPrecedence.setEnabled(!state);
+                            DepHandler.this.hardPrecedence.setEnabled(!state);
+                            DepHandler.this.coupling.setEnabled(!state);
                             DepHandler.this.and.setEnabled(!state);
                             DepHandler.this.xor.setEnabled(!state);
                         } else if (source == DepHandler.this.and) {
                             boolean state = DepHandler.this.and.isSelected();
+                            
                             DepHandler.this.fixed.setEnabled(!state);
-                            DepHandler.this.req.setEnabled(!state);
-                            DepHandler.this.pre.setEnabled(!state);
+                            DepHandler.this.excluded.setEnabled(!state);
+                            DepHandler.this.earlier.setEnabled(!state);
+                            DepHandler.this.later.setEnabled(!state);
+                            DepHandler.this.softPrecedence.setEnabled(!state);
+                            DepHandler.this.hardPrecedence.setEnabled(!state);
+                            DepHandler.this.coupling.setEnabled(!state);
+                            DepHandler.this.separation.setEnabled(!state);
                             DepHandler.this.xor.setEnabled(!state);
                         } else if (source == DepHandler.this.xor) {
                             boolean state = DepHandler.this.xor.isSelected();
+                            
                             DepHandler.this.fixed.setEnabled(!state);
-                            DepHandler.this.req.setEnabled(!state);
-                            DepHandler.this.pre.setEnabled(!state);
+                            DepHandler.this.excluded.setEnabled(!state);
+                            DepHandler.this.earlier.setEnabled(!state);
+                            DepHandler.this.later.setEnabled(!state);
+                            DepHandler.this.softPrecedence.setEnabled(!state);
+                            DepHandler.this.hardPrecedence.setEnabled(!state);
+                            DepHandler.this.coupling.setEnabled(!state);
+                            DepHandler.this.separation.setEnabled(!state);
                             DepHandler.this.and.setEnabled(!state);
                         }
 
@@ -269,20 +359,40 @@ public final class FeaturesPanel extends JPanel {
                     }
                 }
             };
-
+            
             this.fixed = new JToggleButton("FIXED");
             this.fixed.addActionListener(this.listener);
             this.add(this.fixed);
+            
+            this.excluded = new JToggleButton("EXCLUDED");
+            this.excluded.addActionListener(this.listener);
+            this.add(this.excluded);
+            
+            this.earlier = new JToggleButton("EARLIER");
+            this.earlier.addActionListener(this.listener);
+            this.add(this.earlier);
+            
+            this.later = new JToggleButton("LATER");
+            this.later.addActionListener(this.listener);
+            this.add(this.later);
 
             this.add(new JSeparator(JSeparator.VERTICAL));
 
-            this.req = new JToggleButton("REQ");
-            this.req.addActionListener(this.listener);
-            this.add(this.req);
+            this.softPrecedence = new JToggleButton("SOFTPRECEDENCE");
+            this.softPrecedence.addActionListener(this.listener);
+            this.add(this.softPrecedence);
 
-            this.pre = new JToggleButton("PRE");
-            this.pre.addActionListener(this.listener);
-            this.add(this.pre);
+            this.hardPrecedence = new JToggleButton("HARDPRECEDENCE");
+            this.hardPrecedence.addActionListener(this.listener);
+            this.add(this.hardPrecedence);
+            
+            this.coupling = new JToggleButton("COUPLING");
+            this.coupling.addActionListener(this.listener);
+            this.add(this.coupling);
+
+            this.separation = new JToggleButton("SEPARATION");
+            this.separation.addActionListener(this.listener);
+            this.add(this.separation);
 
             this.add(new JSeparator(JSeparator.VERTICAL));
 
@@ -305,34 +415,88 @@ public final class FeaturesPanel extends JPanel {
             if (this.fixed.isSelected()) {
                 if (this.selections.size() == 1) {
                     Feature f = this.selections.get(0).feature;
-                    FixedDependencyDialog.showFixedDependencyDialog(f);
+                    FixedDependencyDialog.showFixedDependencyDialog(f, Dependency.FIXED);
 
                     this.fixed.setSelected(false);
                     ActionEvent ae = new ActionEvent(this.fixed, ActionEvent.ACTION_PERFORMED, null);
                     this.listener.actionPerformed(ae);
                 }
                 return true;
-            } else if (this.req.isSelected()) {
-                if (this.selections.size() == 2) {
-                    Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
-                    Feature f1 = this.selections.get(0).feature;
-                    Feature f2 = this.selections.get(1).feature;
-                    ids.addInterdependency(f1, f2, Dependency.REQ);
+            } else if (this.excluded.isSelected()) {
+                if (this.selections.size() == 1) {
+                    Feature f = this.selections.get(0).feature;
+                    FixedDependencyDialog.showFixedDependencyDialog(f, Dependency.EXCLUDED);
 
-                    this.req.setSelected(false);
-                    ActionEvent ae = new ActionEvent(this.req, ActionEvent.ACTION_PERFORMED, null);
+                    this.excluded.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.excluded, ActionEvent.ACTION_PERFORMED, null);
+                    this.listener.actionPerformed(ae);
+                }
+                return true;   
+            } else if (this.earlier.isSelected()) {
+                if (this.selections.size() == 1) {
+                    Feature f = this.selections.get(0).feature;
+                    FixedDependencyDialog.showFixedDependencyDialog(f, Dependency.EARLIER);
+
+                    this.earlier.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.earlier, ActionEvent.ACTION_PERFORMED, null);
                     this.listener.actionPerformed(ae);
                 }
                 return true;
-            } else if (this.pre.isSelected()) {
+            } else if (this.later.isSelected()) {
+                if (this.selections.size() == 1) {
+                    Feature f = this.selections.get(0).feature;
+                    FixedDependencyDialog.showFixedDependencyDialog(f, Dependency.LATER);
+
+                    this.later.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.later, ActionEvent.ACTION_PERFORMED, null);
+                    this.listener.actionPerformed(ae);
+                }
+                return true;
+            } else if (this.softPrecedence.isSelected()) {
                 if (this.selections.size() == 2) {
                     Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
                     Feature f1 = this.selections.get(0).feature;
                     Feature f2 = this.selections.get(1).feature;
-                    ids.addInterdependency(f1, f2, Dependency.PRE);
+                    ids.addOrderDependency(f1, f2, Dependency.SOFTPRECEDENCE);
 
-                    this.pre.setSelected(false);
-                    ActionEvent ae = new ActionEvent(this.pre, ActionEvent.ACTION_PERFORMED, null);
+                    this.softPrecedence.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.softPrecedence, ActionEvent.ACTION_PERFORMED, null);
+                    this.listener.actionPerformed(ae);
+                }
+                return true;
+            } else if (this.hardPrecedence.isSelected()) {
+                if (this.selections.size() == 2) {
+                    Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
+                    Feature f1 = this.selections.get(0).feature;
+                    Feature f2 = this.selections.get(1).feature;
+                    ids.addOrderDependency(f1, f2, Dependency.HARDPRECEDENCE);
+
+                    this.hardPrecedence.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.hardPrecedence, ActionEvent.ACTION_PERFORMED, null);
+                    this.listener.actionPerformed(ae);
+                }
+                return true;
+            } else if (this.coupling.isSelected()) {
+                if (this.selections.size() == 2) {
+                    Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
+                    Feature f1 = this.selections.get(0).feature;
+                    Feature f2 = this.selections.get(1).feature;
+                    ids.addOrderDependency(f1, f2, Dependency.COUPLING);
+
+                    this.coupling.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.coupling, ActionEvent.ACTION_PERFORMED, null);
+                    this.listener.actionPerformed(ae);
+                }
+                return true;
+            } else if (this.separation.isSelected()) {
+                if (this.selections.size() == 2) {
+                    Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
+                    Feature f1 = this.selections.get(0).feature;
+                    Feature f2 = this.selections.get(1).feature;
+                    ids.addOrderDependency(f1, f2, Dependency.SEPARATION);
+
+                    this.separation.setSelected(false);
+                    ActionEvent ae = new ActionEvent(this.separation, ActionEvent.ACTION_PERFORMED, null);
                     this.listener.actionPerformed(ae);
                 }
                 return true;
@@ -341,7 +505,7 @@ public final class FeaturesPanel extends JPanel {
                     Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
                     Feature f1 = this.selections.get(0).feature;
                     Feature f2 = this.selections.get(1).feature;
-                    ids.addInterdependency(f1, f2, Dependency.AND);
+                    ids.addExistanceDependency(f1, f2, Dependency.AND);
 
                     this.and.setSelected(false);
                     ActionEvent ae = new ActionEvent(this.and, ActionEvent.ACTION_PERFORMED, null);
@@ -353,7 +517,7 @@ public final class FeaturesPanel extends JPanel {
                     Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
                     Feature f1 = this.selections.get(0).feature;
                     Feature f2 = this.selections.get(1).feature;
-                    ids.addInterdependency(f1, f2, Dependency.XOR);
+                    ids.addExistanceDependency(f1, f2, Dependency.XOR);
 
                     this.xor.setSelected(false);
                     ActionEvent ae = new ActionEvent(this.xor, ActionEvent.ACTION_PERFORMED, null);
@@ -510,8 +674,8 @@ public final class FeaturesPanel extends JPanel {
             bg.add(this.days);
 
             Project project = ProjectManager.getCurrentProject();
-            ModifyingInterdependency[] deps = project.getDependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CC);
-            for (ModifyingInterdependency dep : deps) {
+            ModifyingParameterDependency[] deps = project.getDependencies().getTypedDependencies(ModifyingParameterDependency.class, Dependency.CC);
+            for (ModifyingParameterDependency dep : deps) {
                 if (dep.getSecondary() == this.feature) {
                     this.openChangePanel(this.chcost);
                     break;
@@ -748,7 +912,7 @@ public final class FeaturesPanel extends JPanel {
 
         private final class FPCCContent extends JPanel implements ContentPanelListener, HierarchyListener {
 
-            private ModifyingInterdependency dependency;
+            private ModifyingParameterDependency dependency;
             private final JComboBox feature;
             private final ArrayList<JTextField> texts;
             private final ArrayList<JComboBox> combos;
@@ -891,10 +1055,10 @@ public final class FeaturesPanel extends JPanel {
 
             private void reinitializeDependency() {
                 Project project = ProjectManager.getCurrentProject();
-                ModifyingInterdependency[] deps = project.getDependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CC);
+                ModifyingParameterDependency[] deps = project.getDependencies().getTypedDependencies(ModifyingParameterDependency.class, Dependency.CC);
                 Feature feat = FPContent.this.feature;
 
-                for (ModifyingInterdependency dep : deps) {
+                for (ModifyingParameterDependency dep : deps) {
                     if (dep.getSecondary() == feat) {
                         this.dependency = dep;
                         return;
@@ -903,7 +1067,7 @@ public final class FeaturesPanel extends JPanel {
 
                 Feature f = Features.createStandaloneFeature();
                 Feature f1 = project.getFeatures().getFeature(0);
-                this.dependency = project.getDependencies().addModifyingInterdependency(f1, feat, f);
+                this.dependency = project.getDependencies().addModifyingParameterDependency(f1, feat, f);
             }
 
             private void reinitializeElements() {
@@ -977,7 +1141,7 @@ public final class FeaturesPanel extends JPanel {
                         Resource r = rsrcs.getResource(i);
                         f.setConsumption(r, old.getConsumption(r));
                     }
-                    this.dependency = deps.addModifyingInterdependency(f1, FPContent.this.feature, f);
+                    this.dependency = deps.addModifyingParameterDependency(f1, FPContent.this.feature, f);
                 } catch (Exception ex) {
                     Messenger.showError(ex, null);
                 }

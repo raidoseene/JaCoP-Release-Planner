@@ -12,7 +12,7 @@ import ee.raidoseene.releaseplanner.datamodel.Feature;
 import ee.raidoseene.releaseplanner.datamodel.Features;
 import ee.raidoseene.releaseplanner.datamodel.Group;
 import ee.raidoseene.releaseplanner.datamodel.Groups;
-import ee.raidoseene.releaseplanner.datamodel.ModifyingInterdependency;
+import ee.raidoseene.releaseplanner.datamodel.ModifyingParameterDependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Release;
 import ee.raidoseene.releaseplanner.datamodel.Releases;
@@ -786,8 +786,8 @@ public final class UrgValPanel extends JPanel {
                 this.chpanel.setLayout(new ContentListLayout(Container.class));
 
                 Dependencies deps = ProjectManager.getCurrentProject().getDependencies();
-                ModifyingInterdependency[] mds = deps.getTypedDependencies(ModifyingInterdependency.class, null);
-                for (ModifyingInterdependency md : mds) {
+                ModifyingParameterDependency[] mds = deps.getTypedDependencies(ModifyingParameterDependency.class, null);
+                for (ModifyingParameterDependency md : mds) {
                     if (md.getSecondary() == ChangePanel.this.feature) {
                         if (md.type == Dependency.CV) {
                             this.openChangePanel(this.chval);
@@ -835,7 +835,7 @@ public final class UrgValPanel extends JPanel {
 
             private class CPVContent extends JPanel implements ContentPanelListener {
 
-                private ModifyingInterdependency dependency;
+                private ModifyingParameterDependency dependency;
                 private final JComboBox feature;
                 private final JSpinner value;
 
@@ -854,8 +854,8 @@ public final class UrgValPanel extends JPanel {
                     Dependencies deps = project.getDependencies();
                     Features features = project.getFeatures();
 
-                    ModifyingInterdependency[] mds = deps.getTypedDependencies(ModifyingInterdependency.class, Dependency.CV);
-                    for (ModifyingInterdependency md : mds) {
+                    ModifyingParameterDependency[] mds = deps.getTypedDependencies(ModifyingParameterDependency.class, Dependency.CV);
+                    for (ModifyingParameterDependency md : mds) {
                         if (md.getSecondary() == ChangePanel.this.feature) {
                             this.dependency = md;
                             break;
@@ -864,7 +864,7 @@ public final class UrgValPanel extends JPanel {
 
                     if (this.dependency == null) {
                         Value val = new Value(ChangePanel.this.feature, ChangePanel.this.stakeholder);
-                        this.dependency = deps.addModifyingInterdependency(features.getFeature(0), val.getFeature(), val);
+                        this.dependency = deps.addModifyingParameterDependency(features.getFeature(0), val.getFeature(), val);
                     }
 
                     this.feature = new JComboBox();
@@ -924,7 +924,7 @@ public final class UrgValPanel extends JPanel {
                         Feature f = feats.getFeature(index);
 
                         Value val = new Value(ChangePanel.this.feature, ChangePanel.this.stakeholder);
-                        this.dependency = deps.addModifyingInterdependency(f, val.getFeature(), val);
+                        this.dependency = deps.addModifyingParameterDependency(f, val.getFeature(), val);
                     } catch (Exception ex) {
                         Messenger.showError(ex, null);
                     }
@@ -947,7 +947,7 @@ public final class UrgValPanel extends JPanel {
 
             private class CPUContent extends JPanel implements ContentPanelListener {
 
-                private ModifyingInterdependency dependency;
+                private ModifyingParameterDependency dependency;
                 private final JComboBox feature;
                 private final JSpinner urgency;
                 private final JComboBox release;
@@ -974,8 +974,8 @@ public final class UrgValPanel extends JPanel {
                     Features features = project.getFeatures();
                     Urgency urg;
 
-                    ModifyingInterdependency[] mds = deps.getTypedDependencies(ModifyingInterdependency.class, Dependency.CU);
-                    for (ModifyingInterdependency md : mds) {
+                    ModifyingParameterDependency[] mds = deps.getTypedDependencies(ModifyingParameterDependency.class, Dependency.CU);
+                    for (ModifyingParameterDependency md : mds) {
                         if (md.getSecondary() == ChangePanel.this.feature) {
                             this.dependency = md;
                             break;
@@ -984,7 +984,7 @@ public final class UrgValPanel extends JPanel {
 
                     if (this.dependency == null) {
                         urg = ValueAndUrgency.createStandaloneUrgency();
-                        this.dependency = deps.addModifyingInterdependency(features.getFeature(0), ChangePanel.this.feature, urg);
+                        this.dependency = deps.addModifyingParameterDependency(features.getFeature(0), ChangePanel.this.feature, urg);
                     } else {
                         urg = this.dependency.getChange(Urgency.class);
                     }
@@ -1166,7 +1166,7 @@ public final class UrgValPanel extends JPanel {
                         Feature f = feats.getFeature(index);
 
                         Urgency urg = this.dependency.getChange(Urgency.class);
-                        this.dependency = deps.addModifyingInterdependency(f, ChangePanel.this.feature, urg);
+                        this.dependency = deps.addModifyingParameterDependency(f, ChangePanel.this.feature, urg);
                         this.graph.setUrgency(urg);
                     } catch (Exception ex) {
                         Messenger.showError(ex, null);

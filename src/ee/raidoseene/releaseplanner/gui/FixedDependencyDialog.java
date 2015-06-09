@@ -26,15 +26,18 @@ import javax.swing.border.EmptyBorder;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public class FixedDependencyDialog extends JDialog {
 
     private final Feature feature;
     private final JComboBox release;
     private boolean state = false;
+    private int type;
 
-    private FixedDependencyDialog(Feature f) {
+    private FixedDependencyDialog(Feature f, int type) {
+        this.type = type;
+        
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         Dimension size = new Dimension(400, 200);
 
@@ -76,7 +79,7 @@ public class FixedDependencyDialog extends JDialog {
                     Releases rels = ProjectManager.getCurrentProject().getReleases();
                     Release rel = rels.getRelease(FixedDependencyDialog.this.release.getSelectedIndex());
                     Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
-                    ids.addFixedDependency(FixedDependencyDialog.this.feature, rel);
+                    ids.addReleaseDependency(FixedDependencyDialog.this.feature, rel, FixedDependencyDialog.this.type);
                     FixedDependencyDialog.this.state = true;
 
                     FixedDependencyDialog.this.dispose();
@@ -103,8 +106,8 @@ public class FixedDependencyDialog extends JDialog {
         c.add(btn);
     }
 
-    public static boolean showFixedDependencyDialog(Feature f) {
-        FixedDependencyDialog dialog = new FixedDependencyDialog(f);
+    public static boolean showFixedDependencyDialog(Feature f, int type) {
+        FixedDependencyDialog dialog = new FixedDependencyDialog(f, type);
         dialog.setVisible(true);
         return dialog.state;
     }

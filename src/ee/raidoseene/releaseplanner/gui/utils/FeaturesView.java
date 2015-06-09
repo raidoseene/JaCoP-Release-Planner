@@ -8,20 +8,18 @@ import ee.raidoseene.releaseplanner.datamodel.Dependencies;
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
 import ee.raidoseene.releaseplanner.datamodel.Features;
-import ee.raidoseene.releaseplanner.datamodel.FixedDependency;
-import ee.raidoseene.releaseplanner.datamodel.Interdependency;
+import ee.raidoseene.releaseplanner.datamodel.ReleaseDependency;
+import ee.raidoseene.releaseplanner.datamodel.OrderDependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
-import java.lang.reflect.Array;
-import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  *
- * @author Raido
+ * @author Raido Seene
  */
 public class FeaturesView {
 
+    // Logic needs to be finished
     private Features features;
     private Dependencies dependencies;
     private final Feature[] featureContainer;
@@ -44,16 +42,17 @@ public class FeaturesView {
 
     private void sortFeatures(Features features) {
         if (this.dependencies.getDependencyCount()
-                - this.dependencies.getTypedDependancyCount(FixedDependency.class, Dependency.FIXED)
+                - this.dependencies.getTypedDependancyCount(ReleaseDependency.class, Dependency.FIXED)
                 >= 0) {
             LinkedList list = new LinkedList();
-            addDepFeatures(Interdependency.class, Dependency.AND, list);
-            addDepFeatures(Interdependency.class, Dependency.REQ, list);
-            addDepFeatures(Interdependency.class, Dependency.PRE, list);
-            addDepFeatures(Interdependency.class, Dependency.XOR, list);
-            addDepFeatures(Interdependency.class, Dependency.CC, list);
-            addDepFeatures(Interdependency.class, Dependency.CV, list);
-            addDepFeatures(Interdependency.class, Dependency.CU, list);
+            addDepFeatures(OrderDependency.class, Dependency.SOFTPRECEDENCE, list);
+            addDepFeatures(OrderDependency.class, Dependency.HARDPRECEDENCE, list);
+            addDepFeatures(OrderDependency.class, Dependency.COUPLING, list);
+            addDepFeatures(OrderDependency.class, Dependency.SEPARATION, list);
+            addDepFeatures(OrderDependency.class, Dependency.XOR, list);
+            addDepFeatures(OrderDependency.class, Dependency.CC, list);
+            addDepFeatures(OrderDependency.class, Dependency.CV, list);
+            addDepFeatures(OrderDependency.class, Dependency.CU, list);
             addNonDepFeatures(features, list);
 
             for (int i = 0; i < list.size(); i++) {
@@ -66,7 +65,7 @@ public class FeaturesView {
         }
     }
 
-    private <T extends Interdependency> void addDepFeatures(Class<T> cls, Integer criterium, LinkedList list) {
+    private <T extends OrderDependency> void addDepFeatures(Class<T> cls, Integer criterium, LinkedList list) {
         T[] depList = dependencies.getTypedDependencies(cls, criterium);
 
         for (int i = 0; i < this.dependencies.getTypedDependancyCount(cls, criterium); i++) {

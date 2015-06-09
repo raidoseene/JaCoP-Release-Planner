@@ -5,10 +5,11 @@
 package ee.raidoseene.releaseplanner.dataoutput;
 
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
+import ee.raidoseene.releaseplanner.datamodel.ExistanceDependency;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
-import ee.raidoseene.releaseplanner.datamodel.FixedDependency;
+import ee.raidoseene.releaseplanner.datamodel.ReleaseDependency;
 import ee.raidoseene.releaseplanner.datamodel.GroupDependency;
-import ee.raidoseene.releaseplanner.datamodel.Interdependency;
+import ee.raidoseene.releaseplanner.datamodel.OrderDependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 
 /**
@@ -26,17 +27,24 @@ public class DependencyManager {
     public static final int SECONDARY = 0x12;
 
     private static class DataPackage {
-
         private Project project;
         private Project modDep;
-        private FixedDependency[] FixDS;
-        private Interdependency[] AndDS;
-        private Interdependency[] ReqDS;
-        private Interdependency[] MReqDS;
-        private Interdependency[] PreDS;
-        private Interdependency[] MPreDS;
-        private Interdependency[] XorDS;
-        private Interdependency[] MXorDS;
+        private ReleaseDependency[] FixedDS;
+        private ReleaseDependency[] ExcludedDS;
+        private ReleaseDependency[] EarlierDS;
+        private ReleaseDependency[] LaterDS;
+        
+        private OrderDependency[] SoftPrecedenceDS;
+        private OrderDependency[] MSoftPrecedenceDS;
+        private OrderDependency[] HardPrecedenceDS;
+        private OrderDependency[] MHardPrecedenceDS;
+        private OrderDependency[] CouplingDS;
+        private OrderDependency[] SeparationDS;
+        
+        private ExistanceDependency[] AndDS;
+        private ExistanceDependency[] XorDS;
+        private ExistanceDependency[] MXorDS;
+        
         private GroupDependency[] AtLeastDS;
         private GroupDependency[] ExactlyDS;
         private GroupDependency[] AtMostDS;
@@ -44,14 +52,22 @@ public class DependencyManager {
         private DataPackage(Project project, Project modDep) {
             this.project = project;
             this.modDep = modDep;
-            this.FixDS = project.getDependencies().getTypedDependencies(FixedDependency.class, Dependency.FIXED);
-            this.AndDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.AND);
-            this.ReqDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.REQ);
-            this.MReqDS = modDep.getDependencies().getTypedDependencies(Interdependency.class, Dependency.REQ);
-            this.PreDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.PRE);
-            this.MPreDS = modDep.getDependencies().getTypedDependencies(Interdependency.class, Dependency.PRE);
-            this.XorDS = project.getDependencies().getTypedDependencies(Interdependency.class, Dependency.XOR);
-            this.MXorDS = modDep.getDependencies().getTypedDependencies(Interdependency.class, Dependency.XOR);
+            this.FixedDS = project.getDependencies().getTypedDependencies(ReleaseDependency.class, Dependency.FIXED);
+            this.ExcludedDS = project.getDependencies().getTypedDependencies(ReleaseDependency.class, Dependency.EXCLUDED);
+            this.EarlierDS = project.getDependencies().getTypedDependencies(ReleaseDependency.class, Dependency.EARLIER);
+            this.LaterDS = project.getDependencies().getTypedDependencies(ReleaseDependency.class, Dependency.LATER);
+            
+            this.SoftPrecedenceDS = project.getDependencies().getTypedDependencies(OrderDependency.class, Dependency.SOFTPRECEDENCE);
+            this.MSoftPrecedenceDS = modDep.getDependencies().getTypedDependencies(OrderDependency.class, Dependency.SOFTPRECEDENCE);
+            this.HardPrecedenceDS = project.getDependencies().getTypedDependencies(OrderDependency.class, Dependency.HARDPRECEDENCE);
+            this.MHardPrecedenceDS = modDep.getDependencies().getTypedDependencies(OrderDependency.class, Dependency.HARDPRECEDENCE);
+            this.CouplingDS = project.getDependencies().getTypedDependencies(OrderDependency.class, Dependency.COUPLING);
+            this.SeparationDS = project.getDependencies().getTypedDependencies(OrderDependency.class, Dependency.SEPARATION);
+            
+            this.AndDS = project.getDependencies().getTypedDependencies(ExistanceDependency.class, Dependency.AND);
+            this.XorDS = project.getDependencies().getTypedDependencies(ExistanceDependency.class, Dependency.XOR);
+            this.MXorDS = modDep.getDependencies().getTypedDependencies(ExistanceDependency.class, Dependency.XOR);
+            
             this.AtLeastDS = project.getDependencies().getTypedDependencies(GroupDependency.class, Dependency.ATLEAST);
             this.ExactlyDS = project.getDependencies().getTypedDependencies(GroupDependency.class, Dependency.EXACTLY);
             this.AtMostDS = project.getDependencies().getTypedDependencies(GroupDependency.class, Dependency.ATMOST);
@@ -64,7 +80,8 @@ public class DependencyManager {
         if (codeOutput) {
             return getDependencyCode(dp);
         } else {
-            return getDependencyRawData(dp);
+            return "Existing code file solution deprecated!";
+            //return getDependencyRawData(dp);
         }
     }
 
@@ -78,15 +95,16 @@ public class DependencyManager {
 
     private static String getDependencyCode(DataPackage dp) {
         StringBuilder sb = new StringBuilder();
-
+        
         // Non-XOR features
         sb.append("% Non-XOR dependencies" + "\n");
         if (dp.XorDS.length > 0 || dp.MXorDS.length > 0) {
             for (int i = 0; i < dp.project.getFeatures().getFeatureCount(); i++) {
-                boolean xor = false;
-                xor = xor || isXOR(dp.project.getFeatures().getFeature(i), dp.XorDS);
-                xor = xor || isXOR(dp.project.getFeatures().getFeature(i), dp.MXorDS);
-                if (!xor) {
+                boolean xorAnd = false;
+                xorAnd = xorAnd || isXOR(dp.project.getFeatures().getFeature(i), dp.XorDS);
+                xorAnd = xorAnd || isXOR(dp.project.getFeatures().getFeature(i), dp.MXorDS);
+                xorAnd = xorAnd || isAND(dp.project.getFeatures().getFeature(i), dp.AndDS);
+                if (!xorAnd) {
                     sb.append("constraint x["
                             + (i + 1) + "] > 0;"
                             + "\n");
@@ -112,66 +130,143 @@ public class DependencyManager {
             }
         }
 
-
+        sb.append("% Release related dependencies:" + "\n");
+        
         // Fixed release
         sb.append("% FIXED dependencies" + "\n");
-        if (dp.FixDS.length > 0) {
-            for (int i = 0; i < dp.FixDS.length; i++) {
+        if (dp.FixedDS.length > 0) {
+            for (int i = 0; i < dp.FixedDS.length; i++) {
                 boolean xor = false;
-                xor = xor || isXOR(dp.FixDS[i], dp.XorDS);
-                xor = xor || isXOR(dp.FixDS[i], dp.MXorDS);
+                xor = xor || isXOR(dp.FixedDS[i], dp.XorDS);
+                xor = xor || isXOR(dp.FixedDS[i], dp.MXorDS);
                 if (!xor) {
                     sb.append("constraint x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.FixDS[i].getFeature()) + 1) + "] = "
-                            + (dp.project.getReleases().getReleaseIndex(dp.FixDS[i].getRelease()) + 1) + ";"
+                            + (dp.project.getFeatures().getFeatureIndex(dp.FixedDS[i].getFeature()) + 1) + "] = "
+                            + (dp.project.getReleases().getReleaseIndex(dp.FixedDS[i].getRelease()) + 1) + ";"
                             + "\n");
                 } else {
-                    // Is the following part needed?
                     sb.append("constraint x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.FixDS[i].getFeature()) + 1) + "] = "
-                            + (dp.project.getReleases().getReleaseIndex(dp.FixDS[i].getRelease()) + 1) + " \\/ x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.FixDS[i].getFeature()) + 1) + " = 0;"
+                            + (dp.project.getFeatures().getFeatureIndex(dp.FixedDS[i].getFeature()) + 1) + "] = "
+                            + (dp.project.getReleases().getReleaseIndex(dp.FixedDS[i].getRelease()) + 1) + " \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.FixedDS[i].getFeature()) + 1) + " = 0;"
+                            + "\n");
+                }
+            }
+        }
+        
+        // Excluded release
+        sb.append("% EXCLUDED dependencies" + "\n");
+        if (dp.ExcludedDS.length > 0) {
+            for (int i = 0; i < dp.ExcludedDS.length; i++) {
+                sb.append("constraint x["
+                        + (dp.project.getFeatures().getFeatureIndex(dp.ExcludedDS[i].getFeature()) + 1) + "] != "
+                        + (dp.project.getReleases().getReleaseIndex(dp.ExcludedDS[i].getRelease()) + 1) + ";"
+                        + "\n");
+            }
+        }
+        
+        // Earlier release
+        sb.append("% EARLIER dependencies" + "\n");
+        if (dp.EarlierDS.length > 0) {
+            for (int i = 0; i < dp.EarlierDS.length; i++) {
+                sb.append("constraint x["
+                        + (dp.project.getFeatures().getFeatureIndex(dp.EarlierDS[i].getFeature()) + 1) + "] < "
+                        + (dp.project.getReleases().getReleaseIndex(dp.EarlierDS[i].getRelease()) + 1) + ";"
+                        + "\n");
+            }
+        }
+        
+        // Later release
+        sb.append("% LATER dependencies" + "\n");
+        if (dp.LaterDS.length > 0) {
+            for (int i = 0; i < dp.LaterDS.length; i++) {
+                boolean xor = false;
+                xor = xor || isXOR(dp.LaterDS[i], dp.XorDS);
+                xor = xor || isXOR(dp.LaterDS[i], dp.MXorDS);
+                if (!xor) {
+                    sb.append("constraint x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.LaterDS[i].getFeature()) + 1) + "] > "
+                            + (dp.project.getReleases().getReleaseIndex(dp.LaterDS[i].getRelease()) + 1) + ";"
+                            + "\n");
+                } else {
+                    sb.append("constraint x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.LaterDS[i].getFeature()) + 1) + "] > "
+                            + (dp.project.getReleases().getReleaseIndex(dp.LaterDS[i].getRelease()) + 1) + " \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.LaterDS[i].getFeature()) + 1) + " = 0;"
+                            + "\n");
+                }
+            }
+        }
+        
+        sb.append("% Order related dependencies:" + "\n");
+        // SOFTPRECEDENCE dependency
+        sb.append("% SOFTPRECEDENCE dependencies" + "\n");
+        getSoftPrecedenceCode(sb, dp);
+
+        // HARDPRECEDENCE dependency
+        sb.append("% HARDPRECEDENCE dependencies" + "\n");
+        getHardPrecedenceCode(sb, dp);
+        
+        // COUPLING dependency
+        sb.append("% COUPLING dependencies" + "\n");
+        if (dp.CouplingDS.length > 0) {
+            for (int i = 0; i < dp.CouplingDS.length; i++) {
+                boolean xor = false;
+                xor = xor || isXOR(dp.CouplingDS[i], dp.XorDS);
+                xor = xor || isXOR(dp.CouplingDS[i], dp.MXorDS);
+                if (!xor) {
+                    sb.append("constraint x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.CouplingDS[i].getPrimary()) + 1) + "] = x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.CouplingDS[i].getSecondary()) + 1) + "];"
+                            + "\n");
+                } else {
+                    sb.append("constraint x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.CouplingDS[i].getPrimary()) + 1) + "] = x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.CouplingDS[i].getSecondary()) + 1) + "] \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.CouplingDS[i].getPrimary()) + 1) + "] = 0 \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.CouplingDS[i].getSecondary()) + 1) + "] = 0;"
+                            + "\n");
+                }
+            }
+        }
+        
+        // SEPARATION dependency
+        sb.append("% SEPARATION dependencies" + "\n");
+        if (dp.SeparationDS.length > 0) {
+            for (int i = 0; i < dp.SeparationDS.length; i++) {
+                boolean xor = false;
+                xor = xor || isXOR(dp.SeparationDS[i], dp.XorDS);
+                xor = xor || isXOR(dp.SeparationDS[i], dp.MXorDS);
+                if (!xor) {
+                    sb.append("constraint x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SeparationDS[i].getPrimary()) + 1) + "] != x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SeparationDS[i].getSecondary()) + 1) + "];"
+                            + "\n");
+                } else {
+                    sb.append("constraint x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SeparationDS[i].getPrimary()) + 1) + "] != x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SeparationDS[i].getSecondary()) + 1) + "] \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SeparationDS[i].getPrimary()) + 1) + "] = 0 \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SeparationDS[i].getSecondary()) + 1) + "] = 0;"
                             + "\n");
                 }
             }
         }
 
+        sb.append("% Existance related dependencies:" + "\n");
         // AND dependency
         sb.append("% AND dependencies" + "\n");
         if (dp.AndDS.length > 0) {
             for (int i = 0; i < dp.AndDS.length; i++) {
-                /* AND seems to be close enough dependency to leave out both features if one is in XOR dependency
-                boolean xor = false;
-                xor = xor || isXOR(dp.AndDS[i], dp.XorDS);
-                xor = xor || isXOR(dp.AndDS[i], dp.MXorDS);
-                if (!xor) {
-                */
-                    sb.append("constraint x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getPrimary()) + 1) + "] = x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getSecondary()) + 1) + "];"
-                            + "\n");
-                /* AND seems to be close enough dependency to leave out both features if one is in XOR dependency
-                } else {
-                    sb.append("constraint x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getPrimary()) + 1) + "] = x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getSecondary()) + 1) + "] \\/ x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getPrimary()) + 1) + "] = 0 \\/ x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getSecondary()) + 1) + "] = 0;"
-                            + "\n");
-                }
-                */
-                // Add if one of features from AND is in ChangeIn... xor then it has to work with the other XOR feature also
+                sb.append("constraint (x["
+                        + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getPrimary()) + 1) + "] != 0 /\\ x["
+                        + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getSecondary()) + 1) + "] != 0) xor (x["
+                        + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getPrimary()) + 1) + "] = 0 /\\ x["
+                        + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getSecondary()) + 1) + "] = 0);"
+                        + "\n");
             }
         }
-
-        // REQUIRES dependency
-        sb.append("% REQ dependencies" + "\n");
-        getREQCode(sb, dp);
-
-        // PRECEDES dependency
-        sb.append("% PRE dependencies" + "\n");
-        getPRECode(sb, dp);
-
+        
         // XOR dependency
         sb.append("% XOR dependencies" + "\n");
         if (dp.XorDS.length > 0) {
@@ -195,17 +290,18 @@ public class DependencyManager {
         return sb.toString();
     }
 
+    /*
     private static String getDependencyRawData(DataPackage dp) {
         StringBuilder sb = new StringBuilder();
         sb.append("% FIXED features / AND features / REQUIRED features / PRECEDING features / XOR features" + "\n");
 
         // Fixed release
-        sb.append("FIX = " + dp.FixDS.length + ";" + "\n");
+        sb.append("FIX = " + dp.FixedDS.length + ";" + "\n");
         sb.append("fx = [|");
-        if (dp.FixDS.length > 0) {
-            for (int i = 0; i < dp.FixDS.length; i++) {
-                sb.append(" " + (dp.project.getFeatures().getFeatureIndex(dp.FixDS[i].getFeature()) + 1)
-                        + ", " + (dp.project.getReleases().getReleaseIndex(dp.FixDS[i].getRelease()) + 1) + ", |");
+        if (dp.FixedDS.length > 0) {
+            for (int i = 0; i < dp.FixedDS.length; i++) {
+                sb.append(" " + (dp.project.getFeatures().getFeatureIndex(dp.FixedDS[i].getFeature()) + 1)
+                        + ", " + (dp.project.getReleases().getReleaseIndex(dp.FixedDS[i].getRelease()) + 1) + ", |");
             }
             sb.append("];" + "\n");
         } else {
@@ -213,12 +309,12 @@ public class DependencyManager {
         }
 
         // AND dependency
-        sb.append("AND = " + dp.AndDS.length + ";" + "\n");
+        sb.append("AND = " + dp.CouplingDS.length + ";" + "\n");
         sb.append("and = [|");
-        if (dp.AndDS.length > 0) {
-            for (int i = 0; i < dp.AndDS.length; i++) {
-                sb.append(" " + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getPrimary()) + 1)
-                        + ", " + (dp.project.getFeatures().getFeatureIndex(dp.AndDS[i].getSecondary()) + 1) + ", |");
+        if (dp.CouplingDS.length > 0) {
+            for (int i = 0; i < dp.CouplingDS.length; i++) {
+                sb.append(" " + (dp.project.getFeatures().getFeatureIndex(dp.CouplingDS[i].getPrimary()) + 1)
+                        + ", " + (dp.project.getFeatures().getFeatureIndex(dp.CouplingDS[i].getSecondary()) + 1) + ", |");
             }
             sb.append("];" + "\n");
         } else {
@@ -226,18 +322,18 @@ public class DependencyManager {
         }
 
         // REQUIRES dependency
-        sb.append("REQ = " + dp.ReqDS.length + ";" + "\n");
+        sb.append("REQ = " + dp.SoftPrecedenceDS.length + ";" + "\n");
         sb.append("req = [|");
-        if (dp.ReqDS.length > 0) {
-            for (int i = 0; i < dp.ReqDS.length; i++) {
-                sb.append(" " + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getPrimary()) + 1)
-                        + ", " + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getSecondary()) + 1) + ", |");
+        if (dp.SoftPrecedenceDS.length > 0) {
+            for (int i = 0; i < dp.SoftPrecedenceDS.length; i++) {
+                sb.append(" " + (dp.project.getFeatures().getFeatureIndex(dp.SoftPrecedenceDS[i].getPrimary()) + 1)
+                        + ", " + (dp.project.getFeatures().getFeatureIndex(dp.SoftPrecedenceDS[i].getSecondary()) + 1) + ", |");
             }
-        } else if (dp.MReqDS.length > 0) {
-            for (int i = 0; i < dp.MReqDS.length; i++) {
-                sb.append(" " + (dp.modDep.getFeatures().getFeatureIndex(dp.MReqDS[i].getPrimary()) + 1
+        } else if (dp.MSoftPrecedenceDS.length > 0) {
+            for (int i = 0; i < dp.MSoftPrecedenceDS.length; i++) {
+                sb.append(" " + (dp.modDep.getFeatures().getFeatureIndex(dp.MSoftPrecedenceDS[i].getPrimary()) + 1
                         + dp.project.getFeatures().getFeatureCount())
-                        + ", " + (dp.project.getFeatures().getFeatureIndex(dp.MReqDS[i].getSecondary()) + 1) + ", |");
+                        + ", " + (dp.project.getFeatures().getFeatureIndex(dp.MSoftPrecedenceDS[i].getSecondary()) + 1) + ", |");
             }
         } else {
             sb.append(" 0, 0, |");
@@ -245,17 +341,17 @@ public class DependencyManager {
         sb.append("];" + "\n");
 
         // PRECEDES dependency
-        sb.append("PRE = " + dp.PreDS.length + ";" + "\n");
+        sb.append("PRE = " + dp.HardPrecedenceDS.length + ";" + "\n");
         sb.append("pre = [|");
-        if (dp.PreDS.length > 0) {
-            for (int i = 0; i < dp.PreDS.length; i++) {
-                sb.append(" " + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getPrimary()) + 1)
-                        + ", " + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getSecondary()) + 1) + ", |");
+        if (dp.HardPrecedenceDS.length > 0) {
+            for (int i = 0; i < dp.HardPrecedenceDS.length; i++) {
+                sb.append(" " + (dp.project.getFeatures().getFeatureIndex(dp.HardPrecedenceDS[i].getPrimary()) + 1)
+                        + ", " + (dp.project.getFeatures().getFeatureIndex(dp.HardPrecedenceDS[i].getSecondary()) + 1) + ", |");
             }
-        } else if (dp.MPreDS.length > 0) {
-            for (int i = 0; i < dp.MPreDS.length; i++) {
-                sb.append(" " + (dp.project.getFeatures().getFeatureIndex(dp.MPreDS[i].getPrimary()) + 1)
-                        + ", " + (dp.project.getFeatures().getFeatureIndex(dp.MPreDS[i].getSecondary()) + 1) + ", |");
+        } else if (dp.MHardPrecedenceDS.length > 0) {
+            for (int i = 0; i < dp.MHardPrecedenceDS.length; i++) {
+                sb.append(" " + (dp.project.getFeatures().getFeatureIndex(dp.MHardPrecedenceDS[i].getPrimary()) + 1)
+                        + ", " + (dp.project.getFeatures().getFeatureIndex(dp.MHardPrecedenceDS[i].getSecondary()) + 1) + ", |");
             }
         } else {
             sb.append(" 0, 0, |");
@@ -286,6 +382,7 @@ public class DependencyManager {
 
         return sb.toString();
     }
+    */
 
     private static String getGroupDepData(DataPackage dp) {
         StringBuilder sb = new StringBuilder();
@@ -332,7 +429,7 @@ public class DependencyManager {
         return sb.toString();
     }
 
-    private static boolean isXOR(Feature f, Interdependency[] xor) {
+    private static boolean isXOR(Feature f, ExistanceDependency[] xor) {
         boolean exists = false;
         for (int i = 0; i < xor.length; i++) {
             if (f == xor[i].getPrimary()
@@ -343,7 +440,18 @@ public class DependencyManager {
         return exists;
     }
     
-    private static boolean isXOR(FixedDependency dep, Interdependency[] xor) {
+    private static boolean isAND(Feature f, ExistanceDependency[] and) {
+        boolean exists = false;
+        for (int i = 0; i < and.length; i++) {
+            if (f == and[i].getPrimary()
+                    || f == and[i].getSecondary()) {
+                exists = true;
+            }
+        }
+        return exists;
+    }
+    
+    private static boolean isXOR(ReleaseDependency dep, ExistanceDependency[] xor) {
         boolean exists = false;
         for (int i = 0; i < xor.length; i++) {
             if (dep.getFeature() == xor[i].getPrimary()
@@ -354,7 +462,7 @@ public class DependencyManager {
         return exists;
     }
 
-    private static boolean isXOR(Interdependency dep, Interdependency[] xor) {
+    private static boolean isXOR(OrderDependency dep, ExistanceDependency[] xor) {
         boolean exists = false;
         for (int i = 0; i < xor.length; i++) {
             if (dep.getPrimary() == xor[i].getPrimary()
@@ -368,7 +476,7 @@ public class DependencyManager {
     }
     
     /*
-    private static int isXOR(Interdependency dep, Interdependency[] xor) {
+    private static int isXOR(OrderDependency dep, OrderDependency[] xor) {
         int exists = 0;
         int primary = 0;
         int secondary = 0;
@@ -398,109 +506,85 @@ public class DependencyManager {
     }
     */
 
-    private static void getREQCode(StringBuilder sb, DataPackage dp) {
-        if (dp.ReqDS.length > 0) {
-            for (int i = 0; i < dp.ReqDS.length; i++) {
-                //int xorExists = isXOR(dp.ReqDS[i], dp.XorDS);
-                //int mXorExists = isXOR(dp.ReqDS[i], dp.MXorDS);
+    private static void getSoftPrecedenceCode(StringBuilder sb, DataPackage dp) {
+        if (dp.SoftPrecedenceDS.length > 0) {
+            for (int i = 0; i < dp.SoftPrecedenceDS.length; i++) {
                 boolean xor = false;
-                //xor = xor || ((xorExists & DependencyManager.EXIST_MASK) > 0);
-                //xor = xor || ((mXorExists & DependencyManager.EXIST_MASK) > 0);
-                xor = xor || isXOR(dp.ReqDS[i], dp.XorDS);
-                xor = xor || isXOR(dp.ReqDS[i], dp.MXorDS);
+                xor = xor || isXOR(dp.SoftPrecedenceDS[i], dp.XorDS);
+                xor = xor || isXOR(dp.SoftPrecedenceDS[i], dp.MXorDS);
                 if (!xor) {
                     sb.append("constraint x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getSecondary()) + 1) + "] <= x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getPrimary()) + 1) + "];"
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SoftPrecedenceDS[i].getPrimary()) + 1) + "] <= x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SoftPrecedenceDS[i].getSecondary()) + 1) + "];"
                             + "\n");
                 } else {
                     sb.append("constraint x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getSecondary()) + 1) + "] <= x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getPrimary()) + 1) + "] \\/ x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getSecondary()) + 1) + " = 0 \\/ x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getPrimary()) + 1) + " = 0;"
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SoftPrecedenceDS[i].getPrimary()) + 1) + "] <= x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SoftPrecedenceDS[i].getSecondary()) + 1) + "] \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SoftPrecedenceDS[i].getPrimary()) + 1) + " = 0 \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.SoftPrecedenceDS[i].getSecondary()) + 1) + " = 0;"
                             + "\n");
-                    /*
-                    sb.append("constraint x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getSecondary()) + 1) + "] <= x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getPrimary()) + 1) + "]");
-                    if ((((xorExists & DependencyManager.EXIST_MASK) > 0 && (xorExists == DependencyManager.SECONDARY
-                            || xorExists == DependencyManager.BOTH)) || (xorExists & DependencyManager.EXIST_MASK) == 0)
-                            &&
-                            (((mXorExists & DependencyManager.EXIST_MASK) > 0 && (mXorExists == DependencyManager.SECONDARY
-                            || mXorExists == DependencyManager.BOTH)) || (mXorExists & DependencyManager.EXIST_MASK) == 0)) {
-                        sb.append(" \\/ x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getSecondary()) + 1) + " = 0 ");
-                    } else if ((((xorExists & DependencyManager.EXIST_MASK) > 0 && (xorExists == DependencyManager.PRIMARY
-                            || xorExists == DependencyManager.BOTH)) || (xorExists & DependencyManager.EXIST_MASK) == 0)
-                            &&
-                            (((mXorExists & DependencyManager.EXIST_MASK) > 0 && (mXorExists == DependencyManager.PRIMARY
-                            || mXorExists == DependencyManager.BOTH)) || (mXorExists & DependencyManager.EXIST_MASK) == 0)) {
-                        sb.append(" \\/ x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.ReqDS[i].getPrimary()) + 1) + " = 0");
-                    }
-                    sb.append(";" + "\n");
-                    */
                 }
             }
         }
-        if (dp.MReqDS.length > 0) {
-            for (int i = 0; i < dp.MReqDS.length; i++) {
-                boolean xor = isXOR(dp.MReqDS[i], dp.MXorDS);
+        if (dp.MSoftPrecedenceDS.length > 0) {
+            for (int i = 0; i < dp.MSoftPrecedenceDS.length; i++) {
+                boolean xor = isXOR(dp.MSoftPrecedenceDS[i], dp.MXorDS);
                 if (!xor) {
+                    // Do we need even this part? As from MSoftPrecedence only features features with xor can come
                     sb.append("constraint x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.MReqDS[i].getSecondary()) + 1) + "] <= x["
-                            + (dp.modDep.getFeatures().getFeatureIndex(dp.MReqDS[i].getPrimary())
-                            + dp.project.getFeatures().getFeatureCount() + 1) + "];"
+                            + (dp.modDep.getFeatures().getFeatureIndex(dp.MSoftPrecedenceDS[i].getPrimary())
+                            + dp.project.getFeatures().getFeatureCount() + 1) + "] <= x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.MSoftPrecedenceDS[i].getSecondary()) + 1) + "];"
                             + "\n");
                 } else {
                     sb.append("constraint x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.MReqDS[i].getSecondary()) + 1) + "] <= x["
-                            + (dp.modDep.getFeatures().getFeatureIndex(dp.MReqDS[i].getPrimary())
-                            + dp.project.getFeatures().getFeatureCount() + 1) + "] \\/ x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.MReqDS[i].getSecondary()) + 1) + " = 0 \\/ x["
-                            + (dp.modDep.getFeatures().getFeatureIndex(dp.MReqDS[i].getPrimary())
-                            + dp.project.getFeatures().getFeatureCount() + 1) + " = 0;"
+                            + (dp.modDep.getFeatures().getFeatureIndex(dp.MSoftPrecedenceDS[i].getPrimary())
+                            + dp.project.getFeatures().getFeatureCount() + 1) + "] <= x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.MSoftPrecedenceDS[i].getSecondary()) + 1) + "] \\/ x["
+                            + (dp.modDep.getFeatures().getFeatureIndex(dp.MSoftPrecedenceDS[i].getPrimary())
+                            + dp.project.getFeatures().getFeatureCount() + 1) + " = 0 \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.MSoftPrecedenceDS[i].getSecondary()) + 1) + " = 0;"
                             + "\n");
                 }
             }
         }
     }
 
-    private static void getPRECode(StringBuilder sb, DataPackage dp) {
-        if (dp.PreDS.length > 0) {
-            for (int i = 0; i < dp.PreDS.length; i++) {
+    private static void getHardPrecedenceCode(StringBuilder sb, DataPackage dp) {
+        if (dp.HardPrecedenceDS.length > 0) {
+            for (int i = 0; i < dp.HardPrecedenceDS.length; i++) {
                 boolean xor = false;
-                xor = xor || isXOR(dp.PreDS[i], dp.XorDS);
-                xor = xor || isXOR(dp.PreDS[i], dp.MXorDS);
+                xor = xor || isXOR(dp.HardPrecedenceDS[i], dp.XorDS);
+                xor = xor || isXOR(dp.HardPrecedenceDS[i], dp.MXorDS);
                 if (!xor) {
                     sb.append("constraint x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getSecondary()) + 1) + "] <= "
+                            + (dp.project.getFeatures().getFeatureIndex(dp.HardPrecedenceDS[i].getSecondary()) + 1) + "] <= "
                             + (dp.project.getReleases().getReleaseCount()) + " -> x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getPrimary()) + 1) + "] < x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getSecondary()) + 1) + "];"
+                            + (dp.project.getFeatures().getFeatureIndex(dp.HardPrecedenceDS[i].getPrimary()) + 1) + "] < x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.HardPrecedenceDS[i].getSecondary()) + 1) + "];"
                             + "\n");
                 } else {
                     sb.append("constraint (x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getSecondary()) + 1) + "] <= "
+                            + (dp.project.getFeatures().getFeatureIndex(dp.HardPrecedenceDS[i].getSecondary()) + 1) + "] <= "
                             + (dp.project.getReleases().getReleaseCount()) + " -> x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getPrimary()) + 1) + "] < x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getSecondary()) + 1) + "]) \\/ x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getPrimary()) + 1) + " = 0 \\/ x["
-                            + (dp.project.getFeatures().getFeatureIndex(dp.PreDS[i].getSecondary()) + 1) + " = 0;"
+                            + (dp.project.getFeatures().getFeatureIndex(dp.HardPrecedenceDS[i].getPrimary()) + 1) + "] < x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.HardPrecedenceDS[i].getSecondary()) + 1) + "]) \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.HardPrecedenceDS[i].getPrimary()) + 1) + " = 0 \\/ x["
+                            + (dp.project.getFeatures().getFeatureIndex(dp.HardPrecedenceDS[i].getSecondary()) + 1) + " = 0;"
                             + "\n");
                 }
             }
         }
-        if (dp.MPreDS.length > 0) {
-            for (int i = 0; i < dp.MPreDS.length; i++) {
+        if (dp.MHardPrecedenceDS.length > 0) {
+            for (int i = 0; i < dp.MHardPrecedenceDS.length; i++) {
                 sb.append("constraint (x["
-                        + (dp.project.getFeatures().getFeatureIndex(dp.MPreDS[i].getSecondary()) + 1) + "] <= "
+                        + (dp.project.getFeatures().getFeatureIndex(dp.MHardPrecedenceDS[i].getSecondary()) + 1) + "] <= "
                         + (dp.project.getReleases().getReleaseCount()) + " -> x["
-                        + (dp.project.getFeatures().getFeatureIndex(dp.MPreDS[i].getPrimary()) + 1) + "] < x["
-                        + (dp.project.getFeatures().getFeatureIndex(dp.MPreDS[i].getSecondary()) + 1) + "]) \\/ x["
-                        + (dp.project.getFeatures().getFeatureIndex(dp.MPreDS[i].getPrimary()) + 1) + " = 0 \\/ x["
-                        + (dp.project.getFeatures().getFeatureIndex(dp.MPreDS[i].getSecondary()) + 1) + " = 0;"
+                        + (dp.project.getFeatures().getFeatureIndex(dp.MHardPrecedenceDS[i].getPrimary()) + 1) + "] < x["
+                        + (dp.project.getFeatures().getFeatureIndex(dp.MHardPrecedenceDS[i].getSecondary()) + 1) + "]) \\/ x["
+                        + (dp.project.getFeatures().getFeatureIndex(dp.MHardPrecedenceDS[i].getPrimary()) + 1) + " = 0 \\/ x["
+                        + (dp.project.getFeatures().getFeatureIndex(dp.MHardPrecedenceDS[i].getSecondary()) + 1) + " = 0;"
                         + "\n");
             }
         }

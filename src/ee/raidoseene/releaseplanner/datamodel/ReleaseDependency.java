@@ -10,28 +10,28 @@ import java.io.Serializable;
  *
  * @author Raido Seene
  */
-public class FixedDependency extends Dependency implements Serializable {
-    
+public class ReleaseDependency extends Dependency implements Serializable {
+
     private static final long serialVersionUID = 1;
+    
     private Feature feature;
     private Release release;
-    
-    FixedDependency(Feature feature, Release release) {
-        super(Dependency.FIXED);
+
+    ReleaseDependency(Feature feature, Release release, int type) {
+        super(type);
         this.feature = feature;
         this.release = release;
     }
-    
+
     public Feature getFeature() {
         return this.feature;
     }
-    
+
     public Release getRelease() {
         return this.release;
     }
-    
+
     public int getType() {
         return this.type;
     }
-    
 }

@@ -11,7 +11,7 @@ import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
 import ee.raidoseene.releaseplanner.datamodel.Group;
 import ee.raidoseene.releaseplanner.datamodel.GroupDependency;
-import ee.raidoseene.releaseplanner.datamodel.ModifyingInterdependency;
+import ee.raidoseene.releaseplanner.datamodel.ModifyingParameterDependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Release;
 import ee.raidoseene.releaseplanner.datamodel.Urgency;
@@ -67,9 +67,7 @@ public final class DataManager {
         try (PrintWriter pw = new PrintWriter(file)) { // try with resource: printwriter closes automatically!
             DataManager dm = new DataManager(project, pw);
 
-            //Project modDep = new Project("ModifyingDependencies");
             Project modDep = dm.ModifyingDependencyConversion(project);
-            //dm.ModifyingDependencyConversion(modDep);
 
             if (codeOutput) {
                 dm.printFailHeader();
@@ -80,6 +78,8 @@ public final class DataManager {
                 dm.printGroups(true);
                 dm.printWAS(modDep, postponedUrgency);
             } else {
+                System.out.println("Existing code file solution deprecated!");
+                /*
                 dm.printFailHeader();
                 dm.printProjectParameters(modDep.getFeatures().getFeatureCount(), false);
                 dm.printParamImportance();
@@ -89,6 +89,7 @@ public final class DataManager {
                 dm.printFeatures(modDep);
                 dm.printGroups(false);
                 dm.printStakeholders(modDep);
+                */
             }
         }
         return file;
@@ -114,6 +115,7 @@ public final class DataManager {
         printWriter.println("% =========================\n");
     }
 
+    /*
     private void printParamImportance() {
         printWriter.println("% Stakeholder/release importance");
         printWriter.print("lambda = [ ");
@@ -139,6 +141,7 @@ public final class DataManager {
         printWriter.println("];");
         printWriter.println("% =========================\n");
     }
+    */
 
     private void printResources() {
         printWriter.println("% Resources (buffer/id/capacity)");
@@ -239,6 +242,7 @@ public final class DataManager {
         }
     }
 
+    /*
     private void printStakeholders(Project ModDep) {
         printWriter.println("% Stakeholders value(1..9), urgency");
         printWriter.print("value = [");
@@ -262,43 +266,7 @@ public final class DataManager {
             }
         }
         printWriter.println("|];");
-
-        /*
-        printWriter.println("urgency = array3d(1..S, 1..F, 1.." + (project.getReleases().getReleaseCount() + 1) + ", [");
-        for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
-            ValueAndUrgency valueAndUrgency = project.getValueAndUrgency();
-            printWriter.println("% stakeholder " + (s + 1));
-            for (int f = 0; f < project.getFeatures().getFeatureCount(); f++) {
-                for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
-                    printWriter.print(valueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
-                            project.getFeatures().getFeature(f),
-                            project.getReleases().getRelease(r)) + ", ");
-                }
-                printWriter.print(valueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
-                        project.getFeatures().getFeature(f),
-                        null) + ", ");
-
-                printWriter.print("\n");
-            }
-            if (ModDep.getValueAndUrgency().getValueAndUrgencyCount() > 0) {
-                ValueAndUrgency newValueAndUrgency = ModDep.getValueAndUrgency();
-                for (int f = 0; f < ModDep.getFeatures().getFeatureCount(); f++) {
-                    for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
-                        printWriter.print(newValueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
-                                ModDep.getFeatures().getFeature(f),
-                                project.getReleases().getRelease(r)) + ", ");
-                    }
-                    printWriter.print(valueAndUrgency.getUrgency(project.getStakeholders().getStakeholder(s),
-                            project.getFeatures().getFeature(f),
-                            null) + ", ");
-
-                    printWriter.print("\n");
-                }
-            }
-        }
-        */
         
-        // New Urgency and value
         printWriter.println("urgency = array3d(1..S, 1..F, 1.." + (project.getReleases().getReleaseCount() + 1) + ", [");
         ValueAndUrgency valueAndUrgency = project.getValueAndUrgency();
         for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
@@ -560,10 +528,10 @@ public final class DataManager {
                 }
             }
         }
-        // End of new urgendy and value
         
         printWriter.println("]);");
     }
+    */
 
     private void printWAS(Project modDep, boolean postponedUrgency) { // Missing modDep WAS, ADD THEM!!! Check now it may be there
         int[][] urgencies = UrgencyManager.getUrgencies(project, modDep);
@@ -620,8 +588,8 @@ public final class DataManager {
 
     public static Project ModifyingDependencyConversion(Project project) {
         Project ModDep = new Project("ModifyingDependencies");
-        if (project.getDependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CC) > 0) {
-            ModifyingInterdependency[] CcDS = project.getDependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CC);
+        if (project.getDependencies().getTypedDependancyCount(ModifyingParameterDependency.class, Dependency.CC) > 0) {
+            ModifyingParameterDependency[] CcDS = project.getDependencies().getTypedDependencies(ModifyingParameterDependency.class, Dependency.CC);
 
             for (int dep = 0; dep < CcDS.length; dep++) {
                 Feature f = ModDep.getFeatures().addFeature();
@@ -646,14 +614,14 @@ public final class DataManager {
                     }
                 }
 
-                ModDep.getDependencies().addInterdependency(f, CcDS[dep].getPrimary(), Dependency.REQ);
-                ModDep.getDependencies().addInterdependency(CcDS[dep].getPrimary(), CcDS[dep].getSecondary(), Dependency.PRE);
-                ModDep.getDependencies().addInterdependency(CcDS[dep].getPrimary(), f, Dependency.XOR);
+                ModDep.getDependencies().addOrderDependency(f, CcDS[dep].getPrimary(), Dependency.SOFTPRECEDENCE);
+                ModDep.getDependencies().addOrderDependency(CcDS[dep].getPrimary(), CcDS[dep].getSecondary(), Dependency.HARDPRECEDENCE);
+                ModDep.getDependencies().addOrderDependency(CcDS[dep].getPrimary(), f, Dependency.XOR);
             }
         }
 
-        if (project.getDependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CV) > 0) {
-            ModifyingInterdependency[] CvDS = project.getDependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CV);
+        if (project.getDependencies().getTypedDependancyCount(ModifyingParameterDependency.class, Dependency.CV) > 0) {
+            ModifyingParameterDependency[] CvDS = project.getDependencies().getTypedDependencies(ModifyingParameterDependency.class, Dependency.CV);
 
             for (int dep = 0; dep < CvDS.length; dep++) {
                 Feature f = ModDep.getFeatures().addFeature();
@@ -679,14 +647,14 @@ public final class DataManager {
                     }
                 }
 
-                ModDep.getDependencies().addInterdependency(f, CvDS[dep].getPrimary(), Dependency.REQ);
-                ModDep.getDependencies().addInterdependency(CvDS[dep].getPrimary(), CvDS[dep].getSecondary(), Dependency.PRE);
-                ModDep.getDependencies().addInterdependency(CvDS[dep].getPrimary(), f, Dependency.XOR);
+                ModDep.getDependencies().addOrderDependency(f, CvDS[dep].getPrimary(), Dependency.SOFTPRECEDENCE);
+                ModDep.getDependencies().addOrderDependency(CvDS[dep].getPrimary(), CvDS[dep].getSecondary(), Dependency.HARDPRECEDENCE);
+                ModDep.getDependencies().addOrderDependency(CvDS[dep].getPrimary(), f, Dependency.XOR);
             }
         }
 
-        if (project.getDependencies().getTypedDependancyCount(ModifyingInterdependency.class, Dependency.CU) > 0) {
-            ModifyingInterdependency[] CuDS = project.getDependencies().getTypedDependencies(ModifyingInterdependency.class, Dependency.CU);
+        if (project.getDependencies().getTypedDependancyCount(ModifyingParameterDependency.class, Dependency.CU) > 0) {
+            ModifyingParameterDependency[] CuDS = project.getDependencies().getTypedDependencies(ModifyingParameterDependency.class, Dependency.CU);
 
             for (int dep = 0; dep < CuDS.length; dep++) {
                 Feature f = ModDep.getFeatures().addFeature();
@@ -712,9 +680,9 @@ public final class DataManager {
                     }
                 }
 
-                ModDep.getDependencies().addInterdependency(f, CuDS[dep].getPrimary(), Dependency.REQ);
-                ModDep.getDependencies().addInterdependency(CuDS[dep].getPrimary(), CuDS[dep].getSecondary(), Dependency.PRE);
-                ModDep.getDependencies().addInterdependency(CuDS[dep].getPrimary(), f, Dependency.XOR);
+                ModDep.getDependencies().addOrderDependency(f, CuDS[dep].getPrimary(), Dependency.SOFTPRECEDENCE);
+                ModDep.getDependencies().addOrderDependency(CuDS[dep].getPrimary(), CuDS[dep].getSecondary(), Dependency.HARDPRECEDENCE);
+                ModDep.getDependencies().addOrderDependency(CuDS[dep].getPrimary(), f, Dependency.XOR);
             }
         }
         return ModDep;
