@@ -96,7 +96,7 @@ public class AutotestManager {
             }
 
             Settings s = SettingsManager.getCurrentSettings();
-            sr = Solver.executeSimulation(ProjectManager.getCurrentProject(), s.getCodeOutput(), s.getPostponedUrgency(), true);
+            sr = Solver.executeSimulation(ProjectManager.getCurrentProject(), s.getCodeOutput(), s.getPostponedUrgency(), s.getNormalizedImportances(), true);
             //DataManager.fileOutput(project, output);
         } catch (Exception ex) {
             Messenger.showError(ex, null);

@@ -24,7 +24,6 @@ public abstract class Dependency implements Serializable {
     public static final int EXCLUDED = RELEASE | 0x02;
     public static final int EARLIER = RELEASE | 0x03;
     public static final int LATER = RELEASE | 0x04;
-    //public static final int FIXED = 0x10;
     
     // Order related dependencies
     public static final int ORDER = 0x20;
@@ -32,11 +31,6 @@ public abstract class Dependency implements Serializable {
     public static final int HARDPRECEDENCE = ORDER | 0x02;
     public static final int COUPLING = ORDER | 0x03;
     public static final int SEPARATION = ORDER | 0x04;
-    //public static final int INTER = 0x20;
-    //public static final int AND = INTER | 0x01;
-    //public static final int REQ = INTER | 0x02;
-    //public static final int PRE = INTER | 0x03;
-    //public static final int XOR = INTER | 0x04;
     
     // Existance related dependencies
     public static final int EXISTANCE = 0x30;

@@ -5,6 +5,8 @@
 package ee.raidoseene.releaseplanner.autotests;
 
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.datamodel.Dependencies;
+import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
 import ee.raidoseene.releaseplanner.datamodel.Features;
 import ee.raidoseene.releaseplanner.datamodel.Project;
@@ -197,7 +199,163 @@ public class DataGenerator {
     }
 
     private static void generateDependencies(Project project, AutotestSettings settings, int iterator) {
+        int fixedNo = settings.getFixedNo();
+        int excludedNo = settings.getExcludedNo();
+        int earlierNo = settings.getEarlierNo();
+        int laterNo = settings.getLaterNo();
         
+        int softPrecedenceNo = settings.getSoftPrecedenceNo();
+        int hardPrecedenceNo = settings.getHardPrecedenceNo();
+        int couplingNo = settings.getCouplingNo();
+        int separationNo = settings.getSeparationNo();
+        
+        int andNo = settings.getAndNo();
+        int xorNo = settings.getXorNo();
+        
+        Random random = new Random();
+        
+        if(fixedNo > 0) {
+            generateReleaseDep(project, settings, random, fixedNo, Dependency.FIXED, iterator);
+        }
+        if(excludedNo > 0) {
+            generateReleaseDep(project, settings, random, excludedNo, Dependency.EXCLUDED, iterator);
+        }
+        if(earlierNo > 0) {
+            generateReleaseDep(project, settings, random, earlierNo, Dependency.EARLIER, iterator);
+        }
+        if(laterNo > 0) {
+            generateReleaseDep(project, settings, random, laterNo, Dependency.LATER, iterator);
+        }
+        
+        if(softPrecedenceNo > 0) {
+            generateOrderDep(project, settings, random, softPrecedenceNo, Dependency.SOFTPRECEDENCE, iterator);
+        }
+        if(hardPrecedenceNo > 0) {
+            generateOrderDep(project, settings, random, hardPrecedenceNo, Dependency.HARDPRECEDENCE, iterator);
+        }
+        if(couplingNo > 0) {
+            generateOrderDep(project, settings, random, couplingNo, Dependency.COUPLING, iterator);
+        }
+        if(separationNo > 0) {
+            generateOrderDep(project, settings, random, separationNo, Dependency.SEPARATION, iterator);
+        }
+        
+        if(andNo > 0) {
+            generateExistanceDep(project, settings, random, andNo, Dependency.AND, iterator);
+        }
+        if(xorNo > 0) {
+            generateExistanceDep(project, settings, random, xorNo, Dependency.XOR, iterator);
+        }
+    }
+    
+    private static void generateReleaseDep(Project project, AutotestSettings settings, Random random, int depNo, int type, int iterator) {
+        Dependencies dependencies = project.getDependencies();
+        Features features = project.getFeatures();
+        Releases releases = project.getReleases();
+        
+        int featNo = settings.getFeatureNo();
+        int relNo = settings.getReleaseNo();
+        
+        Feature randFeat;
+        Release randRel;
+        int randFeatNo = 0;
+        
+        if(settings.getFeatureInterval()) {
+            featNo += iterator;
+        }
+        if(settings.getReleaseInterval()) {
+            relNo += iterator;
+        }
+        
+        int usedFeat[] = new int[featNo];
+        
+        for (int d = 0; d < depNo; d++) {
+            boolean uniqueFeat = false;
+            while(!uniqueFeat) {
+                randFeatNo = random.nextInt(featNo);
+                uniqueFeat = true;
+                
+                for(int i = 0; i < d; i++) {
+                    if(usedFeat[i] == randFeatNo) {
+                        uniqueFeat = uniqueFeat & false;
+                    } else {
+                        uniqueFeat = uniqueFeat & true;
+                    }
+                }
+            }
+            usedFeat[d] = randFeatNo;
+            
+            randFeat = features.getFeature(randFeatNo);
+            randRel = releases.getRelease(random.nextInt(relNo));
+            
+            dependencies.addReleaseDependency(randFeat, randRel, type);
+        }
+    }
+    
+    private static void generateOrderDep(Project project, AutotestSettings settings, Random random, int depNo, int type, int iterator) {
+        Dependencies dependencies = project.getDependencies();
+        Features features = project.getFeatures();
+        
+        int featNo = settings.getFeatureNo();
+            
+        int randFeat1;
+        int randFeat2 = 0;
+        int randFeatNo = 0;
+            
+        if(settings.getFeatureInterval()) {
+            featNo += iterator;
+        }
+        
+        for(int d = 0; d < depNo; d++) {
+            randFeat1 = random.nextInt(featNo);
+            
+            boolean uniqueFeat = false;
+            while(!uniqueFeat) {
+                randFeat2 = random.nextInt(featNo);
+                uniqueFeat = true;
+                
+                if(randFeat1 == randFeatNo) {
+                    uniqueFeat = uniqueFeat & false;
+                } else {
+                    uniqueFeat = uniqueFeat & true;
+                }
+            }
+            
+            dependencies.addOrderDependency(features.getFeature(randFeat1), features.getFeature(randFeat2), type);
+        }
+    }
+    
+    private static void generateExistanceDep(Project project, AutotestSettings settings, Random random, int depNo, int type, int iterator) {
+        Dependencies dependencies = project.getDependencies();
+        Features features = project.getFeatures();
+        
+        int featNo = settings.getFeatureNo();
+            
+        int randFeat1;
+        int randFeat2 = 0;
+        int randFeatNo = 0;
+            
+        if(settings.getFeatureInterval()) {
+            featNo += iterator;
+        }
+        
+        for(int d = 0; d < depNo; d++) {
+            randFeat1 = random.nextInt(featNo);
+            
+            boolean uniqueFeat = false;
+            while(!uniqueFeat) {
+                randFeat2 = random.nextInt(featNo);
+                uniqueFeat = true;
+                
+                if(randFeat1 == randFeatNo) {
+                    uniqueFeat = uniqueFeat & false;
+                } else {
+                    uniqueFeat = uniqueFeat & true;
+                }
+            }
+            
+            dependencies.addExistanceDependency(features.getFeature(randFeat1), features.getFeature(randFeat2), type);
+        }
     }
 
     public static String numberGenerator(int n, int amount) {

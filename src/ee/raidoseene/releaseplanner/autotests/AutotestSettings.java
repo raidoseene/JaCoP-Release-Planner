@@ -12,12 +12,15 @@ public class AutotestSettings {
 
     private int projNo, featNo, relNo, resNo, stkNo, minCons, maxCons;
     private int featTo, relTo, resTo, stkTo;
+    private int fixedNo, excludedNo, earlierNo, laterNo;
+    private int softPrecedenceNo, hardPrecedenceNo, couplingNo, separationNo;
+    private int andNo, xorNo, atLeastNo, atMostNo, exacltyNo;
     private float tightness, tightnessTo;
     private boolean projInterval, featInterval, relInterval, resInterval, stkInterval, tightnessInterval;
     private int[] totalResUsage;
 
     public AutotestSettings() {
-        
+ 
         this.projNo = 0;
         this.projInterval = false;
         
@@ -45,6 +48,23 @@ public class AutotestSettings {
         this.maxCons = 0;
         
         this.totalResUsage = null;
+        
+        this.fixedNo = 0;
+        this.excludedNo = 0;
+        this.earlierNo = 0;
+        this.laterNo = 0;
+        
+        this.softPrecedenceNo = 0;
+        this.hardPrecedenceNo = 0;
+        this.couplingNo = 0;
+        this.separationNo = 0;
+        
+        this.andNo = 0;
+        this.xorNo = 0;
+        
+        this.atLeastNo = 0;
+        this.atMostNo = 0;
+        this.exacltyNo = 0;
     }
     
     public void setProjectNo(int projNo) {
@@ -177,7 +197,6 @@ public class AutotestSettings {
     
     public void setTightness(float tightness) {
         this.tightness = tightness;
-        // Add setting ProjectNo
     }
     
     public float getTightness() {
@@ -194,7 +213,6 @@ public class AutotestSettings {
     
     public void setTightnessTo(float tightnessTo) {
         this.tightnessTo = tightnessTo;
-        // Add setting ProjectNo
     }
     
     public float getTightnessTo() {
@@ -227,6 +245,110 @@ public class AutotestSettings {
     
     public int getTotalResConsumption(int id) {
         return this.totalResUsage[id];
+    }
+    
+    public void setFixedNo(int fixedNo) {
+        this.fixedNo = fixedNo;
+    }
+    
+    public int getFixedNo() {
+        return this.fixedNo;
+    }
+    
+    public void setExcludedNo(int excludedNo) {
+        this.excludedNo = excludedNo;
+    }
+    
+    public int getExcludedNo() {
+        return this.excludedNo;
+    }
+    
+    public void setEarlierNo(int earlierNo) {
+        this.earlierNo = earlierNo;
+    }
+    
+    public int getEarlierNo() {
+        return this.earlierNo;
+    }
+    
+    public void setLaterNo(int laterNo) {
+        this.laterNo = laterNo;
+    }
+    
+    public int getLaterNo() {
+        return this.laterNo;
+    }
+    
+    public void setSoftPrecedenceNo(int softPrecedenceNo) {
+        this.softPrecedenceNo = softPrecedenceNo;
+    }
+    
+    public int getSoftPrecedenceNo() {
+        return this.softPrecedenceNo;
+    }
+    
+    public void setHardPrecedenceNo(int hardPrecedenceNo) {
+        this.hardPrecedenceNo = hardPrecedenceNo;
+    }
+    
+    public int getHardPrecedenceNo() {
+        return this.hardPrecedenceNo;
+    }
+    
+    public void setCouplingNo(int couplingNo) {
+        this.couplingNo = couplingNo;
+    }
+    
+    public int getCouplingNo() {
+        return this.couplingNo;
+    }
+    
+    public void setSeparationNo(int separationNo) {
+        this.separationNo = separationNo;
+    }
+    
+    public int getSeparationNo() {
+        return this.separationNo;
+    }
+    
+    public void setAndNo(int andNo) {
+        this.andNo = andNo;
+    }
+    
+    public int getAndNo() {
+        return this.andNo;
+    }
+
+    public void setXorNo(int xorNo) {
+        this.xorNo = xorNo;
+    }
+    
+    public int getXorNo() {
+        return this.xorNo;
+    }
+
+    public void setAtLeastNo(int atLeastNo) {
+        this.atLeastNo = atLeastNo;
+    }
+    
+    public int getAtLeastNo() {
+        return this.atLeastNo;
+    }
+
+    public void setAtMostNo(int atMostNo) {
+        this.atMostNo = atMostNo;
+    }
+
+    public int getAtMostNo() {
+        return this.atMostNo;
+    }
+
+    public void setExacltyNo(int exacltyNo) {
+        this.exacltyNo = exacltyNo;
+    }
+
+    public int getExacltyNo() {
+        return this.exacltyNo;
     }
     
     private void setProjectNo(int min, int max) {

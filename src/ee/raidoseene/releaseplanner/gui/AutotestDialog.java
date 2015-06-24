@@ -31,7 +31,7 @@ import javax.swing.border.EmptyBorder;
 public final class AutotestDialog extends JDialog {
     
     private final AutotestSettings settings;
-    private final JTextField numTProjs, minRC, maxRC;
+    private final JTextField numTProjs, minRC, maxRC, fixNo, exNo, earNo, latNo, SPNo, HPNo, coupNo, sepNo, andNo, xorNo;
     private final JTextField[] numFs, numRss, numRls, numSs, resTness;
     private final JRadioButton numFInterv, numRsInterv, numRlInterv, numSInterv, resTInterv;
     private final JCheckBox overInterv;
@@ -91,7 +91,7 @@ public final class AutotestDialog extends JDialog {
         cont.add(BorderLayout.CENTER, wrap);
         
         grid = new Container();
-        grid.setLayout(new GridLayout(7, 1, 2, 2));
+        grid.setLayout(new GridLayout(17, 1, 2, 2));
         grid.add(new JLabel("Number of features"));
         grid.add(new JLabel("  Minimum resource consumption"));
         grid.add(new JLabel("  Maximum resource consumption"));
@@ -99,6 +99,16 @@ public final class AutotestDialog extends JDialog {
         grid.add(new JLabel("Number of releases"));
         grid.add(new JLabel("Number of stakeholders"));
         grid.add(new JLabel("Resource tightness"));
+        grid.add(new JLabel("FIXED dependency"));
+        grid.add(new JLabel("EXCLUDED dependency"));
+        grid.add(new JLabel("EARLIER dependency"));
+        grid.add(new JLabel("LATER dependency"));
+        grid.add(new JLabel("SOFT PRECEDENCE dependency"));
+        grid.add(new JLabel("HARD PRECEDENCE dependency"));
+        grid.add(new JLabel("COUPLING dependency"));
+        grid.add(new JLabel("SEPARATION dependency"));
+        grid.add(new JLabel("AND dependency"));
+        grid.add(new JLabel("XOR dependency"));
         c.add(BorderLayout.LINE_START, grid);
         
         Container cols = new Container();
@@ -106,7 +116,7 @@ public final class AutotestDialog extends JDialog {
         c.add(BorderLayout.CENTER, cols);
         
         grid = new Container();
-        grid.setLayout(new GridLayout(7, 2, 5, 2));
+        grid.setLayout(new GridLayout(17, 2, 5, 2));
         cols.add(BorderLayout.CENTER, grid);
         
         this.numFs = new JTextField[2];
@@ -147,8 +157,48 @@ public final class AutotestDialog extends JDialog {
         grid.add(this.resTness[0]);
         grid.add(this.resTness[1]);
         
+        this.fixNo = new JTextField();
+        grid.add(this.fixNo);
+        grid.add(new JLabel());
+        
+        this.exNo = new JTextField();
+        grid.add(this.exNo);
+        grid.add(new JLabel());
+        
+        this.earNo = new JTextField();
+        grid.add(this.earNo);
+        grid.add(new JLabel());
+        
+        this.latNo = new JTextField();
+        grid.add(this.latNo);
+        grid.add(new JLabel());
+        
+        this.SPNo = new JTextField();
+        grid.add(this.SPNo);
+        grid.add(new JLabel());
+        
+        this.HPNo = new JTextField();
+        grid.add(this.HPNo);
+        grid.add(new JLabel());
+        
+        this.coupNo = new JTextField();
+        grid.add(this.coupNo);
+        grid.add(new JLabel());
+        
+        this.sepNo = new JTextField();
+        grid.add(this.sepNo);
+        grid.add(new JLabel());
+        
+        this.andNo = new JTextField();
+        grid.add(this.andNo);
+        grid.add(new JLabel());
+        
+        this.xorNo = new JTextField();
+        grid.add(this.xorNo);
+        grid.add(new JLabel());
+        
         grid = new Container();
-        grid.setLayout(new GridLayout(7, 1, 2, 2));
+        grid.setLayout(new GridLayout(17, 1, 2, 2));
         cols.add(BorderLayout.LINE_END, grid);
         ButtonGroup bg = new ButtonGroup();
         
@@ -273,6 +323,17 @@ public final class AutotestDialog extends JDialog {
         if (this.settings.getProjectInterval() && this.settings.getTightnessInterval()) {
             this.settings.setTightnessTo(Float.parseFloat(this.resTness[1].getText()));
         }
+        
+        this.settings.setFixedNo(Integer.parseInt(this.fixNo.getText()));
+        this.settings.setExcludedNo(Integer.parseInt(this.exNo.getText()));
+        this.settings.setEarlierNo(Integer.parseInt(this.earNo.getText()));
+        this.settings.setLaterNo(Integer.parseInt(this.latNo.getText()));
+        this.settings.setSoftPrecedenceNo(Integer.parseInt(this.SPNo.getText()));
+        this.settings.setHardPrecedenceNo(Integer.parseInt(this.HPNo.getText()));
+        this.settings.setCouplingNo(Integer.parseInt(this.coupNo.getText()));
+        this.settings.setSeparationNo(Integer.parseInt(this.sepNo.getText()));
+        this.settings.setAndNo(Integer.parseInt(this.andNo.getText()));
+        this.settings.setXorNo(Integer.parseInt(this.xorNo.getText()));
     }
     
     public static boolean showAutotestDialog(AutotestSettings settings) {

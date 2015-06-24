@@ -328,7 +328,7 @@ public final class MainFrame extends JFrame {
 
             //DataManager.saveDataFile(ProjectManager.getCurrentProject());
             Settings settings = SettingsManager.getCurrentSettings();
-            DataManager.initiateDataOutput(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency());
+            DataManager.initiateDataOutput(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency(), settings.getNormalizedImportances());
             //SolverCodeManager.saveSolverCodeFile(ProjectManager.getCurrentProject());
         } catch (Exception ex) {
             Messenger.showError(ex, null);
@@ -346,7 +346,7 @@ public final class MainFrame extends JFrame {
 
             //Solver.runSolver();
             Settings settings = SettingsManager.getCurrentSettings();
-            Solver.executeSimulation(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency(), false);
+            Solver.executeSimulation(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency(), settings.getNormalizedImportances(), false);
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }

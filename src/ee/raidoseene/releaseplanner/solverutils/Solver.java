@@ -26,7 +26,7 @@ import org.jacop.fz.Fz2jacop;
  */
 public class Solver {
 
-    public static SolverResult executeSimulation(Project project, boolean codeOutput, boolean postponedUrgency, boolean saveOutput) throws IOException {
+    public static SolverResult executeSimulation(Project project, boolean codeOutput, boolean postponedUrgency, boolean normalizedImportances, boolean saveOutput) throws IOException {
         SolverResult sr = null;
         // TO DO: check if all needed elements are filled in the project
         if (project.getFeatures().getFeatureCount() > 0 & project.getReleases().getReleaseCount() > 0 &
@@ -34,7 +34,7 @@ public class Solver {
             File[] files;
             try {
                 //file = DataManager.saveDataFile(ProjectManager.getCurrentProject());
-                files = DataManager.initiateDataOutput(project, codeOutput, postponedUrgency);
+                files = DataManager.initiateDataOutput(project, codeOutput, postponedUrgency, normalizedImportances);
                 sr = runSolver(files, codeOutput, saveOutput);
             } catch (Exception ex) {
                 Messenger.showError(ex, null);

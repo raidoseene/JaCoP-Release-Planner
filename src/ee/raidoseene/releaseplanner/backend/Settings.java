@@ -15,7 +15,7 @@ public final class Settings implements Serializable {
     
     private static final long serialVersionUID = 1;
     private String pathMiniZinc, pathJaCoP;
-    private boolean codeOutput, resourceShifting, postponedUrgency;
+    private boolean codeOutput, resourceShifting, postponedUrgency, normalizedImportances;
     
     Settings() {
         this.pathMiniZinc = null;
@@ -23,6 +23,7 @@ public final class Settings implements Serializable {
         this.codeOutput = true;
         this.resourceShifting = false;
         this.postponedUrgency = true;
+        this.normalizedImportances = true;
     }
     
     public void setMiniZincPath(String path) throws Exception {
@@ -71,5 +72,13 @@ public final class Settings implements Serializable {
     
     public boolean getPostponedUrgency() {
         return this.postponedUrgency;
+    }
+    
+    public void setNormalizedImportances(boolean normImp) {
+        this.normalizedImportances = normImp;
+    }
+    
+    public boolean getNormalizedImportances() {
+        return this.normalizedImportances;
     }
 }

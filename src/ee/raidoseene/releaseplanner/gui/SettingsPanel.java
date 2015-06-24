@@ -18,8 +18,6 @@ import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.File;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -94,7 +92,7 @@ public final class SettingsPanel extends JPanel {
         solv.add(BorderLayout.LINE_START, c);
 
         e = new Container();
-        e.setLayout(new GridLayout(4, 1, 10, 10));
+        e.setLayout(new GridLayout(5, 1, 10, 10));
         c.add(BorderLayout.CENTER, e);
 
         this.paths = new JLabel[2];
@@ -106,7 +104,7 @@ public final class SettingsPanel extends JPanel {
         this.paths[1].setToolTipText("Path to JaCoP");
 
         e = new Container();
-        e.setLayout(new GridLayout(4, 1, 10, 10));
+        e.setLayout(new GridLayout(5, 1, 10, 10));
         c.add(BorderLayout.LINE_END, e);
 
         btn = new JButton("Modify");
@@ -137,9 +135,12 @@ public final class SettingsPanel extends JPanel {
 
         final JCheckBox codeOutput = new JCheckBox("Create and use project specific solver code");
         final JCheckBox resourceShifting = new JCheckBox("Allow using unused resources in next releases");
+        final JCheckBox normalizedImportances = new JCheckBox("Allow using normalized importances");
+        
         if (settings.getCodeOutput()) {
             codeOutput.setSelected(true);
         }
+        
         codeOutput.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -181,6 +182,27 @@ public final class SettingsPanel extends JPanel {
             }
         });
         e.add(resourceShifting);
+        
+        if (settings.getNormalizedImportances()) {
+            normalizedImportances.setSelected(true);
+        }
+        
+        normalizedImportances.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    if (normalizedImportances.isSelected()) {
+                        settings.setNormalizedImportances(true);
+                    } else {
+                        settings.setNormalizedImportances(false);
+                    }
+
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        e.add(normalizedImportances);
     }
 
     private void setPath(String path, int target) {

@@ -24,7 +24,7 @@ public class SolverCodeManager {
 
     private final PrintWriter printWriter;
 
-    public static File saveSolverCodeFile(Project project, boolean useResourceShifting, boolean isGroups) throws Exception {
+    public static File saveSolverCodeFile(Project project, DependencyManager depMan, boolean useResourceShifting, boolean isGroups) throws Exception {
         //File inputDir = new File(project.getStorage());
         //File inputFile1 = new File(inputDir, "SolverCode_Par1.mzn");
         //File inputFile2 = new File(inputDir, "SolverCode_Par2.mzn");
@@ -62,7 +62,7 @@ public class SolverCodeManager {
             }
             sb.append(readFile(Par3File));
             //sb.append(readFile(Par4Path));
-            sb.append(DependencyManager.getDependenciesData(project, DataManager.ModifyingDependencyConversion(project), true));
+            sb.append(depMan.getDependenciesData(true));
             if(isGroups) {
                 sb.append(readFile(Par5File));
             }

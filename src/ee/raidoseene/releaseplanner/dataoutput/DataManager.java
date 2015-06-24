@@ -14,6 +14,7 @@ import ee.raidoseene.releaseplanner.datamodel.GroupDependency;
 import ee.raidoseene.releaseplanner.datamodel.ModifyingParameterDependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Release;
+import ee.raidoseene.releaseplanner.datamodel.Stakeholders;
 import ee.raidoseene.releaseplanner.datamodel.Urgency;
 import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
 import java.io.File;
@@ -35,15 +36,17 @@ public final class DataManager {
         // TO DO: append input into the log file
     }
 
-    public static File[] initiateDataOutput(Project project, boolean codeOutput, boolean postponedUrgency) throws Exception {
+    public static File[] initiateDataOutput(Project project, boolean codeOutput, boolean postponedUrgency, boolean normalizedImportances) throws Exception {
+        DependencyManager dm = new DependencyManager(project);
+        
         File[] files = new File[2];
-        File data = saveDataFile(project, codeOutput, postponedUrgency);
+        File data = saveDataFile(project, dm, codeOutput, postponedUrgency, normalizedImportances);
         files[0] = data;
         if (codeOutput) {
             // export solver code file with dependencies
             int group = project.getDependencies().getTypedDependancyCount(GroupDependency.class, Dependency.GROUP);
             Settings settings = SettingsManager.getCurrentSettings();
-            File code = SolverCodeManager.saveSolverCodeFile(project, settings.getResourceShifting(),
+            File code = SolverCodeManager.saveSolverCodeFile(project, dm, settings.getResourceShifting(),
                     group > 0 ? true : false);
             files[1] = code;
         }
@@ -60,23 +63,25 @@ public final class DataManager {
         }
     }
 
-    private static File saveDataFile(Project project, boolean codeOutput, boolean postponedUrgency) throws Exception {
+    private static File saveDataFile(Project project, DependencyManager depMan, boolean codeOutput, boolean postponedUrgency, boolean normalizedImportances) throws Exception {
+        Project modDep = depMan.getModDep();
+        
         File dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage()));
         File file = new File(dir, "data.dzn");
 
         try (PrintWriter pw = new PrintWriter(file)) { // try with resource: printwriter closes automatically!
             DataManager dm = new DataManager(project, pw);
 
-            Project modDep = dm.ModifyingDependencyConversion(project);
+            //Project modDep = dm.ModifyingDependencyConversion(project);
 
             if (codeOutput) {
                 dm.printFailHeader();
                 dm.printProjectParameters(modDep.getFeatures().getFeatureCount(), true);
-                dm.printWriter.println(DependencyManager.getGroupDependenciesData(project, modDep));
+                dm.printWriter.println(depMan.getGroupDependenciesData());
                 dm.printResources();
                 dm.printFeatures(modDep);
                 dm.printGroups(true);
-                dm.printWAS(modDep, postponedUrgency);
+                dm.printWAS(modDep, postponedUrgency, normalizedImportances);
             } else {
                 System.out.println("Existing code file solution deprecated!");
                 /*
@@ -533,30 +538,44 @@ public final class DataManager {
     }
     */
 
-    private void printWAS(Project modDep, boolean postponedUrgency) { // Missing modDep WAS, ADD THEM!!! Check now it may be there
+    private void printWAS(Project modDep, boolean postponedUrgency, boolean normalizedImportances) {
         int[][] urgencies = UrgencyManager.getUrgencies(project, modDep);
         int featureCount = project.getFeatures().getFeatureCount() + modDep.getFeatures().getFeatureCount();
         
-        /*
-        printWriter.print("Urgencies = [");
-        for(int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
-            for(int f = 0; f < featureCount; f++) {
-                printWriter.print("0, ");
-                for(int r = 0; r < project.getReleases().getReleaseCount() + 1; r++) {
-                    printWriter.print(urgencies[(s * featureCount) + f][r] + ", ");
-                }
-                printWriter.println("");
-            }
+        Stakeholders stakeholders = project.getStakeholders();
+        int stkNo = stakeholders.getStakeholderCount();
+        int criteriaNo = 2;
+        
+        float[] stkNormImportance = new float[stkNo];
+        float[] criteriaNormImportance = new float[criteriaNo];
+        
+        int stkImpSum = 0;
+        int criteriaImpSum = 0;
+        
+        for(int s = 0; s < stkNo; s++) {
+            stkImpSum += stakeholders.getStakeholder(s).getImportance();
         }
-        printWriter.println("]");
-        */
+        //for(int c = 0; c < stkNo; c++) {
+            criteriaImpSum += 10;
+        //}
+        
+        for(int s = 0; s < stkNo; s++) {
+            stkNormImportance[s] = (float)(stakeholders.getStakeholder(s).getImportance()) / (float)stkImpSum;
+            System.out.println("Stk" + (s + 1) + " normalized weight: " + stkNormImportance[s]);
+        }
+        //for(int c = 0; c < stkNo; c++) {
+            criteriaNormImportance[0] = 0.5f;
+            criteriaNormImportance[1] = 0.5f;
+        //}
         
         printWriter.print("WAS = [");
-        for (int f = 0; f < /*project.getFeatures().getFeatureCount()*/featureCount; f++) {
+        
+        for (int f = 0; f < featureCount; f++) {
             printWriter.print("| 0, ");
             for (int rel = 0; rel < project.getReleases().getReleaseCount() + 1; rel++) {
-                int temp = 0;
+                float temp = 0.0f;
                 for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
+                    /*
                     temp += project.getStakeholders().getStakeholder(s).getImportance()
                             * (f < project.getFeatures().getFeatureCount() ?
                             project.getValueAndUrgency().getValue(
@@ -566,17 +585,23 @@ public final class DataManager {
                             project.getStakeholders().getStakeholder(s),
                             project.getFeatures().getFeature(f - modDep.getFeatures().getFeatureCount())) )
                             * urgencies[(s * featureCount) + f][rel];
-                            /** project.getValueAndUrgency().getUrgency(
+                    */
+                    temp += stkNormImportance[s] * 
+                            criteriaNormImportance[0] *
+                            (float)project.getValueAndUrgency().getValue(
                             project.getStakeholders().getStakeholder(s),
-                            project.getFeatures().getFeature(f),
-                            project.getReleases().getRelease(rel))*/;
+                            project.getFeatures().getFeature(f));
+                    temp += stkNormImportance[s] * 
+                            criteriaNormImportance[1] *
+                            (float)urgencies[(s * featureCount) + f][rel];
+                    
                 }
                 if (rel == project.getReleases().getReleaseCount()) {
                     if(postponedUrgency) {
-                        printWriter.print((project.getReleases().getRelease(rel - 1).getImportance() * temp) + ", \n");
+                        printWriter.print(Math.round(project.getReleases().getRelease(rel - 1).getImportance() * temp) + ", \n");
                     }
                 } else {
-                    printWriter.print((project.getReleases().getRelease(rel).getImportance() * temp) + ", ");
+                    printWriter.print(Math.round(project.getReleases().getRelease(rel).getImportance() * temp) + ", ");
                 }
             }
         }
@@ -586,6 +611,7 @@ public final class DataManager {
         printWriter.println("|];");
     }
 
+    /*
     public static Project ModifyingDependencyConversion(Project project) {
         Project ModDep = new Project("ModifyingDependencies");
         if (project.getDependencies().getTypedDependancyCount(ModifyingParameterDependency.class, Dependency.CC) > 0) {
@@ -608,8 +634,7 @@ public final class DataManager {
                         //for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
                             ModDep.getValueAndUrgency().setUrgency(project.getStakeholders().getStakeholder(s), f,
                                     //project.getReleases().getRelease(r),
-                                    project.getValueAndUrgency().getUrgency(project.getStakeholders().getStakeholder(s), f/*,
-                                    project.getReleases().getRelease(r)*/));
+                                    project.getValueAndUrgency().getUrgency(project.getStakeholders().getStakeholder(s), f));
                         //}
                     }
                 }
@@ -617,6 +642,8 @@ public final class DataManager {
                 ModDep.getDependencies().addOrderDependency(f, CcDS[dep].getPrimary(), Dependency.SOFTPRECEDENCE);
                 ModDep.getDependencies().addOrderDependency(CcDS[dep].getPrimary(), CcDS[dep].getSecondary(), Dependency.HARDPRECEDENCE);
                 ModDep.getDependencies().addOrderDependency(CcDS[dep].getPrimary(), f, Dependency.XOR);
+                // Add all primary dependencies and group dependencies to f
+                DependencyManager.duplicateDependencies(project, f, CcDS[dep].getPrimary());
             }
         }
 
@@ -641,8 +668,7 @@ public final class DataManager {
                         //for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
                             ModDep.getValueAndUrgency().setUrgency(project.getStakeholders().getStakeholder(s), f,
                                     //project.getReleases().getRelease(r),
-                                    project.getValueAndUrgency().getUrgency(project.getStakeholders().getStakeholder(s), f/*,
-                                    project.getReleases().getRelease(r)*/));
+                                    project.getValueAndUrgency().getUrgency(project.getStakeholders().getStakeholder(s), f));
                         //}
                     }
                 }
@@ -650,6 +676,7 @@ public final class DataManager {
                 ModDep.getDependencies().addOrderDependency(f, CvDS[dep].getPrimary(), Dependency.SOFTPRECEDENCE);
                 ModDep.getDependencies().addOrderDependency(CvDS[dep].getPrimary(), CvDS[dep].getSecondary(), Dependency.HARDPRECEDENCE);
                 ModDep.getDependencies().addOrderDependency(CvDS[dep].getPrimary(), f, Dependency.XOR);
+                // Add all primary dependencies and group dependencies to f
             }
         }
 
@@ -674,8 +701,7 @@ public final class DataManager {
                         //for (int r = 0; r < project.getReleases().getReleaseCount(); r++) {
                             ModDep.getValueAndUrgency().setUrgency(project.getStakeholders().getStakeholder(s), f,
                                     //project.getReleases().getRelease(r),
-                                    urgencies.getUrgency(project.getStakeholders().getStakeholder(s), f/*,
-                                    project.getReleases().getRelease(r)*/));
+                                    urgencies.getUrgency(project.getStakeholders().getStakeholder(s), f));
                         //}
                     }
                 }
@@ -683,8 +709,10 @@ public final class DataManager {
                 ModDep.getDependencies().addOrderDependency(f, CuDS[dep].getPrimary(), Dependency.SOFTPRECEDENCE);
                 ModDep.getDependencies().addOrderDependency(CuDS[dep].getPrimary(), CuDS[dep].getSecondary(), Dependency.HARDPRECEDENCE);
                 ModDep.getDependencies().addOrderDependency(CuDS[dep].getPrimary(), f, Dependency.XOR);
+                // Add all primary dependencies and group dependencies to f
             }
         }
         return ModDep;
     }
+    */
 }
