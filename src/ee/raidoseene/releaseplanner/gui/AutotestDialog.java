@@ -126,6 +126,7 @@ public final class AutotestDialog extends JDialog {
         grid.add(this.numFs[1]);
         
         this.minRC = new JTextField();
+        this.minRC.setText(Integer.toString(this.settings.getMinConsumption()));
         grid.add(this.minRC);
         grid.add(new JLabel());
         

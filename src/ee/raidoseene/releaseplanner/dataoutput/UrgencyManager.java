@@ -274,6 +274,13 @@ public class UrgencyManager {
             }
             */
         }
+        
+        for(int i = 0; i < project.getStakeholders().getStakeholderCount() * featureCount; i++) {
+            for(int j = 0; j < project.getReleases().getReleaseCount() + 1; j++) {
+                System.out.print(urgencies[i][j] + ", ");
+            }
+        }
+        
         return urgencies;
     }
 
@@ -291,7 +298,9 @@ public class UrgencyManager {
             } else {
                 Release release = valueAndUrgency.getUrgencyRelease(stakeholder,
                         proj.getFeatures().getFeature(f));
+                System.out.println(release);
                 int releaseNr = releases.getReleaseIndex(release);
+                System.out.println("release number as got from urgency: " + releaseNr);
                 int deadlineCurve = valueAndUrgency.getDeadlineCurve(stakeholder,
                         proj.getFeatures().getFeature(f));
                 if ((deadlineCurve & Urgency.DEADLINE_MASK) == Urgency.EARLIEST) {

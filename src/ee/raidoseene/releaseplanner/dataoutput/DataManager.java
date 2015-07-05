@@ -9,13 +9,11 @@ import ee.raidoseene.releaseplanner.backend.Settings;
 import ee.raidoseene.releaseplanner.backend.SettingsManager;
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
+import ee.raidoseene.releaseplanner.datamodel.Features;
 import ee.raidoseene.releaseplanner.datamodel.Group;
 import ee.raidoseene.releaseplanner.datamodel.GroupDependency;
-import ee.raidoseene.releaseplanner.datamodel.ModifyingParameterDependency;
 import ee.raidoseene.releaseplanner.datamodel.Project;
-import ee.raidoseene.releaseplanner.datamodel.Release;
 import ee.raidoseene.releaseplanner.datamodel.Stakeholders;
-import ee.raidoseene.releaseplanner.datamodel.Urgency;
 import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
 import java.io.File;
 import java.io.PrintWriter;
@@ -28,6 +26,10 @@ import java.util.List;
 public final class DataManager {
 
     private final Project project;
+    private static Project modDep;
+    private static Features features;
+    private static Stakeholders stakeholders;
+    private static ValueAndUrgency valueAndUrgency;
     private final PrintWriter printWriter;
 
     public static void errorLoging(List<String> input) throws Exception {
@@ -64,13 +66,13 @@ public final class DataManager {
     }
 
     private static File saveDataFile(Project project, DependencyManager depMan, boolean codeOutput, boolean postponedUrgency, boolean normalizedImportances) throws Exception {
-        Project modDep = depMan.getModDep();
+        //Project modDep = depMan.getModDep();
         
         File dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage()));
         File file = new File(dir, "data.dzn");
 
         try (PrintWriter pw = new PrintWriter(file)) { // try with resource: printwriter closes automatically!
-            DataManager dm = new DataManager(project, pw);
+            DataManager dm = new DataManager(project, depMan.getModDep(), pw);
 
             //Project modDep = dm.ModifyingDependencyConversion(project);
 
@@ -100,8 +102,12 @@ public final class DataManager {
         return file;
     }
 
-    private DataManager(Project project, PrintWriter pw) {
+    private DataManager(Project project, Project modDep, PrintWriter pw) {
         this.project = project;
+        this.modDep = modDep;
+        this.features = project.getFeatures();
+        this.stakeholders = project.getStakeholders();
+        this.valueAndUrgency = project.getValueAndUrgency();
         this.printWriter = pw;
     }
 
@@ -537,12 +543,57 @@ public final class DataManager {
         printWriter.println("]);");
     }
     */
+    
+    private static float getNormalizedStkWeight(int s, int f, int[][] urgencies, int rel) {
+        int sumOfStkWeights = 0;
+        int featureCount = features.getFeatureCount() + modDep.getFeatures().getFeatureCount();
+        
+        if(urgencies == null) {
+            if(valueAndUrgency.getValue(stakeholders.getStakeholder(s), features.getFeature(f)) == 0) {
+                return 0;
+            } else {
+                for(int i = 0; i < stakeholders.getStakeholderCount(); i++) {
+                    if(valueAndUrgency.getValue(stakeholders.getStakeholder(i), features.getFeature(f)) > 0) {
+                        sumOfStkWeights += stakeholders.getStakeholder(i).getImportance();
+                    }
+                }
+            }
+        } else {
+            if(urgencies[(s * featureCount) + f][rel] == 0) {
+                return 0;
+            } else {
+                for(int i = 0; i < stakeholders.getStakeholderCount(); i++) {
+                    if(urgencies[(i * featureCount) + f][rel] > 0) {
+                        sumOfStkWeights += stakeholders.getStakeholder(i).getImportance();
+                    }
+                }
+            }
+        }
+        
+        System.out.println("Stk importance: " + stakeholders.getStakeholder(s).getImportance() + ", sum of importances: " + sumOfStkWeights + ", Stk " + s + " weight: " + ((float)stakeholders.getStakeholder(s).getImportance() / (float)sumOfStkWeights));
+        return (float)stakeholders.getStakeholder(s).getImportance() / (float)sumOfStkWeights;
+    }
 
     private void printWAS(Project modDep, boolean postponedUrgency, boolean normalizedImportances) {
         int[][] urgencies = UrgencyManager.getUrgencies(project, modDep);
+        
         int featureCount = project.getFeatures().getFeatureCount() + modDep.getFeatures().getFeatureCount();
         
-        Stakeholders stakeholders = project.getStakeholders();
+        
+        
+        for(int s = 0; s < stakeholders.getStakeholderCount(); s++) {
+            System.out.print("Stakeholder " + s + ":\n");
+            for(int rel = 0; rel < project.getReleases().getReleaseCount(); rel ++) {
+                System.out.print("Release " + rel + ": ");
+                for(int f = 0; f < featureCount; f++) {
+                    System.out.print(urgencies[(s * featureCount) + f][rel] + ", ");
+                }
+                System.out.print("\n");
+            }
+        }
+        
+        
+        
         int stkNo = stakeholders.getStakeholderCount();
         int criteriaNo = 2;
         
@@ -575,26 +626,28 @@ public final class DataManager {
             for (int rel = 0; rel < project.getReleases().getReleaseCount() + 1; rel++) {
                 float temp = 0.0f;
                 for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
-                    /*
-                    temp += project.getStakeholders().getStakeholder(s).getImportance()
-                            * (f < project.getFeatures().getFeatureCount() ?
-                            project.getValueAndUrgency().getValue(
-                            project.getStakeholders().getStakeholder(s),
-                            project.getFeatures().getFeature(f)) :
-                            modDep.getValueAndUrgency().getValue(
-                            project.getStakeholders().getStakeholder(s),
-                            project.getFeatures().getFeature(f - modDep.getFeatures().getFeatureCount())) )
-                            * urgencies[(s * featureCount) + f][rel];
-                    */
-                    temp += stkNormImportance[s] * 
-                            criteriaNormImportance[0] *
-                            (float)project.getValueAndUrgency().getValue(
-                            project.getStakeholders().getStakeholder(s),
-                            project.getFeatures().getFeature(f));
-                    temp += stkNormImportance[s] * 
-                            criteriaNormImportance[1] *
-                            (float)urgencies[(s * featureCount) + f][rel];
-                    
+                    if(!normalizedImportances) {
+                        temp += project.getStakeholders().getStakeholder(s).getImportance()
+                                * (f < project.getFeatures().getFeatureCount() ?
+                                project.getValueAndUrgency().getValue(
+                                project.getStakeholders().getStakeholder(s),
+                                project.getFeatures().getFeature(f)) :
+                                modDep.getValueAndUrgency().getValue(
+                                project.getStakeholders().getStakeholder(s),
+                                project.getFeatures().getFeature(f - modDep.getFeatures().getFeatureCount())) )
+                                * urgencies[(s * featureCount) + f][rel];
+                    } else {
+                        temp += //stkNormImportance[s] *
+                                getNormalizedStkWeight(s, f, null, rel) *
+                                criteriaNormImportance[0] *
+                                (float)valueAndUrgency.getValue(
+                                stakeholders.getStakeholder(s),
+                                features.getFeature(f));
+                        temp += //stkNormImportance[s] *
+                                getNormalizedStkWeight(s, f, urgencies, rel) *
+                                criteriaNormImportance[1] *
+                                (float)urgencies[(s * featureCount) + f][rel];
+                    }
                 }
                 if (rel == project.getReleases().getReleaseCount()) {
                     if(postponedUrgency) {
