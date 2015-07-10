@@ -154,7 +154,7 @@ public class DataGenerator {
     private static void generateValueAndUrgency(Project project, AutotestSettings settings) {
         int stkNo = settings.getStakeholderNo();
         int featNo = settings.getFeatureNo();
-        int relNo = settings.getReleaseNo();
+        int relNo = settings.getReleaseNo() + 1;
         Random random = new Random();
 
         for (int f = 0; f < featNo; f++) {
@@ -254,7 +254,7 @@ public class DataGenerator {
         Releases releases = project.getReleases();
         
         int featNo = settings.getFeatureNo();
-        int relNo = settings.getReleaseNo();
+        int relNo = settings.getReleaseNo() + 1;
         
         Feature randFeat;
         Release randRel;

@@ -19,7 +19,7 @@ public class UrgencyManager {
 
     public static int[][] getUrgencies(Project project, Project ModDep) {
         int featureCount = project.getFeatures().getFeatureCount() + ModDep.getFeatures().getFeatureCount();
-        int urgencies[][] = new int[project.getStakeholders().getStakeholderCount() * featureCount][project.getReleases().getReleaseCount() + 1];
+        int urgencies[][] = new int[project.getStakeholders().getStakeholderCount() * featureCount][project.getReleases().getReleaseCount()];
 
         //ValueAndUrgency valueAndUrgency = project.getValueAndUrgency();
         //ValueAndUrgency newValueAndUrgency = ModDep.getValueAndUrgency();
@@ -276,7 +276,7 @@ public class UrgencyManager {
         }
         
         for(int i = 0; i < project.getStakeholders().getStakeholderCount() * featureCount; i++) {
-            for(int j = 0; j < project.getReleases().getReleaseCount() + 1; j++) {
+            for(int j = 0; j < project.getReleases().getReleaseCount(); j++) {
                 System.out.print(urgencies[i][j] + ", ");
             }
         }
@@ -292,7 +292,7 @@ public class UrgencyManager {
             int urgency = valueAndUrgency.getUrgency(stakeholder,
                     proj.getFeatures().getFeature(f));
             if (urgency == 0) {
-                for (int r = 0; r < releaseCount + 1; r++) {
+                for (int r = 0; r < releaseCount; r++) {
                     urgencies[(s * featureCount) + featureStep + f][r] = 0;
                 }
             } else {
@@ -308,13 +308,13 @@ public class UrgencyManager {
                         for (int r = 0; r < releaseNr; r++) {
                             urgencies[(s * featureCount) + featureStep + f][r] = 0;
                         }
-                        for (int r = releaseNr; r < releaseCount + 1; r++) {
+                        for (int r = releaseNr; r < releaseCount; r++) {
                             urgencies[(s * featureCount) + featureStep + f][r] = urgency;
                         }
                     } else {
-                        int[] tempUrgencies = new int[releaseCount + 1];
+                        int[] tempUrgencies = new int[releaseCount];
                         int tempUrgency = urgency;
-                        if ((releaseCount + 1) - releaseNr > ((urgency > 4)
+                        if ((releaseCount) - releaseNr > ((urgency > 4)
                                 ? (int) (Math.round(urgency / 3f)) : ((urgency == 4 || urgency == 3) ? 2 : 1))) {
                             for (int i = (releaseNr) + (urgency == 4 ? 2 : ((int) (Math.round(urgency / 3f/* 2.5f */)))); i >= releaseNr; i--) {
                                 tempUrgencies[i] = tempUrgency;
@@ -324,14 +324,14 @@ public class UrgencyManager {
                                 tempUrgencies[i] = 0;
                             }
                             if (releaseNr + ((urgency > 4)
-                                    ? (int) (Math.round(urgency / 3f)) : ((urgency == 4 || urgency == 3) ? 2 : 1)) < releaseCount + 1) {
+                                    ? (int) (Math.round(urgency / 3f)) : ((urgency == 4 || urgency == 3) ? 2 : 1)) < releaseCount) {
                                 for (int i = (releaseNr) + ((urgency > 4)
-                                        ? (int) (Math.round(urgency / 3f)) : ((urgency == 4 || urgency == 3) ? 2 : 1)); i < releaseCount + 1; i++) {
+                                        ? (int) (Math.round(urgency / 3f)) : ((urgency == 4 || urgency == 3) ? 2 : 1)); i < releaseCount; i++) {
                                     tempUrgencies[i] = urgency;
                                 }
                             }
                         } else {
-                            for (int i = releaseCount; i >= releaseNr; i--) {
+                            for (int i = releaseCount - 1; i >= releaseNr; i--) {
                                 tempUrgencies[i] = tempUrgency;
                                 tempUrgency = tempUrgency / 2;
                             }
@@ -339,18 +339,18 @@ public class UrgencyManager {
                                 tempUrgencies[i] = 0;
                             }
                         }
-                        System.arraycopy(tempUrgencies, 0, urgencies[(s * featureCount) + featureStep + f], 0, releaseCount + 1);
+                        System.arraycopy(tempUrgencies, 0, urgencies[(s * featureCount) + featureStep + f], 0, releaseCount);
                     }
                 } else if ((deadlineCurve & Urgency.DEADLINE_MASK) == Urgency.LATEST) {
                     if ((deadlineCurve & Urgency.CURVE_MASK) == Urgency.HARD) {
                         for (int r = 0; r <= releaseNr; r++) {
                             urgencies[(s * featureCount) + featureStep + f][r] = urgency;
                         }
-                        for (int r = releaseNr + 1; r < releaseCount + 1; r++) {
+                        for (int r = releaseNr + 1; r < releaseCount; r++) {
                             urgencies[(s * featureCount) + featureStep + f][r] = 0;
                         }
                     } else {
-                        int[] tempUrgencies = new int[releaseCount + 1];
+                        int[] tempUrgencies = new int[releaseCount];
                         int tempUrgency = urgency;
                         if (releaseNr - ((urgency > 4)
                                 ? (int) (Math.round(urgency / 3f)) : (urgency == 4 ? 2 : (urgency == 1 ? 0 : 1))) >= 0) {
@@ -359,7 +359,7 @@ public class UrgencyManager {
                                 tempUrgencies[i] = tempUrgency;
                                 tempUrgency = tempUrgency / 2;
                             }
-                            for (int i = releaseNr + 1; i < releaseCount + 1; i++) {
+                            for (int i = releaseNr + 1; i < releaseCount; i++) {
                                 tempUrgencies[i] = 0;
                             }
                             if (releaseNr - ((urgency > 4)
@@ -374,15 +374,15 @@ public class UrgencyManager {
                                 tempUrgencies[i] = tempUrgency;
                                 tempUrgency = tempUrgency / 2;
                             }
-                            for (int i = releaseNr + 1; i < releaseCount + 1; i++) {
+                            for (int i = releaseNr + 1; i < releaseCount; i++) {
                                 tempUrgencies[i] = 0;
                             }
                         }
-                        System.arraycopy(tempUrgencies, 0, urgencies[(s * featureCount) + featureStep + f], 0, releaseCount + 1);
+                        System.arraycopy(tempUrgencies, 0, urgencies[(s * featureCount) + featureStep + f], 0, releaseCount);
                     }
                 } else {
                     if ((deadlineCurve & Urgency.CURVE_MASK) == Urgency.HARD) {
-                        for (int r = 0; r < releaseCount + 1; r++) {
+                        for (int r = 0; r < releaseCount; r++) {
                             if (r == releaseNr) {
                                 urgencies[(s * featureCount) + featureStep + f][r] = urgency;
                             } else {
@@ -390,10 +390,10 @@ public class UrgencyManager {
                             }
                         }
                     } else {
-                        int[] tempUrgencies = new int[releaseCount + 1];
+                        int[] tempUrgencies = new int[releaseCount];
                         tempUrgencies[releaseNr] = urgency;
                         int tempUrgency = urgency;
-                        for (int r = releaseNr + 1; r < releaseCount + 1; r++) {
+                        for (int r = releaseNr + 1; r < releaseCount; r++) {
                             tempUrgency = tempUrgency / 2;
                             tempUrgencies[r] = tempUrgency;
                         }
@@ -402,7 +402,7 @@ public class UrgencyManager {
                             tempUrgency = tempUrgency / 2;
                             tempUrgencies[r] = tempUrgency;
                         }
-                        System.arraycopy(tempUrgencies, 0, urgencies[(s * featureCount) + featureStep + f], 0, releaseCount + 1);
+                        System.arraycopy(tempUrgencies, 0, urgencies[(s * featureCount) + featureStep + f], 0, releaseCount);
                     }
                 }
             }

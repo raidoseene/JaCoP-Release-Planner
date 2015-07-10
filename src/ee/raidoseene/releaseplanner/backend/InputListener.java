@@ -7,7 +7,7 @@ package ee.raidoseene.releaseplanner.backend;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public interface InputListener {
     

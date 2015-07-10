@@ -34,16 +34,6 @@ public class Urgency implements Serializable {
     Urgency () {
         this.urgencies = new HashMap<>();
     }
-
-    /*
-    public void setUrgency(Release release, int urgency) {
-        if (urgency > 0) {
-            this.urgencies.put(release, urgency);
-        } else {
-            this.urgencies.remove(release);
-        }
-    }
-    */
     
     public void setUrgency(int urgency) {
         this.urgency = urgency;
@@ -57,17 +47,6 @@ public class Urgency implements Serializable {
     public void setDeadlineCurve(int deadlineCurve) {
         this.deadlineCurve = deadlineCurve;
     }
-    
-    /*
-    public int getUrgency(Release release) {
-        Integer value = this.urgencies.get(release);
-        if (value != null) {
-            return value;
-        }
-
-        return 0;
-    }
-    */
     
     public int getUrgency() {
         return this.urgency;

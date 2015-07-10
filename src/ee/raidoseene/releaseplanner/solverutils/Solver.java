@@ -29,7 +29,7 @@ public class Solver {
     public static SolverResult executeSimulation(Project project, boolean codeOutput, boolean postponedUrgency, boolean normalizedImportances, boolean saveOutput) throws IOException {
         SolverResult sr = null;
         // TO DO: check if all needed elements are filled in the project
-        if (project.getFeatures().getFeatureCount() > 0 & project.getReleases().getReleaseCount() > 0 &
+        if (project.getFeatures().getFeatureCount() > 0 & project.getReleases().getReleaseCount() > 1 &
                 project.getResources().getResourceCount() > 0 & project.getStakeholders().getStakeholderCount() > 0) {
             File[] files;
             try {

@@ -11,7 +11,7 @@ import java.io.InputStreamReader;
 
 /**
  *
- * @author risto
+ * @author Raido Seene
  */
 public final class InputReader {
 

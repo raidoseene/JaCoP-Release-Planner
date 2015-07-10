@@ -16,7 +16,6 @@ public class Resources extends ProjectElement implements Serializable {
 
     private static final long serialVersionUID = 1;
     private final List<Resource> resourceContainer;
-    //private Releases releases;
 
     Resources(Project project) {
         super(project);
@@ -24,19 +23,9 @@ public class Resources extends ProjectElement implements Serializable {
         this.resourceContainer = new ArrayList<>();
     }
 
-    /*Resources(List<String> defaultResources, Releases releases) {
-     resourceContainer = new ArrayList<>();
-     this.releases = releases;
-     for (String r : defaultResources) {
-     Resource res = new Resource();
-     resourceContainer.add(res);
-     res.setName(r);
-     }
-     }*/
     public Resource addResource() {
         Resource r = new Resource();
         this.resourceContainer.add(r);
-        //releases.addResource(r);
         return r;
     }
 
@@ -46,9 +35,6 @@ public class Resources extends ProjectElement implements Serializable {
         }
     }
 
-    /*public List<Resource> getResourceList() {
-     return resourceContainer;
-     }*/
     public Resource getResource(int index) {
         return this.resourceContainer.get(index);
     }

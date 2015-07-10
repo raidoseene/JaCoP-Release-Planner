@@ -21,7 +21,6 @@ public final class ModifyingParameterDependency extends Dependency implements Se
         super(CC);
         this.primary = f1;
         this.secondary = f2;
-        //super(f1, f2, CC);
         this.change = feature;
     }
 
@@ -29,7 +28,6 @@ public final class ModifyingParameterDependency extends Dependency implements Se
         super(CV);
         this.primary = f1;
         this.secondary = f2;
-        //super(f1, f2, CV);
         this.change = value;
     }
 
@@ -37,7 +35,6 @@ public final class ModifyingParameterDependency extends Dependency implements Se
         super(CU);
         this.primary = f1;
         this.secondary = f2;
-        //super(f1, f2, CU);
         this.change = urgency;
     }
 

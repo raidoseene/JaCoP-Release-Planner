@@ -40,7 +40,7 @@ public class Dependencies extends ProjectElement implements Serializable {
         this.dependenciesContainer.add(dependency);
         return dependency;
     }
-    
+
     public ExistanceDependency addExistanceDependency(Feature feature1, Feature feature2, int type) {
         ExistanceDependency dependency = new ExistanceDependency(feature1, feature2, type);
         this.dependenciesContainer.add(dependency);
@@ -140,15 +140,17 @@ public class Dependencies extends ProjectElement implements Serializable {
             int sum;
             boolean check = true;
 
-            for (int res = 0; res < resources.getResourceCount(); res++) {
-                sum = feature.getConsumption(resources.getResource(res));
-                for (ReleaseDependency f : fixed) {
-                    sum += (f.getRelease() == release ? f.getFeature().getConsumption(resources.getResource(res)) : 0);
-                }
-                if (sum <= release.getCapacity(resources.getResource(res))) {
-                    check = check && true;
-                } else {
-                    check = false;
+            if (release.getType() != Release.Type.POSTPONED) {
+                for (int res = 0; res < resources.getResourceCount(); res++) {
+                    sum = feature.getConsumption(resources.getResource(res));
+                    for (ReleaseDependency f : fixed) {
+                        sum += (f.getRelease() == release ? f.getFeature().getConsumption(resources.getResource(res)) : 0);
+                    }
+                    if (sum <= release.getCapacity(resources.getResource(res))) {
+                        check = check && true;
+                    } else {
+                        check = false;
+                    }
                 }
             }
 

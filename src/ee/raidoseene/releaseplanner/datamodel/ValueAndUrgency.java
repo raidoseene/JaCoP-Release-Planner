@@ -35,16 +35,6 @@ public class ValueAndUrgency implements Serializable {
             this.parameters.remove(key);
         }
     }
-    /*
-    public void setUrgency(Stakeholder s, Feature f, Release r, int urgency) {
-        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
-        if (val != null) {
-            val.urgency.setUrgency(r, urgency);
-        } else {
-            throw new RuntimeException("Urgency cannot be set without value!");
-        }
-    }
-    */
     
     public void setUrgency(Stakeholder s, Feature f, int urgency) {
         ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
@@ -81,15 +71,6 @@ public class ValueAndUrgency implements Serializable {
         }
         return 0;
     }
-    /*
-    public int getUrgency(Stakeholder s, Feature f, Release r) {
-        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
-        if (val != null) {
-            return val.urgency.getUrgency(r);
-        }
-        return 0;
-    }
-    */
     
     public int getUrgency(Stakeholder s, Feature f) {
         ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
