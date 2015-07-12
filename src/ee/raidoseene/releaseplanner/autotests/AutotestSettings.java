@@ -4,6 +4,10 @@
  */
 package ee.raidoseene.releaseplanner.autotests;
 
+import ee.raidoseene.releaseplanner.datamodel.Resource;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author Raido Seene
@@ -18,6 +22,71 @@ public class AutotestSettings {
     private float tightness, tightnessTo;
     private boolean projInterval, featInterval, relInterval, resInterval, stkInterval, tightnessInterval;
     private int[] totalResUsage;
+    
+    private final Map<Parameter, ParamValues> parameters;
+    public enum Parameter {
+        FEATURES,
+        RESOURCE_CONS,
+        RESOURCES,
+        RELEASES,
+        STAKEHOLDERS,
+        TIGHTNESS,
+        FIXED_DEP,
+        EXCLUDED_DEP,
+        EARLIER_DEP,
+        LATER_DEP,
+        SOFT_PRECEDENCE_DEP,
+        HARD_PRECEDENCE_DEP,
+        COUPLING_DEP,
+        SEPARATION_DEP,
+        AND_DEP,
+        XOR_DEP
+    }
+    
+    public class ParamValues {
+        private int min = 0;
+        private int max = 0;
+        
+        public ParamValues(int min) {
+            this.min = min;
+        }
+        
+        public void setMin(int min) {
+            this.min = min;
+        }
+        
+        public int getMin() {
+            return this.min;
+        }
+        
+        public void setMax(int max) {
+            this.max = max;
+        }
+        
+        public int getMax() {
+            return this.max;
+        }
+    }
+    
+    public void setParameter(Parameter param, int min, int max) {
+        ParamValues values = getParameter(param);
+        if(values == null) {
+            values = new ParamValues(min);
+            values.setMin(min);
+            values.setMax(max);
+        } else {
+            if(min == 0) {
+                parameters.remove(param);
+            } else {
+                values.setMin(min);
+                values.setMax(max);
+            }
+        }
+    }
+    
+    public ParamValues getParameter(Parameter param) {
+        return parameters.get(param);
+    }
 
     public AutotestSettings() {
  
@@ -65,6 +134,8 @@ public class AutotestSettings {
         this.atLeastNo = 0;
         this.atMostNo = 0;
         this.exacltyNo = 0;
+        
+        this.parameters = new HashMap<>();
     }
     
     public void setProjectNo(int projNo) {
