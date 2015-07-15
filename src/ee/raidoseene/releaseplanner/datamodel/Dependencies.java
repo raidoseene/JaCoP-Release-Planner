@@ -131,6 +131,37 @@ public class Dependencies extends ProjectElement implements Serializable {
 
         return count;
     }
+    
+    public Feature[] getDependantFeatures(Feature f) {
+        ArrayList<Feature> list = new ArrayList();
+        int depCount;
+        
+        depCount = getTypedDependancyCount(OrderDependency.class, null);
+        if(depCount > 0) {
+            OrderDependency deps[] = getTypedDependencies(OrderDependency.class, null);
+            for(int i = 0; i < depCount; i++) {
+                if(deps[i].getPrimary() == f) {
+                    list.add(deps[i].getSecondary());
+                } else if(deps[i].getSecondary() == f) {
+                    list.add(deps[i].getPrimary());
+                }
+            }
+        }
+        
+        depCount = getTypedDependancyCount(ExistanceDependency.class, null);
+        if(depCount > 0) {
+            ExistanceDependency deps[] = getTypedDependencies(ExistanceDependency.class, null);
+            for(int i = 0; i < depCount; i++) {
+                if(deps[i].getPrimary() == f) {
+                    list.add(deps[i].getSecondary());
+                } else if(deps[i].getSecondary() == f) {
+                    list.add(deps[i].getPrimary());
+                }
+            }
+        }
+        
+        return list.toArray((Feature[]) Array.newInstance(Feature.class, list.size()));
+    }
 
     private boolean capacityCheck(Feature feature, Release release, int type) {
         // add support for LATER and EARLIER release dependencies

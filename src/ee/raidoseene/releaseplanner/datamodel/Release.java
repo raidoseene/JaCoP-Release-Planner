@@ -38,6 +38,13 @@ public class Release extends NamedObject implements Serializable {
         this.importance = 1;
     }
     
+    Release(Type type, int importance) {
+        this.type = type;
+        
+        this.capacities = new HashMap<>();
+        this.importance = importance;
+    }
+    
     public void setImportance(int importance) {
         if (importance > 0 && importance < 10) {
             this.importance = importance;

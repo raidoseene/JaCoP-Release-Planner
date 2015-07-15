@@ -22,7 +22,7 @@ public class Releases extends ProjectElement implements Serializable {
 
         this.releaseContainer = new ArrayList<>();
         
-        Release postponed = new Release(Release.Type.POSTPONED);
+        Release postponed = new Release(Release.Type.POSTPONED, 0);
         postponed.setName("Postponed");
         this.releaseContainer.add(postponed);
     }

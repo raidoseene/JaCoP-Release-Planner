@@ -141,7 +141,7 @@ public final class ReleasesPanel extends ScrollablePanel {
             c.setLayout(new BorderLayout(5, 5));
             this.cont1.add(BorderLayout.LINE_END, c);
 
-            this.importance = new JSpinner(new SpinnerNumberModel(r.getImportance(), 1, 9, 1));
+            this.importance = new JSpinner(new SpinnerNumberModel(r.getImportance(), 0, 9, 1));
             this.importance.addChangeListener(new ChangeListener() {
 
                 @Override

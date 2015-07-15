@@ -44,38 +44,38 @@ public class AutotestSettings {
     }
     
     public class ParamValues {
-        private int min = 0;
-        private int max = 0;
+        private Number min = 0;
+        private Number max = 0;
         
-        public ParamValues(int min) {
+        public ParamValues(Number min) {
             this.min = min;
         }
         
-        public void setMin(int min) {
+        public void setMin(Number min) {
             this.min = min;
         }
         
-        public int getMin() {
+        public Number getMin() {
             return this.min;
         }
         
-        public void setMax(int max) {
+        public void setMax(Number max) {
             this.max = max;
         }
         
-        public int getMax() {
+        public Number getMax() {
             return this.max;
         }
     }
     
-    public void setParameter(Parameter param, int min, int max) {
+    public void setParameter(Parameter param, Number min, Number max) {
         ParamValues values = getParameter(param);
         if(values == null) {
             values = new ParamValues(min);
             values.setMin(min);
             values.setMax(max);
         } else {
-            if(min == 0) {
+            if(min == null) {
                 parameters.remove(param);
             } else {
                 values.setMin(min);
