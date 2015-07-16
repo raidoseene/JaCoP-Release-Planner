@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
+import ee.raidoseene.releaseplanner.solverutils.SimulationArchive;
 import java.io.Serializable;
 
 /**
@@ -21,6 +22,7 @@ public class Project extends NamedObject implements Serializable {
     private final Resources resources;
     private final Releases releases;
     private final Stakeholders stakeholders;
+    private final SimulationArchive simulationArchive;
 
     public Project(String name) {
         super(name);
@@ -33,7 +35,7 @@ public class Project extends NamedObject implements Serializable {
         this.resources = new Resources(this);
         this.releases = new Releases(this);
         this.stakeholders = new Stakeholders(this);
-       
+        this.simulationArchive = new SimulationArchive();
     }
     
     public void setStorage(String storage) {
@@ -70,6 +72,10 @@ public class Project extends NamedObject implements Serializable {
     
     public Dependencies getDependencies() {
         return this.dependencies;
+    }
+    
+    public SimulationArchive getSimulationArchive() {
+        return this.simulationArchive;
     }
 
     void featureRemoved(Feature feature) {
