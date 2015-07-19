@@ -35,7 +35,7 @@ public class Solver {
             try {
                 //file = DataManager.saveDataFile(ProjectManager.getCurrentProject());
                 files = DataManager.initiateDataOutput(project, codeOutput, postponedUrgency, normalizedImportances);
-                sr = runSolver(files, codeOutput, saveOutput);
+                sr = runSolver(project, files, codeOutput, saveOutput);
             } catch (Exception ex) {
                 Messenger.showError(ex, null);
             }
@@ -45,7 +45,7 @@ public class Solver {
         return sr;
     }
 
-    public static SolverResult runSolver(File[] files, boolean codeOutput, boolean saveOutput) throws IOException {
+    public static SolverResult runSolver(Project project, File[] files, boolean codeOutput, boolean saveOutput) throws IOException {
         String minizincLocation = "C:/Program Files (x86)/MiniZinc 1.6/bin/mzn2fzn.bat";
         String outputFile = "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn";
         String solverCode;
@@ -152,6 +152,7 @@ public class Solver {
         SolverResult sr = new SolverResult(result, time);
         if(!saveOutput) {
             SolverOutputFrame.showSolverOutputFrame(result);
+            SolverResultConverter.SolverResultConverter(project, sr);
         }
         //return output;
         return sr;

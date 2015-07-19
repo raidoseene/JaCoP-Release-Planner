@@ -18,7 +18,7 @@ public class Simulation implements Serializable {
     private static final long serialVersionUID = 1;
     private final List<CandidatePlan> candidatePlanContainer;
     private String simulationDate;
-    private int simulationDuraton;
+    private long simulationDuraton;
     
     Simulation() {
         candidatePlanContainer = new ArrayList<>();
@@ -53,11 +53,11 @@ public class Simulation implements Serializable {
         return this.simulationDate;
     }
     
-    public void setSimulationDuration(int duration) {
+    public void setSimulationDuration(long duration) {
         this.simulationDuraton = duration;
     }
     
-    public int getSimulationDuration() {
+    public long getSimulationDuration() {
         return this.simulationDuraton;
     }
 }
