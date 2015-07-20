@@ -52,9 +52,10 @@ public class SolverResultConverter {
                             }
                         }
                     }
+                } else if(line.startsWith("=====UNSATISFIABLE=====")) {
+                    break;
                 }
             }
-            
             /*
             // for testing the data
             for(int i = 0; i < s.getCandidatePlanCount(); i++) {

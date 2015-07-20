@@ -65,15 +65,12 @@ public class FeaturesSort {
         
         calculateDistances(dependencies);
         distance = cumulativeDistance();
-        System.out.println("Distance = " + distance);
         
         while(gotBetter) {
-            System.out.println("Got in WHILE");
             
             gotBetter = false;
             //for(int i = 0; i < featureList.size(); i++) {
             for(int i = featureList.size() - 1; i >= 0; i--) {
-                System.out.println("Got in FEATURES");
                 for(int j = 0; j < i; j++) {
                     FeatureNode fNode = backupList.get(i);
                     featureList.remove(i);
@@ -82,12 +79,10 @@ public class FeaturesSort {
                     
                     calculateDistances(dependencies);
                     newDistance = cumulativeDistance();
-                    System.out.println("NewDistance = " + newDistance);
                     if(newDistance < distance) {
                         distance = newDistance;
                         backupList = (LinkedList<FeatureNode>)featureList.clone();
                         gotBetter = gotBetter | true;
-                        System.out.println("Got Better");
                     } else {
                         featureList = (LinkedList<FeatureNode>)backupList.clone();
                     }
@@ -100,12 +95,10 @@ public class FeaturesSort {
                     
                     calculateDistances(dependencies);
                     newDistance = cumulativeDistance();
-                    System.out.println("NewDistance = " + newDistance);
                     if(newDistance < distance) {
                         distance = newDistance;
                         backupList = (LinkedList<FeatureNode>)featureList.clone();
                         gotBetter = gotBetter | true;
-                        System.out.println("Got Better");
                     } else {
                         featureList = (LinkedList<FeatureNode>)backupList.clone();
                     }
@@ -126,8 +119,6 @@ public class FeaturesSort {
             FeatureNode fNode = featureList.get(i);
             Feature feature = fNode.getFeature();
             Feature[] dependantF = dependencies.getDependantFeatures(feature);
-            
-            //System.out.println("Dependencies count = " + dependantF.length);
 
             fNode.resetDistances();
             
