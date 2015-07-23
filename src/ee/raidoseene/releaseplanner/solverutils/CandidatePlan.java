@@ -5,8 +5,12 @@
 package ee.raidoseene.releaseplanner.solverutils;
 
 import ee.raidoseene.releaseplanner.datamodel.Feature;
+import ee.raidoseene.releaseplanner.datamodel.Features;
+import ee.raidoseene.releaseplanner.datamodel.Project;
+import ee.raidoseene.releaseplanner.datamodel.ProjectElement;
 import ee.raidoseene.releaseplanner.datamodel.Release;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,8 +24,10 @@ public class CandidatePlan implements Serializable {
     private final Map<Feature, Release> featureAllocations;
     private int planValue;
     private String comment;
+    private Features features;
     
-    CandidatePlan(){
+    CandidatePlan(Features features){
+        this.features = features;
         this.featureAllocations = new HashMap<>();
     }
     
@@ -47,5 +53,19 @@ public class CandidatePlan implements Serializable {
     
     public Release getAllocation(Feature f) {
         return this.featureAllocations.get(f);
+    }
+    
+    public Feature[] getAllocation(Release r) {
+        ArrayList<Feature> featuresList = new ArrayList<>();
+        
+        int featCount = features.getFeatureCount();
+        for(int i = 0; i < featCount; i++) {
+            Release rel = featureAllocations.get(features.getFeature(i));
+            if(r == rel) {
+                featuresList.add(features.getFeature(i));
+            }
+        }
+        
+        return featuresList.toArray(new Feature[featuresList.size()]);
     }
 }

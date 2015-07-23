@@ -35,7 +35,7 @@ public class Project extends NamedObject implements Serializable {
         this.resources = new Resources(this);
         this.releases = new Releases(this);
         this.stakeholders = new Stakeholders(this);
-        this.simulationArchive = new SimulationArchive();
+        this.simulationArchive = new SimulationArchive(this);
     }
     
     public void setStorage(String storage) {

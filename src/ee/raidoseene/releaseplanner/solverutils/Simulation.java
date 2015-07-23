@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.solverutils;
 
+import ee.raidoseene.releaseplanner.datamodel.Features;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -19,8 +20,10 @@ public class Simulation implements Serializable {
     private final List<CandidatePlan> candidatePlanContainer;
     private String simulationDate;
     private long simulationDuraton;
+    private Features features;
     
-    Simulation() {
+    Simulation(Features features) {
+        this.features = features;
         candidatePlanContainer = new ArrayList<>();
         
         Date date = new Date();
@@ -28,7 +31,7 @@ public class Simulation implements Serializable {
     }
     
     public CandidatePlan addCandidatePlan() {
-        CandidatePlan cp = new CandidatePlan();
+        CandidatePlan cp = new CandidatePlan(this.features);
         this.candidatePlanContainer.add(cp);
         return cp;
     }

@@ -4,6 +4,8 @@
  */
 package ee.raidoseene.releaseplanner.solverutils;
 
+import ee.raidoseene.releaseplanner.datamodel.Project;
+import ee.raidoseene.releaseplanner.datamodel.ProjectElement;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,17 +14,19 @@ import java.util.List;
  *
  * @author Raido Seene
  */
-public class SimulationArchive implements Serializable {
+public class SimulationArchive extends ProjectElement implements Serializable {
     
     private static final long serialVersionUID = 1;
     private final List<Simulation> simulationContainer;
     
-    public SimulationArchive() {
+    public SimulationArchive(Project project) {
+        super(project);
+        
         this.simulationContainer = new ArrayList<>();
     }
     
     public Simulation addSimulation() {
-        Simulation s = new Simulation();
+        Simulation s = new Simulation(this.parent.getFeatures());
         this.simulationContainer.add(s);
         return s;
     }
