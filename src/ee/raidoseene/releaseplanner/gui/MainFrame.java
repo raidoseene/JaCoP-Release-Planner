@@ -2,14 +2,12 @@ package ee.raidoseene.releaseplanner.gui;
 
 import ee.raidoseene.releaseplanner.autotests.AutotestManager;
 import ee.raidoseene.releaseplanner.autotests.AutotestSettings;
-import ee.raidoseene.releaseplanner.autotests.DataGenerator;
 import ee.raidoseene.releaseplanner.backend.ProjectFileFilter;
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.backend.Settings;
 import ee.raidoseene.releaseplanner.backend.SettingsManager;
 import ee.raidoseene.releaseplanner.dataimport.ImportManager;
-import ee.raidoseene.releaseplanner.datamodel.Releases;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import ee.raidoseene.releaseplanner.gui.utils.FeaturesSort;
 import ee.raidoseene.releaseplanner.solverutils.Solver;

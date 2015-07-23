@@ -5,8 +5,6 @@
 package ee.raidoseene.releaseplanner.datamodel;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  *
@@ -15,7 +13,6 @@ import java.util.Map;
 public class Urgency implements Serializable {
     
     private static final long serialVersionUID = 1;
-    private final Map<Release, Integer> urgencies;
     
     public static final int DEADLINE_MASK = 0xf0;
     public static final int CURVE_MASK = 0x0f;
@@ -31,9 +28,7 @@ public class Urgency implements Serializable {
     private int urgency;
     private int deadlineCurve;
     
-    Urgency () {
-        this.urgencies = new HashMap<>();
-    }
+    Urgency () {}
     
     public void setUrgency(int urgency) {
         this.urgency = urgency;
@@ -59,14 +54,4 @@ public class Urgency implements Serializable {
     public int getDeadlineCurve() {
         return this.deadlineCurve;
     }
-    
-
-    boolean removeUrgency(Release release) {
-        return (this.urgencies.remove(release) != null);
-    }
-
-    boolean hasUrgency(Release r) {
-        return this.urgencies.containsKey(r);
-    }
-    
 }

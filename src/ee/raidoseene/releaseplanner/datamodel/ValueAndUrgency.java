@@ -16,7 +16,7 @@ import java.util.Objects;
 public class ValueAndUrgency implements Serializable {
 
     private static final long serialVersionUID = 1;
-    private final Map<ValueAndUrgency.Key, ValueAndUrgency.Value> parameters;
+    private final Map<ValueAndUrgency.Key, ValueAndUrgency.ValUrg> parameters;
 
     ValueAndUrgency() {
         this.parameters = new HashMap<>();
@@ -24,82 +24,90 @@ public class ValueAndUrgency implements Serializable {
 
     public void setValue(Stakeholder s, Feature f, int value) {
         ValueAndUrgency.Key key = new ValueAndUrgency.Key(s, f);
-        ValueAndUrgency.Value val = this.parameters.get(key);
+        ValueAndUrgency.ValUrg valUrg = this.parameters.get(key);
         if (value > 0) {
-            if (val == null) {
-                this.parameters.put(key, new ValueAndUrgency.Value(value));
+            if (valUrg == null) {
+                this.parameters.put(key, new ValueAndUrgency.ValUrg(value));
             } else {
-                val.value = value;
+                valUrg.value = value;
             }
-        } else if (val != null) {
+        } else if (valUrg != null) {
             this.parameters.remove(key);
         }
     }
     
     public void setUrgency(Stakeholder s, Feature f, int urgency) {
-        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
-        if (val != null) {
-            val.urgency.setUrgency(urgency);
+        ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (valUrg != null) {
+            valUrg.urgency.setUrgency(urgency);
         } else {
             throw new RuntimeException("Urgency cannot be set without value!");
         }
     }
     
     public void setRelease(Stakeholder s, Feature f, Release r) {
-        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
-        if (val != null) {
-            val.urgency.setRelease(r);
+        ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (valUrg != null) {
+            valUrg.urgency.setRelease(r);
         } else {
             throw new RuntimeException("Urgency cannot be set without value!");
         }
     }
     
     public void setDeadlineCurve(Stakeholder s, Feature f, int deadlineCurve) {
-        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
-        if (val != null) {
-            val.urgency.setDeadlineCurve(deadlineCurve);
+        ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (valUrg != null) {
+            valUrg.urgency.setDeadlineCurve(deadlineCurve);
         } else {
             throw new RuntimeException("Urgency cannot be set without value!");
         }
     }
-    
 
     public int getValue(Stakeholder s, Feature f) {
-        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
-        if (val != null) {
-            return val.value;
+        ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (valUrg != null) {
+            return valUrg.value;
         }
         return 0;
     }
     
     public int getUrgency(Stakeholder s, Feature f) {
-        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
-        if (val != null) {
-            return val.urgency.getUrgency();
+        ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (valUrg != null) {
+            return valUrg.urgency.getUrgency();
         }
         return 0;
     }
     
+    public void setValUrgObject(Stakeholder s, Feature f, ValUrg valUrg) {
+        ValueAndUrgency.Key key = new ValueAndUrgency.Key(s, f);
+        this.parameters.put(key, valUrg);
+    }
+    
     public Urgency getUrgencyObject(Stakeholder s, Feature f) {
-        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
-        if (val != null) {
-            return val.urgency;
+        ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (valUrg != null) {
+            return valUrg.urgency;
         }
         return null;
     }
     
+    public ValUrg getValUrgObject(Stakeholder s, Feature f) {
+        return this.parameters.get(new ValueAndUrgency.Key(s, f));
+    }
+    
     public Release getUrgencyRelease(Stakeholder s, Feature f) {
-        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
-        if (val != null) {
-            return val.urgency.getRelease();
+        ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (valUrg != null) {
+            return valUrg.urgency.getRelease();
         }
         return null;
     }
     
     public int getDeadlineCurve(Stakeholder s, Feature f) {
-        ValueAndUrgency.Value val = this.parameters.get(new ValueAndUrgency.Key(s, f));
-        if (val != null) {
-            return val.urgency.getDeadlineCurve();
+        ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
+        if (valUrg != null) {
+            return valUrg.urgency.getDeadlineCurve();
         }
         return 0x00;
     }
@@ -140,13 +148,13 @@ public class ValueAndUrgency implements Serializable {
 
     }
 
-    private final class Value implements Serializable {
+    public final class ValUrg implements Serializable {
 
         private static final long serialVersionUID = 1;
         private final Urgency urgency;
         private int value;
 
-        private Value(int v) {
+        private ValUrg(int v) {
             this.urgency = new Urgency();
             this.value = v;
         }

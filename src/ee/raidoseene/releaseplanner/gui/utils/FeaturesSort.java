@@ -7,6 +7,7 @@ package ee.raidoseene.releaseplanner.gui.utils;
 import ee.raidoseene.releaseplanner.datamodel.Dependencies;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
 import ee.raidoseene.releaseplanner.datamodel.Features;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -37,6 +38,7 @@ public class FeaturesSort {
         feats = features;
     }
 
+    /*
     public void rePopulate(Features features) {
         int featuresNo = features.getFeatureCount();
 
@@ -50,11 +52,13 @@ public class FeaturesSort {
             }
         }
     }
+    */
 
-    public void sort(Dependencies dependencies) {
+    public Feature[] sort(Dependencies dependencies) {
         int distance;
         int newDistance;
         boolean gotBetter = true;
+        ArrayList<Feature> newFeaturesList = new ArrayList<>();
         LinkedList<FeatureNode> backupList = (LinkedList<FeatureNode>)featureList.clone();
         
         /*
@@ -69,7 +73,6 @@ public class FeaturesSort {
         while(gotBetter) {
             
             gotBetter = false;
-            //for(int i = 0; i < featureList.size(); i++) {
             for(int i = featureList.size() - 1; i >= 0; i--) {
                 for(int j = 0; j < i; j++) {
                     FeatureNode fNode = backupList.get(i);
@@ -109,9 +112,12 @@ public class FeaturesSort {
         System.out.println("\\nSorted list:");
         for(int i = 0; i < featureList.size(); i++) {
             FeatureNode fNode = featureList.get(i);
+            newFeaturesList.add(fNode.getFeature());
             System.out.println(feats.getFeatureIndex(fNode.getFeature()));
         }
         System.out.println("End of sorted list");
+        
+        return newFeaturesList.toArray(new Feature[featureList.size()]);
     }
 
     private void calculateDistances(Dependencies dependencies) {
