@@ -32,7 +32,7 @@ public class Dependencies extends ProjectElement implements Serializable {
             return dep;
         } else {
             //System.out.println("!!! FEIL !!!");
-            if(!automatic) {
+            if (!automatic) {
                 throw new RuntimeException("Adding another FIXED dependency to release " + release.getName()
                         + " will violate release capacity!");
             } else {
@@ -137,35 +137,35 @@ public class Dependencies extends ProjectElement implements Serializable {
 
         return count;
     }
-    
+
     public Feature[] getDependantFeatures(Feature f) {
         ArrayList<Feature> list = new ArrayList();
         int depCount;
-        
+
         depCount = getTypedDependancyCount(OrderDependency.class, null);
-        if(depCount > 0) {
+        if (depCount > 0) {
             OrderDependency deps[] = getTypedDependencies(OrderDependency.class, null);
-            for(int i = 0; i < depCount; i++) {
-                if(deps[i].getPrimary() == f) {
+            for (int i = 0; i < depCount; i++) {
+                if (deps[i].getPrimary() == f) {
                     list.add(deps[i].getSecondary());
-                } else if(deps[i].getSecondary() == f) {
+                } else if (deps[i].getSecondary() == f) {
                     list.add(deps[i].getPrimary());
                 }
             }
         }
-        
+
         depCount = getTypedDependancyCount(ExistanceDependency.class, null);
-        if(depCount > 0) {
+        if (depCount > 0) {
             ExistanceDependency deps[] = getTypedDependencies(ExistanceDependency.class, null);
-            for(int i = 0; i < depCount; i++) {
-                if(deps[i].getPrimary() == f) {
+            for (int i = 0; i < depCount; i++) {
+                if (deps[i].getPrimary() == f) {
                     list.add(deps[i].getSecondary());
-                } else if(deps[i].getSecondary() == f) {
+                } else if (deps[i].getSecondary() == f) {
                     list.add(deps[i].getPrimary());
                 }
             }
         }
-        
+
         return list.toArray((Feature[]) Array.newInstance(Feature.class, list.size()));
     }
 
@@ -196,31 +196,29 @@ public class Dependencies extends ProjectElement implements Serializable {
         } else if (type == Dependency.EARLIER) {
             Resources resources = super.getProject().getResources();
             Releases releases = super.getProject().getReleases();
-            ReleaseDependency[] fixed = getTypedDependencies(ReleaseDependency.class, Dependency.EARLIER);
+            ReleaseDependency[] earlier = getTypedDependencies(ReleaseDependency.class, Dependency.EARLIER);
             int sum;
             boolean check = true;
 
-            //if (release.getType() != Release.Type.POSTPONED) {
-                for (int res = 0; res < resources.getResourceCount(); res++) {
-                    sum = feature.getConsumption(resources.getResource(res));
-                    
-                    int relIndex = releases.getReleaseIndex(release);
-                    for (ReleaseDependency f : fixed) {
-                        sum += (releases.getReleaseIndex(f.getRelease()) < relIndex ? f.getFeature().getConsumption(resources.getResource(res)) : 0);
-                    }
-                    int capSum = 0;
-                    for(int r = 0; r < relIndex; r++) {
-                        capSum = releases.getRelease(r).getCapacity(resources.getResource(res));
-                    }
-                    if (sum <= capSum) {
-                        //System.out.println("Sum = " + sum + ", capacity = " + release.getCapacity(resources.getResource(res)));
-                        check = check && true;
-                    } else {
-                        //System.out.println("Sum = " + sum + ", capacity = " + release.getCapacity(resources.getResource(res)));
-                        check = false;
-                    }
+            for (int res = 0; res < resources.getResourceCount(); res++) {
+                sum = feature.getConsumption(resources.getResource(res));
+
+                int relIndex = releases.getReleaseIndex(release);
+                for (ReleaseDependency e : earlier) {
+                    sum += (releases.getReleaseIndex(e.getRelease()) < relIndex ? e.getFeature().getConsumption(resources.getResource(res)) : 0);
                 }
-            //}
+                int capSum = 0;
+                for (int r = 0; r < relIndex; r++) {
+                    capSum += releases.getRelease(r).getCapacity(resources.getResource(res));
+                }
+                if (sum <= capSum) {
+                    //System.out.println("Sum = " + sum + ", capacity = " + release.getCapacity(resources.getResource(res)));
+                    check = check && true;
+                } else {
+                    //System.out.println("Sum = " + sum + ", capacity = " + release.getCapacity(resources.getResource(res)));
+                    check = false;
+                }
+            }
 
             return check;
         } else {
