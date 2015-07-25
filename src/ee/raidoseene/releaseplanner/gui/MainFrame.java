@@ -331,13 +331,6 @@ public final class MainFrame extends JFrame {
             DataManager.initiateDataOutput(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency(), settings.getNormalizedImportances());
             //SolverCodeManager.saveSolverCodeFile(ProjectManager.getCurrentProject());
             
-            
-            // Test Sorting
-            
-            FeaturesSort fs = new FeaturesSort(ProjectManager.getCurrentProject().getFeatures());
-            fs.sort(ProjectManager.getCurrentProject().getDependencies());
-            
-            // Sorting Test End
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }

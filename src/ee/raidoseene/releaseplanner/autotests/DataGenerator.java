@@ -4,6 +4,7 @@
  */
 package ee.raidoseene.releaseplanner.autotests;
 
+import ee.raidoseene.releaseplanner.autotests.AutotestSettings.ParamValues;
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.datamodel.Dependencies;
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
@@ -35,46 +36,68 @@ public class DataGenerator {
     private static final int urgCurveLen = urgCurve.length;
 
     public static Project generateProject(String name, AutotestSettings settings, int iterator) throws Exception {
+        System.out.println("Project generation started");
         ProjectManager.createNewProject(name);
         Project project = ProjectManager.getCurrentProject();
 
-        generateResources(project.getResources(), settings, iterator);
-        generateFeatures(project, settings, iterator);
-        generateReleases(project, settings, iterator);
-        generateStakeholders(project, settings, iterator);
-        generateValueAndUrgency(project, settings);
-        generateDependencies(project, settings, iterator);
+        int resNo = generateResources(project.getResources(), settings, iterator);
+        int featNo = generateFeatures(project, settings, iterator, resNo);
+        int relNo = generateReleases(project, settings, iterator, resNo);
+        int stkNo = generateStakeholders(project, settings, iterator);
+        generateValueAndUrgency(project, stkNo, featNo, relNo);
+        generateDependencies(project, settings, iterator, featNo, relNo);
 
+        System.out.println("Project generation ended");
         return project;
     }
 
-    private static void generateResources(Resources resources, AutotestSettings settings, int iterator) {
-        int resNo = settings.getResourceNo();
+    private static int generateResources(Resources resources, AutotestSettings settings, int iterator) {
+        ParamValues params = settings.getParameter(AutotestSettings.Parameter.RESOURCES);
+        int projNo = settings.getProjectNo();
+        Integer resMin = (Integer) params.getMin();
+        Integer resMax = (Integer) params.getMax();
+        int resNo;
 
-        if (settings.getResourceInterval()) {
-            resNo += iterator;
+        if (resMax != null && resMax > resMin) {
+            float step = (float) (resMax - resMin) / (float) projNo;
+            resNo = resMin + Math.round(step * (float) iterator);
+        } else {
+            resNo = resMin;
         }
 
         for (int r = 0; r < resNo; r++) {
             Resource resource = resources.addResource();
             resource.setName("Res" + numberGenerator(r, resNo));
         }
+
+        return resNo;
     }
 
-    private static void generateFeatures(Project project, AutotestSettings settings, int iterator) {
-        int resNo = settings.getResourceNo();
-        int featNo = settings.getFeatureNo();
-        int minCons = settings.getMinConsumption();
-        int maxCons = settings.getMaxConsumption();
-        int midCons = (int) ((maxCons - minCons + 1) * 0.6);
+    private static int generateFeatures(Project project, AutotestSettings settings, int iterator, int resNo) {
+        ParamValues featParams = settings.getParameter(AutotestSettings.Parameter.FEATURES);
+        ParamValues consParams = settings.getParameter(AutotestSettings.Parameter.RESOURCE_CONS);
+        int projNo = settings.getProjectNo();
+        Integer featMin = (Integer) featParams.getMin();
+        Integer featMax = (Integer) featParams.getMax();
+        Integer consMin = (Integer) consParams.getMin();
+        Integer consMax = (Integer) consParams.getMax();
+        Integer consMid = null;
+        if (consMax != null) {
+            consMid = (int) ((consMax - consMin + 1) * 0.6);
+        }
+        int featNo;
 
         Resources resources = project.getResources();
         Features features = project.getFeatures();
-        settings.initializeResConsumption();
+
+        settings.initializeResConsumption(resNo);
         Random random = new Random();
 
-        if (settings.getFeatureInterval()) {
-            featNo += iterator;
+        if (featMax != null && featMax > featMin) {
+            float step = (float) (featMax - featMin) / (float) projNo;
+            featNo = featMin + Math.round(step * (float) iterator);
+        } else {
+            featNo = featMin;
         }
 
         for (int f = 0; f < featNo; f++) {
@@ -82,25 +105,36 @@ public class DataGenerator {
             feature.setName("F" + numberGenerator(f, featNo));
 
             for (int r = 0; r < resNo; r++) {
-                if (Math.random() > 0.4) {
-                    int consumption = generateRandCons(random, minCons, midCons, maxCons);
-                    feature.setConsumption(resources.getResource(r), consumption);
-                    settings.addResConsumption(r, consumption);
+                if (consMax != null) {
+                    if (Math.random() > 0.4) {
+                        int consumption = generateRandCons(random, consMin, consMid, consMax);
+                        feature.setConsumption(resources.getResource(r), consumption);
+                        settings.addResConsumption(r, consumption);
+                    }
+                } else {
+                    feature.setConsumption(resources.getResource(r), consMin);
+                    settings.addResConsumption(r, consMin);
                 }
             }
             int randResId = random.nextInt(resNo);
             Resource randRes = resources.getResource(randResId);
             if (!feature.hasConsumption(randRes)) {
-                int consumption = generateRandCons(random, minCons, midCons, maxCons);
-                feature.setConsumption(randRes, consumption);
-                settings.addResConsumption(randResId, consumption);
+                if (consMax != null) {
+                    int consumption = generateRandCons(random, consMin, consMid, consMax);
+                    feature.setConsumption(randRes, consumption);
+                    settings.addResConsumption(randResId, consumption);
+                } else {
+                    feature.setConsumption(randRes, consMin);
+                    settings.addResConsumption(randResId, consMin);
+                }
             }
         }
+        return featNo;
     }
 
     private static int generateRandCons(Random random, int minCons, int midCons, int maxCons) {
         int consumption;
-        
+
         if (Math.random() > 0.4) {
             consumption = random.nextInt(midCons - minCons + 1) + minCons;
         } else {
@@ -110,16 +144,33 @@ public class DataGenerator {
         return consumption;
     }
 
-    private static void generateReleases(Project project, AutotestSettings settings, int iterator) {
-        int relNo = settings.getReleaseNo();
-        int resNo = settings.getResourceNo();
-        float tightness = settings.getTightness();
+    private static int generateReleases(Project project, AutotestSettings settings, int iterator, int resNo) {
+        ParamValues relParams = settings.getParameter(AutotestSettings.Parameter.RELEASES);
+        ParamValues tightParams = settings.getParameter(AutotestSettings.Parameter.TIGHTNESS);
+        int projNo = settings.getProjectNo();
+        Integer relMin = (Integer) relParams.getMin();
+        Integer relMax = (Integer) relParams.getMax();
+        Float tightMin = (Float) tightParams.getMin();
+        Float tightMax = (Float) tightParams.getMax();
+        int relNo;
+        Float tightNo;
+        
         Releases releases = project.getReleases();
         Resources resources = project.getResources();
         Random random = new Random();
 
-        if (settings.getReleaseInterval()) {
-            relNo += iterator;
+        if (relMax != null && relMax > relMin) {
+            float step = (float) (relMax - relMin) / (float) projNo;
+            relNo = relMin + Math.round(step * (float) iterator);
+        } else {
+            relNo = relMin;
+        }
+        
+        if (tightMax != null && tightMax > tightMin) {
+            float step = (tightMax - tightMin) / (float) projNo;
+            tightNo = tightMin + (step * (float) iterator);
+        } else {
+            tightNo = tightMin;
         }
 
         for (int r = 0; r < relNo; r++) {
@@ -129,32 +180,39 @@ public class DataGenerator {
 
             for (int res = 0; res < resNo; res++) {
                 int totalResConsumption = settings.getTotalResConsumption(res);
-                int capacity = (int) ((float) totalResConsumption / (tightness * (float) relNo));
+                int capacity = (int) ((float) totalResConsumption / (tightNo * (float) relNo));
                 release.setCapacity(resources.getResource(res), capacity);
             }
         }
+        return relNo;
     }
 
-    private static void generateStakeholders(Project project, AutotestSettings settings, int iterator) {
-        int stkNo = settings.getStakeholderNo();
+    private static int generateStakeholders(Project project, AutotestSettings settings, int iterator) {
+        ParamValues params = settings.getParameter(AutotestSettings.Parameter.STAKEHOLDERS);
+        int projNo = settings.getProjectNo();
+        Integer stkMin = (Integer) params.getMin();
+        Integer stkMax = (Integer) params.getMax();
+        int stkNo;
+        
         Stakeholders stakeholders = project.getStakeholders();
         Random random = new Random();
 
-        if (settings.getStakeholderInterval()) {
-            stkNo += iterator;
+        if (stkMax != null && stkMax > stkMin) {
+            float step = (float) (stkMax - stkMin) / (float) projNo;
+            stkNo = stkMin + Math.round(step * (float) iterator);
+        } else {
+            stkNo = stkMin;
         }
 
         for (int s = 0; s < stkNo; s++) {
             Stakeholder stakeholder = stakeholders.addStakeholder();
-            stakeholder.setName("Stk" + numberGenerator(s, stkNo));
+            stakeholder.setName("Res" + numberGenerator(s, stkNo));
             stakeholder.setImportance(random.nextInt(9) + 1);
         }
+        return stkNo;
     }
 
-    private static void generateValueAndUrgency(Project project, AutotestSettings settings) {
-        int stkNo = settings.getStakeholderNo();
-        int featNo = settings.getFeatureNo();
-        int relNo = settings.getReleaseNo() + 1;
+    private static void generateValueAndUrgency(Project project, int stkNo, int featNo, int relNo) {
         Random random = new Random();
 
         for (int f = 0; f < featNo; f++) {
@@ -198,85 +256,100 @@ public class DataGenerator {
         urg.setDeadlineCurve(urgCurve[randUrgCurve]);
     }
 
-    private static void generateDependencies(Project project, AutotestSettings settings, int iterator) {
-        int fixedNo = settings.getFixedNo();
-        int excludedNo = settings.getExcludedNo();
-        int earlierNo = settings.getEarlierNo();
-        int laterNo = settings.getLaterNo();
+    private static void generateDependencies(Project project, AutotestSettings settings, int iterator, int featNo, int relNo) {
+        System.out.println("Dependency generations started");
         
-        int softPrecedenceNo = settings.getSoftPrecedenceNo();
-        int hardPrecedenceNo = settings.getHardPrecedenceNo();
-        int couplingNo = settings.getCouplingNo();
-        int separationNo = settings.getSeparationNo();
-        
-        int andNo = settings.getAndNo();
-        int xorNo = settings.getXorNo();
-        
+        ParamValues fixParams = settings.getParameter(AutotestSettings.Parameter.FIXED_DEP);
+        ParamValues exParams = settings.getParameter(AutotestSettings.Parameter.EXCLUDED_DEP);
+        ParamValues earParams = settings.getParameter(AutotestSettings.Parameter.EARLIER_DEP);
+        ParamValues latParams = settings.getParameter(AutotestSettings.Parameter.LATER_DEP);
+        ParamValues softParams = settings.getParameter(AutotestSettings.Parameter.SOFT_PRECEDENCE_DEP);
+        ParamValues hardParams = settings.getParameter(AutotestSettings.Parameter.HARD_PRECEDENCE_DEP);
+        ParamValues coupParams = settings.getParameter(AutotestSettings.Parameter.COUPLING_DEP);
+        ParamValues sepParams = settings.getParameter(AutotestSettings.Parameter.SEPARATION_DEP);
+        ParamValues andParams = settings.getParameter(AutotestSettings.Parameter.AND_DEP);
+        ParamValues xorParams = settings.getParameter(AutotestSettings.Parameter.XOR_DEP);
+
         Random random = new Random();
-        
-        if(fixedNo > 0) {
-            generateReleaseDep(project, settings, random, fixedNo, Dependency.FIXED, iterator);
+
+        //System.out.println("Fixed dependency check");
+        if (fixParams != null) {
+            generateReleaseDep(project, settings, random, fixParams, Dependency.FIXED, iterator, featNo, relNo);
         }
-        if(excludedNo > 0) {
-            generateReleaseDep(project, settings, random, excludedNo, Dependency.EXCLUDED, iterator);
+        //System.out.println("Excluded dependency check");
+        if (exParams != null) {
+            generateReleaseDep(project, settings, random, exParams, Dependency.EXCLUDED, iterator, featNo, relNo);
         }
-        if(earlierNo > 0) {
-            generateReleaseDep(project, settings, random, earlierNo, Dependency.EARLIER, iterator);
+        //System.out.println("Earlier dependency check");
+        if (earParams != null) {
+            generateReleaseDep(project, settings, random, earParams, Dependency.EARLIER, iterator, featNo, relNo);
         }
-        if(laterNo > 0) {
-            generateReleaseDep(project, settings, random, laterNo, Dependency.LATER, iterator);
+        //System.out.println("Later dependency check");
+        if (latParams != null) {
+            generateReleaseDep(project, settings, random, latParams, Dependency.LATER, iterator, featNo, relNo);
         }
-        
-        if(softPrecedenceNo > 0) {
-            generateOrderDep(project, settings, random, softPrecedenceNo, Dependency.SOFTPRECEDENCE, iterator);
+
+        //System.out.println("Soft precedence dependency check");
+        if (softParams != null) {
+            generateOrderDep(project, settings, random, softParams, Dependency.SOFTPRECEDENCE, iterator, featNo);
         }
-        if(hardPrecedenceNo > 0) {
-            generateOrderDep(project, settings, random, hardPrecedenceNo, Dependency.HARDPRECEDENCE, iterator);
+        //System.out.println("Hard precedence dependency check");
+        if (hardParams != null) {
+            generateOrderDep(project, settings, random, hardParams, Dependency.HARDPRECEDENCE, iterator, featNo);
         }
-        if(couplingNo > 0) {
-            generateOrderDep(project, settings, random, couplingNo, Dependency.COUPLING, iterator);
+        //System.out.println("Coupling dependency check");
+        if (coupParams != null) {
+            generateOrderDep(project, settings, random, coupParams, Dependency.COUPLING, iterator, featNo);
         }
-        if(separationNo > 0) {
-            generateOrderDep(project, settings, random, separationNo, Dependency.SEPARATION, iterator);
+        //System.out.println("Separation dependency check");
+        if (sepParams != null) {
+            generateOrderDep(project, settings, random, sepParams, Dependency.SEPARATION, iterator, featNo);
         }
-        
-        if(andNo > 0) {
-            generateExistanceDep(project, settings, random, andNo, Dependency.AND, iterator);
+
+        //System.out.println("And dependency check");
+        if (andParams != null) {
+            generateExistanceDep(project, settings, random, andParams, Dependency.AND, iterator, featNo);
         }
-        if(xorNo > 0) {
-            generateExistanceDep(project, settings, random, xorNo, Dependency.XOR, iterator);
+        //System.out.println("Xor dependency check");
+        if (xorParams != null) {
+            generateExistanceDep(project, settings, random, xorParams, Dependency.XOR, iterator, featNo);
         }
+        //System.out.println("Dependency generations ended");
     }
-    
-    private static void generateReleaseDep(Project project, AutotestSettings settings, Random random, int depNo, int type, int iterator) {
-        Dependencies dependencies = project.getDependencies();
-        Features features = project.getFeatures();
-        Releases releases = project.getReleases();
+
+    private static void generateReleaseDep(Project project, AutotestSettings settings, Random random, ParamValues params, int type, int iterator, int featNo, int relNo) {
+        //System.out.println("Release dependency generations started");
         
-        int featNo = settings.getFeatureNo();
-        int relNo = settings.getReleaseNo() + 1;
+        int projNo = settings.getProjectNo();
+        Integer depMin = (Integer)params.getMin();
+        Integer depMax = (Integer)params.getMax();
+        int depNo;
         
         Feature randFeat;
         Release randRel;
         int randFeatNo = 0;
-        
-        if(settings.getFeatureInterval()) {
-            featNo += iterator;
-        }
-        if(settings.getReleaseInterval()) {
-            relNo += iterator;
-        }
-        
+
         int usedFeat[] = new int[featNo];
         
+        Dependencies dependencies = project.getDependencies();
+        Features features = project.getFeatures();
+        Releases releases = project.getReleases();
+        
+        if (depMax != null && depMax > depMin) {
+            float step = (float) (depMax - depMin) / (float) projNo;
+            depNo = depMin + Math.round(step * (float) iterator);
+        } else {
+            depNo = depMin;
+        }
+
         for (int d = 0; d < depNo; d++) {
             boolean uniqueFeat = false;
-            while(!uniqueFeat) {
+            while (!uniqueFeat) {
                 randFeatNo = random.nextInt(featNo);
                 uniqueFeat = true;
-                
-                for(int i = 0; i < d; i++) {
-                    if(usedFeat[i] == randFeatNo) {
+
+                for (int i = 0; i < d; i++) {
+                    if (usedFeat[i] == randFeatNo) {
                         uniqueFeat = uniqueFeat & false;
                     } else {
                         uniqueFeat = uniqueFeat & true;
@@ -284,78 +357,97 @@ public class DataGenerator {
                 }
             }
             usedFeat[d] = randFeatNo;
-            
+
             randFeat = features.getFeature(randFeatNo);
             randRel = releases.getRelease(random.nextInt(relNo));
-            
-            dependencies.addReleaseDependency(randFeat, randRel, type);
+
+            if(dependencies.addReleaseDependency(randFeat, randRel, type, true, false) == null) {
+                d--;
+            }
         }
+        //System.out.println("Release dependency generations ended");
     }
-    
-    private static void generateOrderDep(Project project, AutotestSettings settings, Random random, int depNo, int type, int iterator) {
+
+    private static void generateOrderDep(Project project, AutotestSettings settings, Random random, ParamValues params, int type, int iterator, int featNo) {
+        //System.out.println("Order dependency generations started");
+        
+        int projNo = settings.getProjectNo();
+        Integer depMin = (Integer)params.getMin();
+        Integer depMax = (Integer)params.getMax();
+        int depNo;
+        
+        int randFeat1;
+        int randFeat2 = 0;
+        
         Dependencies dependencies = project.getDependencies();
         Features features = project.getFeatures();
         
-        int featNo = settings.getFeatureNo();
-            
-        int randFeat1;
-        int randFeat2 = 0;
-        int randFeatNo = 0;
-            
-        if(settings.getFeatureInterval()) {
-            featNo += iterator;
+        if (depMax != null && depMax > depMin) {
+            float step = (float) (depMax - depMin) / (float) projNo;
+            depNo = depMin + Math.round(step * (float) iterator);
+        } else {
+            depNo = depMin;
         }
         
-        for(int d = 0; d < depNo; d++) {
+        for (int d = 0; d < depNo; d++) {
             randFeat1 = random.nextInt(featNo);
-            
+
             boolean uniqueFeat = false;
-            while(!uniqueFeat) {
+            while (!uniqueFeat) {
                 randFeat2 = random.nextInt(featNo);
                 uniqueFeat = true;
-                
-                if(randFeat1 == randFeatNo) {
+
+                if (randFeat1 == randFeat2) {
                     uniqueFeat = uniqueFeat & false;
                 } else {
                     uniqueFeat = uniqueFeat & true;
                 }
             }
-            
+
             dependencies.addOrderDependency(features.getFeature(randFeat1), features.getFeature(randFeat2), type);
         }
+        //System.out.println("Order dependency generations ended");
     }
-    
-    private static void generateExistanceDep(Project project, AutotestSettings settings, Random random, int depNo, int type, int iterator) {
-        Dependencies dependencies = project.getDependencies();
-        Features features = project.getFeatures();
+
+    private static void generateExistanceDep(Project project, AutotestSettings settings, Random random, ParamValues params, int type, int iterator, int featNo) {
+        //System.out.println("Existance dependency generations started");
+        int projNo = settings.getProjectNo();
+        Integer depMin = (Integer)params.getMin();
+        Integer depMax = (Integer)params.getMax();
+        int depNo;
         
-        int featNo = settings.getFeatureNo();
-            
         int randFeat1;
         int randFeat2 = 0;
         int randFeatNo = 0;
-            
-        if(settings.getFeatureInterval()) {
-            featNo += iterator;
-        }
         
-        for(int d = 0; d < depNo; d++) {
+        Dependencies dependencies = project.getDependencies();
+        Features features = project.getFeatures();
+        
+        if (depMax != null && depMax > depMin) {
+            float step = (float) (depMax - depMin) / (float) projNo;
+            depNo = depMin + Math.round(step * (float) iterator);
+        } else {
+            depNo = depMin;
+        }
+
+        for (int d = 0; d < depNo; d++) {
             randFeat1 = random.nextInt(featNo);
-            
+
             boolean uniqueFeat = false;
-            while(!uniqueFeat) {
+            while (!uniqueFeat) {
                 randFeat2 = random.nextInt(featNo);
                 uniqueFeat = true;
-                
-                if(randFeat1 == randFeatNo) {
+
+                if (randFeat1 == randFeatNo) {
                     uniqueFeat = uniqueFeat & false;
                 } else {
                     uniqueFeat = uniqueFeat & true;
                 }
             }
-            
+
             dependencies.addExistanceDependency(features.getFeature(randFeat1), features.getFeature(randFeat2), type);
         }
+        //System.out.println("Existance dependency generations ended");
     }
 
     public static String numberGenerator(int n, int amount) {

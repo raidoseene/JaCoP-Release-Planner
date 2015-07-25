@@ -252,7 +252,7 @@ public final class DataManager {
             }
         }
         
-        System.out.println("Stk importance: " + stakeholders.getStakeholder(s).getImportance() + ", sum of importances: " + sumOfStkWeights + ", Stk " + s + " weight: " + ((float)stakeholders.getStakeholder(s).getImportance() / (float)sumOfStkWeights));
+        //System.out.println("Stk importance: " + stakeholders.getStakeholder(s).getImportance() + ", sum of importances: " + sumOfStkWeights + ", Stk " + s + " weight: " + ((float)stakeholders.getStakeholder(s).getImportance() / (float)sumOfStkWeights));
         return (float)stakeholders.getStakeholder(s).getImportance() / (float)sumOfStkWeights;
     }
 
@@ -262,7 +262,7 @@ public final class DataManager {
         int featureCount = project.getFeatures().getFeatureCount() + modDep.getFeatures().getFeatureCount();
         
         
-        
+        /*
         for(int s = 0; s < stakeholders.getStakeholderCount(); s++) {
             System.out.print("Stakeholder " + s + ":\n");
             for(int rel = 0; rel < project.getReleases().getReleaseCount(); rel ++) {
@@ -273,6 +273,7 @@ public final class DataManager {
                 System.out.print("\n");
             }
         }
+        */
         
         
         
@@ -294,7 +295,7 @@ public final class DataManager {
         
         for(int s = 0; s < stkNo; s++) {
             stkNormImportance[s] = (float)(stakeholders.getStakeholder(s).getImportance()) / (float)stkImpSum;
-            System.out.println("Stk" + (s + 1) + " normalized weight: " + stkNormImportance[s]);
+            //System.out.println("Stk" + (s + 1) + " normalized weight: " + stkNormImportance[s]);
         }
         //for(int c = 0; c < stkNo; c++) {
             criteriaNormImportance[0] = 0.5f;

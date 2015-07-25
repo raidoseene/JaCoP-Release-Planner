@@ -79,7 +79,7 @@ public class FixedDependencyDialog extends JDialog {
                     Releases rels = ProjectManager.getCurrentProject().getReleases();
                     Release rel = rels.getRelease(FixedDependencyDialog.this.release.getSelectedIndex());
                     Dependencies ids = ProjectManager.getCurrentProject().getDependencies();
-                    ids.addReleaseDependency(FixedDependencyDialog.this.feature, rel, FixedDependencyDialog.this.type);
+                    ids.addReleaseDependency(FixedDependencyDialog.this.feature, rel, FixedDependencyDialog.this.type, false, false);
                     FixedDependencyDialog.this.state = true;
 
                     FixedDependencyDialog.this.dispose();

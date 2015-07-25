@@ -724,7 +724,7 @@ public class DependencyManager {
         for(int i = 0; i < dependencies.length; i++) {
             if (dependencies[i].getFeature() == donor) {
                 type = dependencies[i].getType();
-                this.deps.addReleaseDependency(receiver, dependencies[i].getRelease(), type);
+                this.deps.addReleaseDependency(receiver, dependencies[i].getRelease(), type, false, true);
             }
         }
     }

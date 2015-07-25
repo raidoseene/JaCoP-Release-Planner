@@ -27,6 +27,7 @@ public class Urgency implements Serializable {
     private Release release;
     private int urgency;
     private int deadlineCurve;
+    private Stakeholder stakeholder;
     
     Urgency () {}
     

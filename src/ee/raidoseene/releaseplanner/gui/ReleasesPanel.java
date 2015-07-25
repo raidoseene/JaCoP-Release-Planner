@@ -65,7 +65,8 @@ public final class ReleasesPanel extends ScrollablePanel {
             for (int i = 0; i < count; i++) {
                 Release r = releases.getRelease(i);
                 ReleasesPanel.RPContent content = new ReleasesPanel.RPContent(r);
-                ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE);
+                int type = (r.getType() == Release.Type.RELEASE) ? (ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE) : 0;
+                ContentPanel panel = new ContentPanel(content, type);
                 panel.addContentPanelListener(content);
                 this.scrollable.add(panel);
             }
@@ -91,7 +92,7 @@ public final class ReleasesPanel extends ScrollablePanel {
         ReleasesPanel.RPContent content = new ReleasesPanel.RPContent(r);
         ContentPanel panel = new ContentPanel(content, ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE);
 
-        this.scrollable.add(panel, this.scrollable.getComponentCount() - 1);
+        this.scrollable.add(panel, this.scrollable.getComponentCount() - 2);
         this.scrollable.contentUpdated();
         this.scrollable.scrollDown();
 

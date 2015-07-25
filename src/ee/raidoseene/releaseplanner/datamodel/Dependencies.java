@@ -24,14 +24,20 @@ public class Dependencies extends ProjectElement implements Serializable {
         this.dependenciesContainer = new ArrayList<>();
     }
 
-    public ReleaseDependency addReleaseDependency(Feature feature, Release release, int type) {
-        if (capacityCheck(feature, release, type)) {
+    public ReleaseDependency addReleaseDependency(Feature feature, Release release, int type, boolean automatic, boolean hasToPass) {
+        if (capacityCheck(feature, release, type) || hasToPass) {
+            //System.out.println("!!! SUCCESS !!!");
             ReleaseDependency dep = new ReleaseDependency(feature, release, type);
             this.dependenciesContainer.add(dep);
             return dep;
         } else {
-            throw new RuntimeException("Adding another FIXED dependency to release " + release.getName()
-                    + " will violate release capacity!");
+            //System.out.println("!!! FEIL !!!");
+            if(!automatic) {
+                throw new RuntimeException("Adding another FIXED dependency to release " + release.getName()
+                        + " will violate release capacity!");
+            } else {
+                return null;
+            }
         }
     }
 
@@ -164,7 +170,6 @@ public class Dependencies extends ProjectElement implements Serializable {
     }
 
     private boolean capacityCheck(Feature feature, Release release, int type) {
-        // add support for LATER and EARLIER release dependencies
         if (type == Dependency.FIXED) {
             Resources resources = super.getProject().getResources();
             ReleaseDependency[] fixed = getTypedDependencies(ReleaseDependency.class, Dependency.FIXED);
@@ -178,12 +183,44 @@ public class Dependencies extends ProjectElement implements Serializable {
                         sum += (f.getRelease() == release ? f.getFeature().getConsumption(resources.getResource(res)) : 0);
                     }
                     if (sum <= release.getCapacity(resources.getResource(res))) {
+                        //System.out.println("Sum = " + sum + ", capacity = " + release.getCapacity(resources.getResource(res)));
                         check = check && true;
                     } else {
+                        //System.out.println("Sum = " + sum + ", capacity = " + release.getCapacity(resources.getResource(res)));
                         check = false;
                     }
                 }
             }
+
+            return check;
+        } else if (type == Dependency.EARLIER) {
+            Resources resources = super.getProject().getResources();
+            Releases releases = super.getProject().getReleases();
+            ReleaseDependency[] fixed = getTypedDependencies(ReleaseDependency.class, Dependency.EARLIER);
+            int sum;
+            boolean check = true;
+
+            //if (release.getType() != Release.Type.POSTPONED) {
+                for (int res = 0; res < resources.getResourceCount(); res++) {
+                    sum = feature.getConsumption(resources.getResource(res));
+                    
+                    int relIndex = releases.getReleaseIndex(release);
+                    for (ReleaseDependency f : fixed) {
+                        sum += (releases.getReleaseIndex(f.getRelease()) < relIndex ? f.getFeature().getConsumption(resources.getResource(res)) : 0);
+                    }
+                    int capSum = 0;
+                    for(int r = 0; r < relIndex; r++) {
+                        capSum = releases.getRelease(r).getCapacity(resources.getResource(res));
+                    }
+                    if (sum <= capSum) {
+                        //System.out.println("Sum = " + sum + ", capacity = " + release.getCapacity(resources.getResource(res)));
+                        check = check && true;
+                    } else {
+                        //System.out.println("Sum = " + sum + ", capacity = " + release.getCapacity(resources.getResource(res)));
+                        check = false;
+                    }
+                }
+            //}
 
             return check;
         } else {

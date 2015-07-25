@@ -4,7 +4,6 @@
  */
 package ee.raidoseene.releaseplanner.autotests;
 
-import ee.raidoseene.releaseplanner.datamodel.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,16 +13,16 @@ import java.util.Map;
  */
 public class AutotestSettings {
 
-    private int projNo, featNo, relNo, resNo, stkNo, minCons, maxCons;
-    private int featTo, relTo, resTo, stkTo;
-    private int fixedNo, excludedNo, earlierNo, laterNo;
-    private int softPrecedenceNo, hardPrecedenceNo, couplingNo, separationNo;
-    private int andNo, xorNo, atLeastNo, atMostNo, exacltyNo;
-    private float tightness, tightnessTo;
-    private boolean projInterval, featInterval, relInterval, resInterval, stkInterval, tightnessInterval;
+    private int projNo;//, featNo, relNo, resNo, stkNo, minCons, maxCons;
+    //private int featTo, relTo, resTo, stkTo;
+    //private int fixedNo, excludedNo, earlierNo, laterNo;
+    //private int softPrecedenceNo, hardPrecedenceNo, couplingNo, separationNo;
+    //private int andNo, xorNo, atLeastNo, atMostNo, exacltyNo;
+    //private float tightness, tightnessTo;
+    //private boolean projInterval, featInterval, relInterval, resInterval, stkInterval, tightnessInterval;
     private int[] totalResUsage;
-    
     private final Map<Parameter, ParamValues> parameters;
+    
     public enum Parameter {
         FEATURES,
         RESOURCE_CONS,
@@ -44,11 +43,12 @@ public class AutotestSettings {
     }
     
     public class ParamValues {
-        private Number min = 0;
-        private Number max = 0;
+        private Number min = null;
+        private Number max = null;
         
-        public ParamValues(Number min) {
+        public ParamValues(Number min, Number max) {
             this.min = min;
+            this.max = max;
         }
         
         public void setMin(Number min) {
@@ -71,9 +71,9 @@ public class AutotestSettings {
     public void setParameter(Parameter param, Number min, Number max) {
         ParamValues values = getParameter(param);
         if(values == null) {
-            values = new ParamValues(min);
-            values.setMin(min);
-            values.setMax(max);
+            if(min != null) {
+                values = parameters.put(param, new ParamValues(min, max));
+            }
         } else {
             if(min == null) {
                 parameters.remove(param);
@@ -89,7 +89,7 @@ public class AutotestSettings {
     }
 
     public AutotestSettings() {
- 
+        /*
         this.projNo = 0;
         this.projInterval = false;
         
@@ -134,7 +134,7 @@ public class AutotestSettings {
         this.atLeastNo = 0;
         this.atMostNo = 0;
         this.exacltyNo = 0;
-        
+        */
         this.parameters = new HashMap<>();
     }
     
@@ -145,7 +145,7 @@ public class AutotestSettings {
     public int getProjectNo() {
         return this.projNo;
     }
-    
+    /*
     public void setProjectInterval(boolean interval) {
         this.projInterval = interval;
     }
@@ -305,9 +305,9 @@ public class AutotestSettings {
     public int getMaxConsumption() {
         return this.maxCons;
     }
-    
-    public void initializeResConsumption() {
-        this.totalResUsage = new int[this.resNo];
+    */
+    public void initializeResConsumption(int resNo) {
+        this.totalResUsage = new int[resNo];
     }
     
     public void addResConsumption(int id, int consumption) {
@@ -317,7 +317,7 @@ public class AutotestSettings {
     public int getTotalResConsumption(int id) {
         return this.totalResUsage[id];
     }
-    
+    /*
     public void setFixedNo(int fixedNo) {
         this.fixedNo = fixedNo;
     }
@@ -425,4 +425,5 @@ public class AutotestSettings {
     private void setProjectNo(int min, int max) {
         this.projNo = max - min + 1;
     }
+    */
 }

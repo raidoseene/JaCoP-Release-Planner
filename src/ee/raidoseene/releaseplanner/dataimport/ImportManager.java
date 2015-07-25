@@ -367,7 +367,7 @@ public class ImportManager {
     private static void addReleaseDependency(Dependencies dependencies, Features features, Releases releases, Node n, int type) {
         Feature f = features.getFeature(Integer.parseInt(n.getAttributes().getNamedItem("feature").getNodeValue()) - 1);
         Release r = releases.getRelease(Integer.parseInt(n.getAttributes().getNamedItem("release").getNodeValue()) - 1);
-        dependencies.addReleaseDependency(f, r, type);
+        dependencies.addReleaseDependency(f, r, type, false, true);
     }
 
     private static void addOrderDependency(Dependencies dependencies, Features features, Node n, int type) {

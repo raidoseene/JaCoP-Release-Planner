@@ -18,6 +18,7 @@ import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
 public class UrgencyManager {
 
     public static int[][] getUrgencies(Project project, Project ModDep) {
+        System.out.println("getUrgencies started");
         int featureCount = project.getFeatures().getFeatureCount() + ModDep.getFeatures().getFeatureCount();
         int urgencies[][] = new int[project.getStakeholders().getStakeholderCount() * featureCount][project.getReleases().getReleaseCount()];
 
@@ -275,11 +276,13 @@ public class UrgencyManager {
             */
         }
         
+        /*
         for(int i = 0; i < project.getStakeholders().getStakeholderCount() * featureCount; i++) {
             for(int j = 0; j < project.getReleases().getReleaseCount(); j++) {
                 System.out.print(urgencies[i][j] + ", ");
             }
         }
+        */
         
         return urgencies;
     }
@@ -298,9 +301,9 @@ public class UrgencyManager {
             } else {
                 Release release = valueAndUrgency.getUrgencyRelease(stakeholder,
                         proj.getFeatures().getFeature(f));
-                System.out.println(release);
+                //System.out.println(release);
                 int releaseNr = releases.getReleaseIndex(release);
-                System.out.println("release number as got from urgency: " + releaseNr);
+                //System.out.println("release number as got from urgency: " + releaseNr);
                 int deadlineCurve = valueAndUrgency.getDeadlineCurve(stakeholder,
                         proj.getFeatures().getFeature(f));
                 if ((deadlineCurve & Urgency.DEADLINE_MASK) == Urgency.EARLIEST) {

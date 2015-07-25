@@ -694,9 +694,10 @@ public final class UrgValPanel extends JPanel {
                     int index = 0;
                     int segm = width / (rcount + 1);
                     for (int i = 0; i < rcount; i++) {
-                        String str = Integer.toString(i + 1);
+                        Release r = releases.getRelease(i);
+                        String str = (r.getType() == Release.Type.POSTPONED) ? "P" : Integer.toString(i + 1);
                         g.drawString(str, segm * (i + 1) - (fm.stringWidth(str) >> 1), height - 1);
-                        if (rel != null && rel == releases.getRelease(i)) {
+                        if (rel != null && rel == r) {
                             index = i;
                         }
                     }
