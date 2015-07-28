@@ -4,7 +4,6 @@
  */
 package ee.raidoseene.releaseplanner.datamodel;
 
-import ee.raidoseene.releaseplanner.solverutils.SimulationArchive;
 import java.io.Serializable;
 
 /**
@@ -12,7 +11,7 @@ import java.io.Serializable;
  * @author Raido Seene
  */
 public class Project extends NamedObject implements Serializable {
-
+    
     private static final long serialVersionUID = 1;
     private transient String storage;
     private final Features features;
@@ -101,5 +100,36 @@ public class Project extends NamedObject implements Serializable {
 
     void groupRemoved(Group g) {
         // TODO
+    }
+    
+    @Override
+    public boolean isModified() {
+        if(super.isModified()) {
+            return true;
+        } else {
+            boolean modified = features.isModified();
+            modified = modified || groups.isModified();
+            modified = modified || dependencies.isModified();
+            modified = modified || valueAndUrgency.isModified();
+            modified = modified || resources.isModified();
+            modified = modified || releases.isModified();
+            modified = modified || stakeholders.isModified();
+            modified = modified || simulationArchive.isModified();
+            
+            return modified;
+        }
+    }
+    
+    @Override
+    public void resetModification() {
+        super.resetModification();
+        features.resetModification();
+        groups.resetModification();
+        dependencies.resetModification();
+        valueAndUrgency.resetModification();
+        resources.resetModification();
+        releases.resetModification();
+        stakeholders.resetModification();
+        simulationArchive.resetModification();
     }
 }

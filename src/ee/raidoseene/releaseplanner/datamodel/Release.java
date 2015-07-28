@@ -48,6 +48,7 @@ public class Release extends NamedObject implements Serializable {
     public void setImportance(int importance) {
         if (importance > 0 && importance < 10) {
             this.importance = importance;
+            this.modify();
         } else {
             throw new ArrayIndexOutOfBoundsException(importance);
         }
@@ -64,6 +65,7 @@ public class Release extends NamedObject implements Serializable {
             } else {
                 this.capacities.remove(r);
             }
+            this.modify();
         }
     }
 
@@ -81,10 +83,12 @@ public class Release extends NamedObject implements Serializable {
 
     public boolean removeCapacity(Resource r) {
         if(this.type == Type.RELEASE) {
-            return (this.capacities.remove(r) != null);
-        } else {
-            return false;
+           if (this.capacities.remove(r) != null) {
+               this.modify();
+               return true;
+           }
         }
+        return false;
     }
 
     public boolean hasCapacity(Resource r) {

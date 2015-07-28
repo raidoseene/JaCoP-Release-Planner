@@ -29,6 +29,7 @@ public class Dependencies extends ProjectElement implements Serializable {
             //System.out.println("!!! SUCCESS !!!");
             ReleaseDependency dep = new ReleaseDependency(feature, release, type);
             this.dependenciesContainer.add(dep);
+            this.modify();
             return dep;
         } else {
             //System.out.println("!!! FEIL !!!");
@@ -44,54 +45,63 @@ public class Dependencies extends ProjectElement implements Serializable {
     public OrderDependency addOrderDependency(Feature feature1, Feature feature2, int type) {
         OrderDependency dependency = new OrderDependency(feature1, feature2, type);
         this.dependenciesContainer.add(dependency);
+        this.modify();
         return dependency;
     }
 
     public ExistanceDependency addExistanceDependency(Feature feature1, Feature feature2, int type) {
         ExistanceDependency dependency = new ExistanceDependency(feature1, feature2, type);
         this.dependenciesContainer.add(dependency);
+        this.modify();
         return dependency;
     }
 
     public ModifyingParameterDependency addModifyingParameterDependency(Feature feature1, Feature feature2, Feature feature) {
         ModifyingParameterDependency dependency = new ModifyingParameterDependency(feature1, feature2, feature);
         this.dependenciesContainer.add(dependency);
+        this.modify();
         return dependency;
     }
 
     public ModifyingParameterDependency addModifyingParameterDependency(Feature feature1, Feature feature2, Value value) {
         ModifyingParameterDependency dependency = new ModifyingParameterDependency(feature1, feature2, value);
         this.dependenciesContainer.add(dependency);
+        this.modify();
         return dependency;
     }
 
     public ModifyingParameterDependency addModifyingParameterDependency(Feature feature1, Feature feature2, Urgency urgency) {
         ModifyingParameterDependency dependency = new ModifyingParameterDependency(feature1, feature2, urgency);
         this.dependenciesContainer.add(dependency);
+        this.modify();
         return dependency;
     }
 
     public GroupDependency addAtLeastGroupDependency(Group group, int featureCount) {
         GroupDependency dependency = new GroupDependency(group, featureCount, Dependency.ATLEAST);
         this.dependenciesContainer.add(dependency);
+        this.modify();
         return dependency;
     }
 
     public GroupDependency addExactlyGroupDependency(Group group, int featureCount) {
         GroupDependency dependency = new GroupDependency(group, featureCount, Dependency.EXACTLY);
         this.dependenciesContainer.add(dependency);
+        this.modify();
         return dependency;
     }
 
     public GroupDependency addAtMostGroupDependency(Group group, int featureCount) {
         GroupDependency dependency = new GroupDependency(group, featureCount, Dependency.ATMOST);
         this.dependenciesContainer.add(dependency);
+        this.modify();
         return dependency;
     }
 
     public void removeInterdependency(Dependency dependency) {
         if (this.dependenciesContainer.remove(dependency) && super.parent != null) {
             super.parent.dependencyRemoved(dependency);
+            this.modify();
         }
     }
 
@@ -223,6 +233,28 @@ public class Dependencies extends ProjectElement implements Serializable {
             return check;
         } else {
             return true;
+        }
+    }
+    
+    @Override
+    public boolean isModified() {
+        if(super.isModified()) {
+            return true;
+        } else {
+            for(Dependency d: dependenciesContainer) {
+                if (d.isModified()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    
+    @Override
+    public void resetModification() {
+        super.resetModification();
+        for(Dependency d: dependenciesContainer) {
+            d.resetModification();
         }
     }
 }

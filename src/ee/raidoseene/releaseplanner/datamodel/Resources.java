@@ -26,12 +26,14 @@ public class Resources extends ProjectElement implements Serializable {
     public Resource addResource() {
         Resource r = new Resource();
         this.resourceContainer.add(r);
+        this.modify();
         return r;
     }
 
     public void removeResource(Resource r) {
         if (this.resourceContainer.remove(r) && super.parent != null) {
             super.parent.resourceRemoved(r);
+            this.modify();
         }
     }
 

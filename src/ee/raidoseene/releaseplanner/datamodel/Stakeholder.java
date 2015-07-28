@@ -23,6 +23,7 @@ public class Stakeholder extends NamedObject implements Serializable {
     public void setImportance(int importance) {
         if (importance > 0 && importance < 10) {
             this.importance = importance;
+            this.modify();
         } else {
             throw new ArrayIndexOutOfBoundsException(importance);
         }

@@ -10,7 +10,7 @@ import java.io.Serializable;
  *
  * @author Raido Seene
  */
-public abstract class Dependency implements Serializable {
+public abstract class Dependency extends ModifiableObject implements Serializable {
 
     private static final long serialVersionUID = 1;
     

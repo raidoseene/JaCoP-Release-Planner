@@ -11,7 +11,7 @@ import java.io.Serializable;
  *
  * @author Raido Seene
  */
-abstract public class ProjectElement implements Serializable {
+abstract public class ProjectElement extends ModifiableObject implements Serializable {
 
     private static final long serialVersionUID = 1;
     protected Project parent;
@@ -22,6 +22,7 @@ abstract public class ProjectElement implements Serializable {
     
     void setProject(Project project) {
         this.parent = project;
+        this.modify();
     }
     
     Project getProject() {

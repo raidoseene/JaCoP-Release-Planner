@@ -27,6 +27,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -47,6 +48,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
@@ -64,71 +66,10 @@ public final class FeaturesPanel extends JPanel {
         this.setLayout(new BorderLayout(10, 10));
         this.setBorder(new EmptyBorder(10, 10, 10, 10));
         this.scrollable = new FeaturesPanel.FPScrollable();
-        this.add(BorderLayout.CENTER, new JScrollPane(this.scrollable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
+        this.add(new JScrollPane(this.scrollable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
 
-        Container c = new Container();
-        this.add(BorderLayout.PAGE_END, c);
-        c.add(this.handler = new DepHandler());
-        c.setLayout(new LayoutManager() {
-
-            @Override
-            public void addLayoutComponent(String string, Component cmpnt) {
-            }
-
-            @Override
-            public void removeLayoutComponent(Component cmpnt) {
-            }
-
-            @Override
-            public Dimension preferredLayoutSize(Container cntnr) {
-                Component[] comps = cntnr.getComponents();
-                int height = comps[0].getPreferredSize().height;
-                int width = 300;
-
-                for (int i = 1; i < comps.length; i++) {
-                    Dimension d = comps[i].getPreferredSize();
-                    width += (10 + d.width);
-
-                    if (d.height > height) {
-                        height = d.height;
-                    }
-                }
-
-                return new Dimension(width, height);
-            }
-
-            @Override
-            public Dimension minimumLayoutSize(Container cntnr) {
-                Component[] comps = cntnr.getComponents();
-                int height = comps[0].getMinimumSize().height;
-                int width = 300;
-
-                for (int i = 1; i < comps.length; i++) {
-                    Dimension d = comps[i].getMinimumSize();
-                    width += (10 + d.width);
-
-                    if (d.height > height) {
-                        height = d.height;
-                    }
-                }
-
-                return new Dimension(width, height);
-            }
-
-            @Override
-            public void layoutContainer(Container cntnr) {
-                Component[] comps = cntnr.getComponents();
-                int height = cntnr.getHeight();
-                int x = 850;
-
-                comps[0].setBounds(0, 0, 850, height);
-                for (int i = 1; i < comps.length; i++) {
-                    int w = comps[i].getPreferredSize().width;
-                    comps[i].setBounds(x + 10, 0, w, height);
-                    x += (10 + w);
-                }
-            }
-        });
+        this.add(this.handler = new DepHandler());
+        this.setLayout(this.handler);
 
         JButton btn = new JButton("Add new feature");
         btn.addActionListener(new ActionListener() {
@@ -142,7 +83,7 @@ public final class FeaturesPanel extends JPanel {
                 }
             }
         });
-        c.add(btn);
+        this.add(btn);
 
         btn = new JButton("Manage groups");
         btn.addActionListener(new ActionListener() {
@@ -156,7 +97,7 @@ public final class FeaturesPanel extends JPanel {
                 }
             }
         });
-        c.add(btn);
+        this.add(btn);
 
         Project project = ProjectManager.getCurrentProject();
         if (project != null) {
@@ -200,10 +141,25 @@ public final class FeaturesPanel extends JPanel {
     }
 
     private final class FPScrollable extends ScrollablePanel {
+        
+        private boolean visibility;
 
         private FPScrollable() {
             this.setBorder(new EmptyBorder(10, 310, 10, 10));
             this.setLayout(new ContentListLayout(ContentPanel.class));
+            this.visibility = true;
+        }
+        
+        private void setGraphicsVisible(boolean visible) {
+            if (this.visibility != visible) {
+                this.visibility = visible;
+                
+                if (this.visibility) {
+                    this.setBorder(new EmptyBorder(10, 310, 10, 10));
+                } else {
+                    this.setBorder(new EmptyBorder(10, 10, 10, 10));
+                }
+            }
         }
 
         @Override
@@ -213,14 +169,15 @@ public final class FeaturesPanel extends JPanel {
 
     }
 
-    private final class DepHandler extends JPanel {
+    private final class DepHandler extends JPanel implements LayoutManager {
 
         private final JToggleButton fixed, excluded, earlier, later, softPrecedence, hardPrecedence, coupling, separation, and, xor;
         private final ArrayList<FPContent> selections;
         private final ActionListener listener;
+        private final JPanel buttons;
 
         private DepHandler() {
-            this.setLayout(new FlowLayout(FlowLayout.CENTER, 2, 0));
+            this.setLayout(new BorderLayout());
             this.selections = new ArrayList<>(2);
             this.listener = new ActionListener() {
 
@@ -360,49 +317,74 @@ public final class FeaturesPanel extends JPanel {
                 }
             };
             
+            this.buttons = new JPanel(new GridLayout(12, 1, 2, 2));
+            this.buttons.setBorder(new EmptyBorder(5, 5, 5, 5));
+            
             this.fixed = new JToggleButton("FIXED");
             this.fixed.addActionListener(this.listener);
-            this.add(this.fixed);
+            this.buttons.add(this.fixed);
             
             this.excluded = new JToggleButton("EXCLUDED");
             this.excluded.addActionListener(this.listener);
-            this.add(this.excluded);
+            this.buttons.add(this.excluded);
             
             this.earlier = new JToggleButton("EARLIER");
             this.earlier.addActionListener(this.listener);
-            this.add(this.earlier);
+            this.buttons.add(this.earlier);
             
             this.later = new JToggleButton("LATER");
             this.later.addActionListener(this.listener);
-            this.add(this.later);
+            this.buttons.add(this.later);
 
-            this.add(new JSeparator(JSeparator.VERTICAL));
+            this.buttons.add(new JSeparator(JSeparator.HORIZONTAL));
 
             this.softPrecedence = new JToggleButton("SOFTPRECEDENCE");
             this.softPrecedence.addActionListener(this.listener);
-            this.add(this.softPrecedence);
+            this.buttons.add(this.softPrecedence);
 
             this.hardPrecedence = new JToggleButton("HARDPRECEDENCE");
             this.hardPrecedence.addActionListener(this.listener);
-            this.add(this.hardPrecedence);
+            this.buttons.add(this.hardPrecedence);
             
             this.coupling = new JToggleButton("COUPLING");
             this.coupling.addActionListener(this.listener);
-            this.add(this.coupling);
+            this.buttons.add(this.coupling);
 
             this.separation = new JToggleButton("SEPARATION");
             this.separation.addActionListener(this.listener);
-            this.add(this.separation);
+            this.buttons.add(this.separation);
 
-            this.add(new JSeparator(JSeparator.VERTICAL));
+            this.buttons.add(new JSeparator(JSeparator.HORIZONTAL));
 
             this.and = new JToggleButton("AND");
             this.and.addActionListener(this.listener);
-            this.add(this.and);
+            this.buttons.add(this.and);
 
             this.xor = new JToggleButton("XOR");
             this.xor.addActionListener(this.listener);
-            this.add(this.xor);
+            this.buttons.add(this.xor);
+            
+            JToggleButton toggler = new JToggleButton("Dependencies");
+            toggler.addActionListener(new ActionListener() {
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        if (FeaturesPanel.this.scrollable.visibility) {
+                            FeaturesPanel.this.add(FeaturesPanel.DepHandler.this.buttons);
+                            FeaturesPanel.this.scrollable.setGraphicsVisible(false);
+                        } else {
+                            FeaturesPanel.this.remove(FeaturesPanel.DepHandler.this.buttons);
+                            FeaturesPanel.this.scrollable.setGraphicsVisible(true);
+                        }
+                        FeaturesPanel.this.validate();
+                        FeaturesPanel.this.repaint();
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            });
+            this.add(toggler);
         }
 
         public boolean processFeatureEvent(FPContent source, boolean selected) {
@@ -528,6 +510,55 @@ public final class FeaturesPanel extends JPanel {
 
             this.selections.clear();
             return false;
+        }
+
+        @Override
+        public void addLayoutComponent(String name, Component comp) {
+        }
+
+        @Override
+        public void removeLayoutComponent(Component comp) {
+        }
+
+        @Override
+        public Dimension preferredLayoutSize(Container parent) {
+            return new Dimension();
+        }
+
+        @Override
+        public Dimension minimumLayoutSize(Container parent) {
+            return new Dimension();
+        }
+
+        @Override
+        public void layoutContainer(Container parent) {
+            Insets is = parent.getInsets();
+            int width = parent.getWidth();
+            int height = parent.getHeight();
+            
+            int deph = this.getPreferredSize().height;
+            int h = height - is.top - is.bottom - deph - 10;
+            this.setBounds(is.left, height - is.bottom - deph, 300, deph);
+            
+            int x = is.left + 300 + 10;
+            int count = parent.getComponentCount();
+            for (int i = 2; i < count; i++) {
+                Component c = parent.getComponent(i);
+                Dimension pref = c.getPreferredSize();
+                c.setBounds(x, height - is.bottom - deph, pref.width, pref.height);
+                x += (pref.width + 10);
+            }
+            
+            if (!FeaturesPanel.this.scrollable.visibility) {
+                int w = width - is.left - is.right - 300;
+                parent.getComponent(0).setBounds(is.left + 300, is.top, w, h);
+                
+                Dimension pref = this.buttons.getPreferredSize();
+                this.buttons.setBounds(is.left, height - is.bottom - deph - pref.height - 10, 300, pref.height);
+            } else {
+                int w = width - is.left - is.right;
+                parent.getComponent(0).setBounds(is.left, is.top, w, h);
+            }
         }
 
     }

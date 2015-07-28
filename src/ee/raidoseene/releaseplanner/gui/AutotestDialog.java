@@ -250,7 +250,6 @@ public final class AutotestDialog extends JDialog {
 
         if (more) {
             this.numFs[1].setEnabled(isInt(this.numFs[0].getText()));
-            this.numRC[1].setEnabled(isInt(this.numRC[0].getText()));
             this.numRss[1].setEnabled(isInt(this.numRss[0].getText()));
             this.numRls[1].setEnabled(isInt(this.numRls[0].getText()));
             this.numSs[1].setEnabled(isInt(this.numSs[0].getText()));
@@ -265,16 +264,8 @@ public final class AutotestDialog extends JDialog {
             this.sepNo[1].setEnabled(isInt(this.sepNo[0].getText()));
             this.andNo[1].setEnabled(isInt(this.andNo[0].getText()));
             this.xorNo[1].setEnabled(isInt(this.xorNo[0].getText()));
-
-            this.test.setEnabled(isInt(this.numFs[0].getText())
-                    && isInt(this.numRC[0].getText())
-                    && isInt(this.numRss[0].getText())
-                    && isInt(this.numRls[0].getText())
-                    && isInt(this.numSs[0].getText())
-                    && isFloat(this.resTness[0].getText()));
         } else {
             this.numFs[1].setEnabled(false);
-            this.numRC[1].setEnabled(false);
             this.numRss[1].setEnabled(false);
             this.numRls[1].setEnabled(false);
             this.numSs[1].setEnabled(false);
@@ -289,79 +280,85 @@ public final class AutotestDialog extends JDialog {
             this.sepNo[1].setEnabled(false);
             this.andNo[1].setEnabled(false);
             this.xorNo[1].setEnabled(false);
-
-            this.test.setEnabled(false);
         }
+
+        this.numRC[1].setEnabled(isInt(this.numRC[0].getText()));
+        this.test.setEnabled(isInt(this.numFs[0].getText())
+                && isInt(this.numRC[0].getText())
+                && isInt(this.numRss[0].getText())
+                && isInt(this.numRls[0].getText())
+                && isInt(this.numSs[0].getText())
+                && isFloat(this.resTness[0].getText()));
     }
 
     private void fillSettings() {
-        if(isInt(this.numTProjs.getText())) {
+        if (isInt(this.numTProjs.getText())) {
             this.settings.setProjectNo(Integer.parseInt(this.numTProjs.getText()));
         }
-        
-        if(isInt(this.numFs[0].getText())) {
+
+        if (isInt(this.numFs[0].getText())) {
             Integer max = isInt(this.numFs[1].getText()) ? Integer.parseInt(this.numFs[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.FEATURES, Integer.parseInt(this.numFs[0].getText()), max);
         }
-        
-        if(isInt(this.numRC[0].getText())) {
+
+        if (isInt(this.numRC[0].getText())) {
             Integer max = isInt(this.numRC[1].getText()) ? Integer.parseInt(this.numRC[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.RESOURCE_CONS, Integer.parseInt(this.numRC[0].getText()), max);
         }
 
-        if(isInt(this.numRss[0].getText())) {
+        if (isInt(this.numRss[0].getText())) {
             Integer max = isInt(this.numRss[1].getText()) ? Integer.parseInt(this.numRss[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.RESOURCES, Integer.parseInt(this.numRss[0].getText()), max);
         }
-        if(isInt(this.numRls[0].getText())) {
+        if (isInt(this.numRls[0].getText())) {
             Integer max = isInt(this.numRls[1].getText()) ? Integer.parseInt(this.numRls[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.RELEASES, Integer.parseInt(this.numRls[0].getText()), max);
         }
-        if(isInt(this.numSs[0].getText())) {
+        if (isInt(this.numSs[0].getText())) {
             Integer max = isInt(this.numSs[1].getText()) ? Integer.parseInt(this.numSs[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.STAKEHOLDERS, Integer.parseInt(this.numSs[0].getText()), max);
         }
-        if(isFloat(this.resTness[0].getText())) {
+        if (isFloat(this.resTness[0].getText())) {
             Float max = isFloat(this.resTness[1].getText()) ? Float.parseFloat(this.resTness[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.TIGHTNESS, Float.parseFloat(this.resTness[0].getText()), max);
         }
-        if(isInt(this.fixNo[0].getText())) {
+        if (isInt(this.fixNo[0].getText())) {
             Integer max = isInt(this.fixNo[1].getText()) ? Integer.parseInt(this.fixNo[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.FIXED_DEP, Integer.parseInt(this.fixNo[0].getText()), max);
         }
-        if(isInt(this.exNo[0].getText())) {
+        if (isInt(this.exNo[0].getText())) {
             Integer max = isInt(this.exNo[1].getText()) ? Integer.parseInt(this.exNo[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.EXCLUDED_DEP, Integer.parseInt(this.exNo[0].getText()), max);
         }
-        if(isInt(this.earNo[0].getText())) {
+        if (isInt(this.earNo[0].getText())) {
             Integer max = isInt(this.earNo[1].getText()) ? Integer.parseInt(this.earNo[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.EARLIER_DEP, Integer.parseInt(this.earNo[0].getText()), max);
         }
-        if(isInt(this.latNo[0].getText())) {
+        if (isInt(this.latNo[0].getText())) {
             Integer max = isInt(this.latNo[1].getText()) ? Integer.parseInt(this.latNo[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.LATER_DEP, Integer.parseInt(this.latNo[0].getText()), max);
         }
-        if(isInt(this.SPNo[0].getText())) {
+        if (isInt(this.SPNo[0].getText())) {
             Integer max = isInt(this.SPNo[1].getText()) ? Integer.parseInt(this.SPNo[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.SOFT_PRECEDENCE_DEP, Integer.parseInt(this.SPNo[0].getText()), max);
         }
-        if(isInt(this.HPNo[0].getText())) {
+        if (isInt(this.HPNo[0].getText())) {
             Integer max = isInt(this.HPNo[1].getText()) ? Integer.parseInt(this.HPNo[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.HARD_PRECEDENCE_DEP, Integer.parseInt(this.HPNo[0].getText()), max);
         }
-        if(isInt(this.coupNo[0].getText())) {
+        if (isInt(this.coupNo[0].getText())) {
             Integer max = isInt(this.coupNo[1].getText()) ? Integer.parseInt(this.coupNo[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.COUPLING_DEP, Integer.parseInt(this.coupNo[0].getText()), max);
         }
-        if(isInt(this.sepNo[0].getText())) {
+        if (isInt(this.sepNo[0].getText())) {
             Integer max = isInt(this.sepNo[1].getText()) ? Integer.parseInt(this.sepNo[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.SEPARATION_DEP, Integer.parseInt(this.sepNo[0].getText()), max);
         }
-        if(isInt(this.andNo[0].getText())) {
+        if (isInt(this.andNo[0].getText())) {
             Integer max = isInt(this.andNo[1].getText()) ? Integer.parseInt(this.andNo[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.AND_DEP, Integer.parseInt(this.andNo[0].getText()), max);
         }
-        if(isInt(this.xorNo[0].getText())) {
+        if (isInt(this.xorNo[0].getText())) {
             Integer max = isInt(this.xorNo[1].getText()) ? Integer.parseInt(this.xorNo[1].getText()) : null;
             this.settings.setParameter(AutotestSettings.Parameter.XOR_DEP, Integer.parseInt(this.xorNo[0].getText()), max);
         }

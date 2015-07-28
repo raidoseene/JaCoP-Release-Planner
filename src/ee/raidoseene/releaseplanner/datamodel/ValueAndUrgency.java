@@ -5,6 +5,7 @@
 package ee.raidoseene.releaseplanner.datamodel;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -13,7 +14,7 @@ import java.util.Objects;
  *
  * @author Raido Seene
  */
-public class ValueAndUrgency implements Serializable {
+public class ValueAndUrgency extends ModifiableObject implements Serializable {
 
     private static final long serialVersionUID = 1;
     private final Map<ValueAndUrgency.Key, ValueAndUrgency.ValUrg> parameters;
@@ -31,33 +32,38 @@ public class ValueAndUrgency implements Serializable {
             } else {
                 valUrg.value = value;
             }
+            this.modify();
         } else if (valUrg != null) {
             this.parameters.remove(key);
+            this.modify();
         }
     }
-    
+
     public void setUrgency(Stakeholder s, Feature f, int urgency) {
         ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (valUrg != null) {
             valUrg.urgency.setUrgency(urgency);
+            this.modify();
         } else {
             throw new RuntimeException("Urgency cannot be set without value!");
         }
     }
-    
+
     public void setRelease(Stakeholder s, Feature f, Release r) {
         ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (valUrg != null) {
             valUrg.urgency.setRelease(r);
+            this.modify();
         } else {
             throw new RuntimeException("Urgency cannot be set without value!");
         }
     }
-    
+
     public void setDeadlineCurve(Stakeholder s, Feature f, int deadlineCurve) {
         ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (valUrg != null) {
             valUrg.urgency.setDeadlineCurve(deadlineCurve);
+            this.modify();
         } else {
             throw new RuntimeException("Urgency cannot be set without value!");
         }
@@ -70,7 +76,7 @@ public class ValueAndUrgency implements Serializable {
         }
         return 0;
     }
-    
+
     public int getUrgency(Stakeholder s, Feature f) {
         ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (valUrg != null) {
@@ -78,24 +84,26 @@ public class ValueAndUrgency implements Serializable {
         }
         return 0;
     }
-    
+
     public void setValUrgObject(Stakeholder s, Feature f, ValUrg valUrg) {
         ValueAndUrgency.Key key = new ValueAndUrgency.Key(s, f);
         this.parameters.put(key, valUrg);
+        this.modify();
     }
-    
+
     public Urgency getUrgencyObject(Stakeholder s, Feature f) {
         ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (valUrg != null) {
             return valUrg.urgency;
         }
+        System.out.println("Urgency is null!");
         return null;
     }
-    
+
     public ValUrg getValUrgObject(Stakeholder s, Feature f) {
         return this.parameters.get(new ValueAndUrgency.Key(s, f));
     }
-    
+
     public Release getUrgencyRelease(Stakeholder s, Feature f) {
         ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (valUrg != null) {
@@ -103,7 +111,7 @@ public class ValueAndUrgency implements Serializable {
         }
         return null;
     }
-    
+
     public int getDeadlineCurve(Stakeholder s, Feature f) {
         ValueAndUrgency.ValUrg valUrg = this.parameters.get(new ValueAndUrgency.Key(s, f));
         if (valUrg != null) {
@@ -111,7 +119,6 @@ public class ValueAndUrgency implements Serializable {
         }
         return 0x00;
     }
-    
 
     public int getValueAndUrgencyCount() {
         return this.parameters.size();
@@ -145,7 +152,6 @@ public class ValueAndUrgency implements Serializable {
             hash = 17 * hash + Objects.hashCode(this.feature);
             return hash;
         }
-
     }
 
     public final class ValUrg implements Serializable {
@@ -158,11 +164,35 @@ public class ValueAndUrgency implements Serializable {
             this.urgency = new Urgency();
             this.value = v;
         }
-
     }
-    
+
     public static Urgency createStandaloneUrgency() {
         return new Urgency();
     }
 
+    @Override
+    public boolean isModified() {
+        if (super.isModified()) {
+            return true;
+        } else {
+            Collection<ValueAndUrgency.ValUrg> col = parameters.values();
+            for (ValueAndUrgency.ValUrg v : col) {
+                if (v.urgency != null && v.urgency.isModified()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    @Override
+    public void resetModification() {
+        super.resetModification();
+        Collection<ValueAndUrgency.ValUrg> col = parameters.values();
+        for (ValueAndUrgency.ValUrg v : col) {
+            if (v.urgency != null) {
+                v.urgency.resetModification();
+            }
+        }
+    }
 }

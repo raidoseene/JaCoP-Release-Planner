@@ -8,6 +8,7 @@ import ee.raidoseene.releaseplanner.backend.InputListener;
 import ee.raidoseene.releaseplanner.backend.InputReader;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
+import ee.raidoseene.releaseplanner.dataoutput.DependencyManager;
 import ee.raidoseene.releaseplanner.gui.Messenger;
 import ee.raidoseene.releaseplanner.gui.SolverOutputFrame;
 import java.io.File;
@@ -28,14 +29,15 @@ public class Solver {
 
     public static SolverResult executeSimulation(Project project, boolean codeOutput, boolean postponedUrgency, boolean normalizedImportances, boolean saveOutput) throws IOException {
         SolverResult sr = null;
+        DependencyManager dm = new DependencyManager(project);
         // TO DO: check if all needed elements are filled in the project
         if (project.getFeatures().getFeatureCount() > 0 & project.getReleases().getReleaseCount() > 1 &
                 project.getResources().getResourceCount() > 0 & project.getStakeholders().getStakeholderCount() > 0) {
             File[] files;
             try {
                 //file = DataManager.saveDataFile(ProjectManager.getCurrentProject());
-                files = DataManager.initiateDataOutput(project, codeOutput, postponedUrgency, normalizedImportances);
-                sr = runSolver(project, files, codeOutput, saveOutput);
+                files = DataManager.initiateDataOutput(project, dm, codeOutput, postponedUrgency, normalizedImportances);
+                sr = runSolver(project, dm, files, codeOutput, saveOutput);
             } catch (Exception ex) {
                 Messenger.showError(ex, null);
             }
@@ -45,7 +47,7 @@ public class Solver {
         return sr;
     }
 
-    public static SolverResult runSolver(Project project, File[] files, boolean codeOutput, boolean saveOutput) throws IOException {
+    public static SolverResult runSolver(Project project, DependencyManager dm, File[] files, boolean codeOutput, boolean saveOutput) throws IOException {
         String minizincLocation = "C:/Program Files (x86)/MiniZinc 1.6/bin/mzn2fzn.bat";
         String outputFile = "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn";
         String solverCode;
@@ -151,8 +153,8 @@ public class Solver {
         String result = sb.toString();
         SolverResult sr = new SolverResult(result, time);
         if(!saveOutput) {
-            SolverOutputFrame.showSolverOutputFrame(result);
-            SolverResultConverter.SolverResultConverter(project, sr);
+            //SolverOutputFrame.showSolverOutputFrame(result);
+            SolverResultConverter.SolverResultConverter(project, dm, sr);
         }
         //return output;
         return sr;

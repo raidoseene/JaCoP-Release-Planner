@@ -790,9 +790,9 @@ public final class UrgValPanel extends JPanel {
                 ModifyingParameterDependency[] mds = deps.getTypedDependencies(ModifyingParameterDependency.class, null);
                 for (ModifyingParameterDependency md : mds) {
                     if (md.getSecondary() == ChangePanel.this.feature) {
-                        if (md.type == Dependency.CV) {
+                        if (md.type == Dependency.CV && md.getChange(Value.class).getStakeholder() == ChangePanel.this.stakeholder) {
                             this.openChangePanel(this.chval);
-                        } else if (md.type == Dependency.CU) {
+                        } else if (md.type == Dependency.CU && md.getChange(Urgency.class).getStakeholder() == ChangePanel.this.stakeholder) {
                             this.openChangePanel(this.churg);
                         }
                     }
@@ -985,6 +985,7 @@ public final class UrgValPanel extends JPanel {
 
                     if (this.dependency == null) {
                         urg = ValueAndUrgency.createStandaloneUrgency();
+                        urg.setStakeholder(ChangePanel.this.stakeholder);
                         this.dependency = deps.addModifyingParameterDependency(features.getFeature(0), ChangePanel.this.feature, urg);
                     } else {
                         urg = this.dependency.getChange(Urgency.class);

@@ -28,6 +28,7 @@ public class Feature extends NamedObject implements Serializable {
         } else {
             this.consumptions.remove(r);
         }
+        this.modify();
     }
 
     public int getConsumption(Resource r) {
@@ -40,7 +41,11 @@ public class Feature extends NamedObject implements Serializable {
     }
 
     public boolean removeConsumption(Resource r) {
-        return (this.consumptions.remove(r) != null);
+        if (this.consumptions.remove(r) != null) {
+            this.modify();
+            return true;
+        }
+        return false;
     }
 
     public boolean hasConsumption(Resource r) {
@@ -49,6 +54,7 @@ public class Feature extends NamedObject implements Serializable {
     
     public void setComment(String comment) {
         this.comment = comment;
+        this.modify();
     }
     
     public String getComment() {

@@ -23,11 +23,13 @@ public class Group extends NamedObject implements Serializable {
 
     protected void addFeature(Feature f) {
         this.featureContainer.add(f);
-        
+        this.modify();
     }
 
     public void removeFeature(Feature f) {
-        this.featureContainer.remove(f);
+        if(this.featureContainer.remove(f)) {
+            this.modify();
+        }
     }
     
     public Feature getFeature(int index) {

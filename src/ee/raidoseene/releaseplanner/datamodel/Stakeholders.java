@@ -26,12 +26,14 @@ public class Stakeholders extends ProjectElement implements Serializable {
     public Stakeholder addStakeholder() {
         Stakeholder stakeholder = new Stakeholder();
         stakeholderContainer.add(stakeholder);
+        this.modify();
         return stakeholder;
     }
 
     public void removeStakeholder(Stakeholder stakeholder) {
         if (this.stakeholderContainer.remove(stakeholder) && super.parent != null) {
             super.parent.stakeholderRemoved(stakeholder);
+            this.modify();
         }
     }
 
@@ -41,5 +43,27 @@ public class Stakeholders extends ProjectElement implements Serializable {
 
     public int getStakeholderCount() {
         return this.stakeholderContainer.size();
+    }
+    
+    @Override
+    public boolean isModified() {
+        if(super.isModified()) {
+            return true;
+        } else {
+            for(Stakeholder s: stakeholderContainer) {
+                if (s.isModified()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    
+    @Override
+    public void resetModification() {
+        super.resetModification();
+        for(Stakeholder s: stakeholderContainer) {
+            s.resetModification();
+        }
     }
 }

@@ -20,9 +20,9 @@ import javax.swing.border.EmptyBorder;
 /**
  *
  * @author Raido Seene
+ * Needs to be deprecated
  */
 public class SolverOutputFrame extends JFrame {
-
     private final ScrollablePanel scrollable;
     //private final JTextField name;
     private final TextArea name;
@@ -52,6 +52,7 @@ public class SolverOutputFrame extends JFrame {
         this.add(this.name);
     }
 
+    @Deprecated
     public static void showSolverOutputFrame(String input) {
         SolverOutputFrame solverOutput = new SolverOutputFrame(input);
         solverOutput.setVisible(true);

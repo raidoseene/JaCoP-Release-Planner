@@ -35,6 +35,9 @@ public class TabbedView extends JPanel {
 
         UrgValPanel urgvp = new UrgValPanel();
         tb.add(UrgValPanel.TITLE_STRING, urgvp);
+        
+        SimulationPanel simp = new SimulationPanel();
+        tb.add(SimulationPanel.TITLE_STRING, simp);
 
         SettingsPanel setp = new SettingsPanel();
         tb.add(SettingsPanel.TITLE_STRING, setp);

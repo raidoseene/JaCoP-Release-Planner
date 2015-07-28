@@ -280,8 +280,6 @@ public final class ReleasesPanel extends ScrollablePanel {
                     this.validate();
                 }
             }
-
         }
-
     }
 }

@@ -2,9 +2,8 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package ee.raidoseene.releaseplanner.solverutils;
+package ee.raidoseene.releaseplanner.datamodel;
 
-import ee.raidoseene.releaseplanner.datamodel.Features;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,16 +13,22 @@ import java.util.List;
  *
  * @author Raido Seene
  */
-public class Simulation implements Serializable {
+public class Simulation extends ModifiableObject implements Serializable {
     
     private static final long serialVersionUID = 1;
     private final List<CandidatePlan> candidatePlanContainer;
-    private String simulationDate;
     private long simulationDuraton;
-    private Features features;
+    private String simulationDate;
+    private String comment;
     
-    Simulation(Features features) {
+    private final Features independentFeatures;
+    private final Features features;
+    private final Releases releases;
+    
+    Simulation(Features features, Releases releases, Project modDep) {
         this.features = features;
+        this.independentFeatures = modDep != null ? modDep.getFeatures() : null;
+        this.releases = releases;
         candidatePlanContainer = new ArrayList<>();
         
         Date date = new Date();
@@ -31,13 +36,16 @@ public class Simulation implements Serializable {
     }
     
     public CandidatePlan addCandidatePlan() {
-        CandidatePlan cp = new CandidatePlan(this.features);
+        CandidatePlan cp = new CandidatePlan(this.features, this.releases, this.independentFeatures);
         this.candidatePlanContainer.add(cp);
+        this.modify();
         return cp;
     }
     
     public void removeCandidatePlan(CandidatePlan cp) {
-        this.candidatePlanContainer.remove(cp);
+        if(this.candidatePlanContainer.remove(cp)) {
+            this.modify();
+        }
     }
 
     public CandidatePlan getCandidatePlan(int index) {
@@ -58,9 +66,19 @@ public class Simulation implements Serializable {
     
     public void setSimulationDuration(long duration) {
         this.simulationDuraton = duration;
+        this.modify();
     }
     
     public long getSimulationDuration() {
         return this.simulationDuraton;
+    }
+    
+    public void setComment(String comment) {
+        this.comment = comment;
+        this.modify();
+    }
+    
+    public String getComment() {
+        return this.comment;
     }
 }

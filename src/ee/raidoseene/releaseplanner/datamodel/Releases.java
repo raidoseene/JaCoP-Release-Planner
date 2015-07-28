@@ -31,12 +31,14 @@ public class Releases extends ProjectElement implements Serializable {
         Release r = new Release();
         int count = getReleaseCount();
         this.releaseContainer.add(count - 1, r);
+        this.modify();
         return r;
     }
 
     public void removeRelease(Release r) {
         if (this.releaseContainer.remove(r) && super.parent != null) {
             super.parent.releaseRemoved(r);
+            this.modify();
         }
     }
 
@@ -50,5 +52,27 @@ public class Releases extends ProjectElement implements Serializable {
     
     public int getReleaseIndex(Release release) {
         return this.releaseContainer.indexOf(release);
+    }
+    
+    @Override
+    public boolean isModified() {
+        if(super.isModified()) {
+            return true;
+        } else {
+            for(Release r: releaseContainer) {
+                if (r.isModified()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    
+    @Override
+    public void resetModification() {
+        super.resetModification();
+        for(Release r: releaseContainer) {
+            r.resetModification();
+        }
     }
 }

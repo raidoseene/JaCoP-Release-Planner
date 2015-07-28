@@ -9,7 +9,7 @@ import java.io.Serializable;
 /**
  * @author Raido Seene
  */
-public class Value implements Serializable {
+public class Value extends ModifiableObject implements Serializable {
     
     private static final long serialVersionUID = 1;
     private final Feature feature;
@@ -25,10 +25,10 @@ public class Value implements Serializable {
     public void setValue(int value) {
         if (value >= 0 && value < 10) {
             this.value = value;
+            this.modify();
         } else {
             throw new ArrayIndexOutOfBoundsException(value);
         }
-        this.value = value;
     }
 
     public int getValue() {

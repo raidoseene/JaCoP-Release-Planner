@@ -11,7 +11,7 @@ import java.io.Serializable;
  *
  * @author Raido Seene
  */
-public abstract class NamedObject implements Serializable {
+public abstract class NamedObject extends ModifiableObject implements Serializable {
 
     private static final long serialVersionUID = 1;
     private String name;
@@ -30,6 +30,7 @@ public abstract class NamedObject implements Serializable {
         } else {
             this.name = new String();
         }
+        this.modify();
     }
 
     public final String getName() {

@@ -7,9 +7,9 @@ import ee.raidoseene.releaseplanner.backend.ProjectManager;
 import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.backend.Settings;
 import ee.raidoseene.releaseplanner.backend.SettingsManager;
+import ee.raidoseene.releaseplanner.backend.UnsavedException;
 import ee.raidoseene.releaseplanner.dataimport.ImportManager;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
-import ee.raidoseene.releaseplanner.gui.utils.FeaturesSort;
 import ee.raidoseene.releaseplanner.solverutils.Solver;
 import java.awt.Dimension;
 import java.awt.FileDialog;
@@ -17,6 +17,8 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.io.File;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -27,6 +29,8 @@ import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 
 /**
  *
@@ -35,7 +39,6 @@ import javax.swing.UIManager;
 public final class MainFrame extends JFrame {
 
     private final JMenuItem save, saveas, close;
-    private final JMenuItem dataDump, solver;
 
     private MainFrame() {
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
@@ -44,7 +47,37 @@ public final class MainFrame extends JFrame {
         this.setMinimumSize(new Dimension(800, 600));
         this.setSize(size);
 
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+        this.addWindowListener(new WindowListener() {
+
+            @Override
+            public void windowOpened(WindowEvent e) {}
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if(MainFrame.this.closeCurrentProject()) {
+                    MainFrame.this.dispose();
+                }
+            }
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                System.exit(0);
+            }
+
+            @Override
+            public void windowIconified(WindowEvent e) {}
+
+            @Override
+            public void windowDeiconified(WindowEvent e) {}
+
+            @Override
+            public void windowActivated(WindowEvent e) {}
+
+            @Override
+            public void windowDeactivated(WindowEvent e) {}
+            
+        });
         this.setTitle("Release Planner");
 
         this.setContentPane(new JPanel());
@@ -58,6 +91,25 @@ public final class MainFrame extends JFrame {
         // File menu
         menu = new JMenu("File");
         menu.setMnemonic(KeyEvent.VK_F);
+        menu.addMenuListener(new MenuListener() {
+            @Override
+            public void menuSelected(MenuEvent e) {
+                try {
+                    MainFrame.this.updateEnablity();
+                } catch (Exception ex) {
+                    Messenger.showWarning(ex, "Oh snap!");
+                }
+            }
+
+            @Override
+            public void menuDeselected(MenuEvent e) {
+            }
+
+            @Override
+            public void menuCanceled(MenuEvent e) {
+            }
+        });
+
         menubar.add(menu);
 
         item = new JMenuItem("New Empty Project", KeyEvent.VK_E);
@@ -103,6 +155,24 @@ public final class MainFrame extends JFrame {
             }
         });
         menu.add(item);
+        
+        //Import menu
+        JMenu menu2 = new JMenu("Import");
+        menu2.setMnemonic(KeyEvent.VK_I);
+        menu.add(menu2);
+
+        item = new JMenuItem("Import Project");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    MainFrame.this.importProject();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        menu2.add(item);
 
         menu.addSeparator();
 
@@ -151,53 +221,6 @@ public final class MainFrame extends JFrame {
         });
         menu.add(this.close);
 
-        // Temporary menu
-        menu = new JMenu("Temporary");
-        menubar.add(menu);
-
-        this.dataDump = new JMenuItem("Dump Data");
-        this.dataDump.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                try {
-                    MainFrame.this.dumpData();
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-            }
-        });
-        menu.add(this.dataDump);
-
-        this.solver = new JMenuItem("Simulate");
-        this.solver.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                try {
-                    MainFrame.this.runSolver();
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-            }
-        });
-        menu.add(this.solver);
-
-        //Import menu
-        menu = new JMenu("Import");
-        menubar.add(menu);
-
-        item = new JMenuItem("Import Project");
-        item.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                try {
-                    MainFrame.this.importProject();
-                } catch (Throwable t) {
-                    t.printStackTrace();
-                }
-            }
-        });
-        menu.add(item);
-        
         //Autotests menu
         menu = new JMenu("Autotests");
         menubar.add(menu);
@@ -217,6 +240,9 @@ public final class MainFrame extends JFrame {
     }
 
     private void createNewProject(boolean def) {
+        if(!this.closeCurrentProject()) {
+            return;
+        }
         try {
             String title = def ? "New Default Project" : "New Empty Project";
             String name = JOptionPane.showInputDialog(this, "Project name:", title, JOptionPane.QUESTION_MESSAGE);
@@ -251,6 +277,9 @@ public final class MainFrame extends JFrame {
     }
 
     private void openSavedProject() {
+        if(!this.closeCurrentProject()) {
+            return;
+        }
         try {
             FileDialog fd = new FileDialog(this, "Load Project", FileDialog.LOAD);
             fd.setFilenameFilter(new ProjectFileFilter());
@@ -276,11 +305,11 @@ public final class MainFrame extends JFrame {
         this.updateEnablity();
     }
 
-    private void saveCurrentProject(boolean as) {
+    private boolean saveCurrentProject(boolean as) {
         try {
             if (!as && ProjectManager.getCurrentProject().getStorage() != null) { // Overwrite
                 ProjectManager.saveCurrentProject(null);
-                return;
+                return true;
             }
 
             String name = ProjectManager.getCurrentProject().getName();
@@ -295,62 +324,44 @@ public final class MainFrame extends JFrame {
             if (dir != null && fil != null) {
                 File file = new File(dir, fil);
                 ProjectManager.saveCurrentProject(file);
+                return true;
             }
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
+        return false;
     }
 
-    private void closeCurrentProject() {
+    private boolean closeCurrentProject() {
         try {
-            ProjectManager.closeCurrentProject();
+            ProjectManager.closeCurrentProject(false);
+        } catch (UnsavedException uex) {
+            String message = "There are unsaved changes in current project. Would you like to save the project?";
+            int result = JOptionPane.showConfirmDialog(this, message, "Unsaved project", JOptionPane.YES_NO_CANCEL_OPTION);
+            if (result == JOptionPane.YES_OPTION) {
+                if(!this.saveCurrentProject(false)) {
+                    return false;
+                }
+            } else if (result == JOptionPane.NO_OPTION) {
+                try {
+                    ProjectManager.closeCurrentProject(true);
+                } catch (Exception ex) {
+                }
+            } else if (result == JOptionPane.CANCEL_OPTION) {
+                this.updateEnablity();
+                return false;
+            }
         } catch (Exception ex) {
             Messenger.showError(ex, null);
-        } finally {
-            if (ProjectManager.getCurrentProject() != null) {
-                this.setContentPane(new TabbedView());
-            } else {
-                this.setContentPane(new JPanel());
-            }
+        }
+        if (ProjectManager.getCurrentProject() != null) {
+            this.setContentPane(new TabbedView());
+        } else {
+            this.setContentPane(new JPanel());
         }
 
         this.updateEnablity();
-    }
-
-    private void dumpData() {
-        this.saveCurrentProject(false);
-
-        try {
-            if (ProjectManager.getCurrentProject().getStorage() == null) {
-                String msg = "Project is not saved!\nUnable to determine dump location!";
-                throw new Exception(msg);
-            }
-
-            //DataManager.saveDataFile(ProjectManager.getCurrentProject());
-            Settings settings = SettingsManager.getCurrentSettings();
-            DataManager.initiateDataOutput(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency(), settings.getNormalizedImportances());
-            //SolverCodeManager.saveSolverCodeFile(ProjectManager.getCurrentProject());
-            
-        } catch (Exception ex) {
-            Messenger.showError(ex, null);
-        }
-    }
-
-    private void runSolver() {
-        this.saveCurrentProject(false);
-
-        try {
-            if (ProjectManager.getCurrentProject().getStorage() == null) {
-                String msg = "Project is not saved!\nUnable to determine dump location!";
-                throw new Exception(msg);
-            }
-
-            //Solver.runSolver();
-            Settings settings = SettingsManager.getCurrentSettings();
-            Solver.executeSimulation(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency(), settings.getNormalizedImportances(), false);
-        } catch (Exception ex) {
-            Messenger.showError(ex, null);
-        }
+        return true;
     }
 
     private void importProject() {
@@ -377,7 +388,7 @@ public final class MainFrame extends JFrame {
         }
         this.updateEnablity();
     }
-    
+
     private void testProject() {
         try {
             AutotestManager am = new AutotestManager();
@@ -401,12 +412,9 @@ public final class MainFrame extends JFrame {
 
     private void updateEnablity() {
         boolean has = (ProjectManager.getCurrentProject() != null);
-
-        this.save.setEnabled(has);
+        this.save.setEnabled(has && ProjectManager.getCurrentProject().isModified());
         this.saveas.setEnabled(has);
         this.close.setEnabled(has);
-        this.dataDump.setEnabled(has);
-        this.solver.setEnabled(has);
 
         this.revalidate();
     }

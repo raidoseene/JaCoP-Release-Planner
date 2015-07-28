@@ -26,12 +26,14 @@ public class Groups extends ProjectElement implements Serializable {
     public Group addGroup() {
         Group g = new Group();
         this.groupContainer.add(g);
+        this.modify();
         return g;
     }
 
     public void removeGroup(Group g) {
         if (this.groupContainer.remove(g) && super.parent != null) {
             super.parent.groupRemoved(g);
+            this.modify();
         }
     }
 
@@ -53,6 +55,7 @@ public class Groups extends ProjectElement implements Serializable {
             group.removeFeature(f);
         }
         g.addFeature(f);
+        this.modify();
     }
     
     public List<Feature> getFeaturesInGroup(Group g) {
@@ -71,5 +74,27 @@ public class Groups extends ProjectElement implements Serializable {
             }
         }
         return null;
+    }
+    
+    @Override
+    public boolean isModified() {
+        if(super.isModified()) {
+            return true;
+        } else {
+            for(Group g: groupContainer) {
+                if (g.isModified()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    
+    @Override
+    public void resetModification() {
+        super.resetModification();
+        for(Group g: groupContainer) {
+            g.resetModification();
+        }
     }
 }

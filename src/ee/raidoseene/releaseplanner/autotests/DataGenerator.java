@@ -28,7 +28,8 @@ import java.util.Random;
 public class DataGenerator {
 
     private static final int[] urgCurve = new int[]{
-        Urgency.EXACT,
+        Urgency.EXACT | Urgency.HARD,
+        Urgency.EXACT | Urgency.SOFT,
         Urgency.EARLIEST | Urgency.HARD,
         Urgency.EARLIEST | Urgency.SOFT,
         Urgency.LATEST | Urgency.HARD,
@@ -206,7 +207,7 @@ public class DataGenerator {
 
         for (int s = 0; s < stkNo; s++) {
             Stakeholder stakeholder = stakeholders.addStakeholder();
-            stakeholder.setName("Res" + numberGenerator(s, stkNo));
+            stakeholder.setName("Stk" + numberGenerator(s, stkNo));
             stakeholder.setImportance(random.nextInt(9) + 1);
         }
         return stkNo;

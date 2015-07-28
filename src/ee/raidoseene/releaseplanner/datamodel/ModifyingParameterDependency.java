@@ -13,7 +13,6 @@ import java.io.Serializable;
 public final class ModifyingParameterDependency extends Dependency implements Serializable {
 
     private static final long serialVersionUID = 1;
-    
     protected final Feature primary, secondary;
     private final Object change;
 
@@ -55,6 +54,26 @@ public final class ModifyingParameterDependency extends Dependency implements Se
             return (T) change;
         } else {
             throw new RuntimeException();
+        }
+    }
+
+    @Override
+    public boolean isModified() {
+        if (super.isModified()) {
+            return true;
+        } else {
+            if (change != null && change instanceof ModifiableObject) {
+                return ((ModifiableObject) change).isModified();
+            }
+            return false;
+        }
+    }
+
+    @Override
+    public void resetModification() {
+        super.resetModification();
+        if (change != null && change instanceof ModifiableObject) {
+            ((ModifiableObject) change).resetModification();
         }
     }
 }

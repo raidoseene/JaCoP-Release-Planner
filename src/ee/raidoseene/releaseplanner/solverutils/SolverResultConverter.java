@@ -4,9 +4,14 @@
  */
 package ee.raidoseene.releaseplanner.solverutils;
 
+import ee.raidoseene.releaseplanner.datamodel.SimulationArchive;
+import ee.raidoseene.releaseplanner.datamodel.Simulation;
+import ee.raidoseene.releaseplanner.datamodel.CandidatePlan;
+import ee.raidoseene.releaseplanner.datamodel.Feature;
 import ee.raidoseene.releaseplanner.datamodel.Features;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Releases;
+import ee.raidoseene.releaseplanner.dataoutput.DependencyManager;
 import java.util.Scanner;
 
 /**
@@ -15,16 +20,19 @@ import java.util.Scanner;
  */
 public class SolverResultConverter {
 
-    public static void SolverResultConverter(Project project, SolverResult result) {
+    public static void SolverResultConverter(Project project, DependencyManager dm, SolverResult result) {
         SimulationArchive archive = project.getSimulationArchive();
         Features features = project.getFeatures();
+        Features independentFeatures = dm.getModDep().getFeatures();
+        Project modDep = dm.getModDep();
+        int originalFeatCount = features.getFeatureCount();
         Releases releases = project.getReleases();
         
         String solverResult = result.getResult();
         long simulationDuration = result.getTime();
         
         try (Scanner scanner = new Scanner(solverResult)) {
-            Simulation s = archive.addSimulation();
+            Simulation s = archive.addSimulation(modDep);
             s.setSimulationDuration(simulationDuration);
             
             while (scanner.hasNextLine()) {
@@ -45,10 +53,16 @@ public class SolverResultConverter {
                         cp.setPlanValue(Integer.parseInt(value));
                         for(int i = 0; i < allocations.length; i++) {
                             int index = Integer.parseInt(allocations[i]) - 1;
-                            if(index < 0) {
-                                cp.setAllocation(features.getFeature(i), null);
+                            Feature feat;
+                            if(i < originalFeatCount) {
+                                feat = features.getFeature(i);
                             } else {
-                                cp.setAllocation(features.getFeature(i), releases.getRelease(index));
+                                feat = independentFeatures.getFeature(i - originalFeatCount);
+                            }
+                            if(index < 0) {
+                                cp.setAllocation(feat, null);
+                            } else {
+                                cp.setAllocation(feat, releases.getRelease(index));
                             }
                         }
                     }

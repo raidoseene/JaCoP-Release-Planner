@@ -26,16 +26,17 @@ public final class ProjectManager {
 
     public static void createNewProject(String name) throws Exception {
         if (ProjectManager.currentProject != null) {
-            ProjectManager.closeCurrentProject();
+            ProjectManager.closeCurrentProject(false);
         }
 
         ProjectManager.currentProject = new Project(name);
         ProjectManager.currentProject.setStorage(null);
+        ProjectManager.currentProject.modify();
     }
 
     public static void loadSavedProject(File file) throws Exception {
         if (ProjectManager.currentProject != null) {
-            ProjectManager.closeCurrentProject();
+            ProjectManager.closeCurrentProject(false);
         }
         
         try (InputStream in = new FileInputStream(file)) {
@@ -72,13 +73,16 @@ public final class ProjectManager {
             try (ObjectOutputStream oout = new ObjectOutputStream(out)) {
                 ProjectManager.currentProject.setStorage(file.getPath());
                 oout.writeObject(ProjectManager.currentProject);
+                ProjectManager.currentProject.resetModification();
             }
         }
     }
 
-    public static void closeCurrentProject() throws Exception {
-        if (ProjectManager.currentProject != null) {
-            // TODO: ...
+    public static void closeCurrentProject(boolean force) throws Exception {
+        if (!force && ProjectManager.currentProject != null) {
+            if(ProjectManager.currentProject.isModified()) {
+                throw new UnsavedException("Current project is not saved!");
+            }
         }
 
         ProjectManager.currentProject = null;

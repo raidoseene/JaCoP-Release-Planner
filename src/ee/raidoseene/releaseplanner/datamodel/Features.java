@@ -26,12 +26,14 @@ public class Features extends ProjectElement implements Serializable {
     public Feature addFeature() {
         Feature f = new Feature();
         this.featureContainer.add(f);
+        this.modify();
         return f;
     }
 
     public void removeFeature(Feature f) {
         if (this.featureContainer.remove(f) && super.parent != null) {
             super.parent.featureRemoved(f);
+            this.modify();
         }
     }
 
@@ -51,4 +53,25 @@ public class Features extends ProjectElement implements Serializable {
         return new Feature();
     }
     
+    @Override
+    public boolean isModified() {
+        if(super.isModified()) {
+            return true;
+        } else {
+            for(Feature f: featureContainer) {
+                if (f.isModified()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    
+    @Override
+    public void resetModification() {
+        super.resetModification();
+        for(Feature f: featureContainer) {
+            f.resetModification();
+        }
+    }
 }

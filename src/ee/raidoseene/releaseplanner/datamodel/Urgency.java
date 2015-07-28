@@ -10,7 +10,7 @@ import java.io.Serializable;
  *
  * @author Raido Seene
  */
-public class Urgency implements Serializable {
+public class Urgency extends ModifiableObject implements Serializable {
     
     private static final long serialVersionUID = 1;
     
@@ -33,15 +33,22 @@ public class Urgency implements Serializable {
     
     public void setUrgency(int urgency) {
         this.urgency = urgency;
+        this.modify();
     }
     
     public void setRelease(Release release) {
         this.release = release;
-        
+        this.modify();
     }
     
     public void setDeadlineCurve(int deadlineCurve) {
         this.deadlineCurve = deadlineCurve;
+        this.modify();
+    }
+    
+    public void setStakeholder(Stakeholder stakeholder) {
+        this.stakeholder = stakeholder;
+        this.modify();
     }
     
     public int getUrgency() {
@@ -54,5 +61,9 @@ public class Urgency implements Serializable {
     
     public int getDeadlineCurve() {
         return this.deadlineCurve;
+    }
+    
+    public Stakeholder getStakeholder() {
+        return this.stakeholder;
     }
 }
