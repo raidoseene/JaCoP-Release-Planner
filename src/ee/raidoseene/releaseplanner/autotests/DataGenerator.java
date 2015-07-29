@@ -258,7 +258,7 @@ public class DataGenerator {
     }
 
     private static void generateDependencies(Project project, AutotestSettings settings, int iterator, int featNo, int relNo) {
-        System.out.println("Dependency generations started");
+        System.out.println("  Dependency generation process started");
         
         ParamValues fixParams = settings.getParameter(AutotestSettings.Parameter.FIXED_DEP);
         ParamValues exParams = settings.getParameter(AutotestSettings.Parameter.EXCLUDED_DEP);
@@ -273,54 +273,62 @@ public class DataGenerator {
 
         Random random = new Random();
 
-        //System.out.println("Fixed dependency check");
         if (fixParams != null) {
+            System.out.println("    Fixed release dependency generation started");
             generateReleaseDep(project, settings, random, fixParams, Dependency.FIXED, iterator, featNo, relNo);
+            System.out.println("    Fixed release dependency generation ended");
         }
-        //System.out.println("Excluded dependency check");
         if (exParams != null) {
+            System.out.println("    Excluded release dependency generation started");
             generateReleaseDep(project, settings, random, exParams, Dependency.EXCLUDED, iterator, featNo, relNo);
+            System.out.println("    Excluded release dependency generation ended");
         }
-        //System.out.println("Earlier dependency check");
         if (earParams != null) {
+            System.out.println("    Earlier release dependency generation started");
             generateReleaseDep(project, settings, random, earParams, Dependency.EARLIER, iterator, featNo, relNo);
+            System.out.println("    Earlier release dependency generation ended");
         }
-        //System.out.println("Later dependency check");
         if (latParams != null) {
+            System.out.println("    Later release dependency generation started");
             generateReleaseDep(project, settings, random, latParams, Dependency.LATER, iterator, featNo, relNo);
+            System.out.println("    Later release dependency generation ended");
         }
 
-        //System.out.println("Soft precedence dependency check");
         if (softParams != null) {
+            System.out.println("    Soft precedence order dependency generation started");
             generateOrderDep(project, settings, random, softParams, Dependency.SOFTPRECEDENCE, iterator, featNo);
+            System.out.println("    Soft precedence order dependency generation ended");
         }
-        //System.out.println("Hard precedence dependency check");
         if (hardParams != null) {
+            System.out.println("    Hard precedence order dependency generation started");
             generateOrderDep(project, settings, random, hardParams, Dependency.HARDPRECEDENCE, iterator, featNo);
+            System.out.println("    Hard precedence order dependency generation ended");
         }
-        //System.out.println("Coupling dependency check");
         if (coupParams != null) {
+            System.out.println("    Coupling order dependency generation started");
             generateOrderDep(project, settings, random, coupParams, Dependency.COUPLING, iterator, featNo);
+            System.out.println("    Coupling order dependency generation ended");
         }
-        //System.out.println("Separation dependency check");
         if (sepParams != null) {
+            System.out.println("    Separation order dependency generation started");
             generateOrderDep(project, settings, random, sepParams, Dependency.SEPARATION, iterator, featNo);
+            System.out.println("    Separation order dependency generation ended");
         }
 
-        //System.out.println("And dependency check");
         if (andParams != null) {
+            System.out.println("    And existance dependency generation started");
             generateExistanceDep(project, settings, random, andParams, Dependency.AND, iterator, featNo);
+            System.out.println("    And existance dependency generation ended");
         }
-        //System.out.println("Xor dependency check");
         if (xorParams != null) {
+            System.out.println("    Xor existance dependency generation started");
             generateExistanceDep(project, settings, random, xorParams, Dependency.XOR, iterator, featNo);
+            System.out.println("    Xor existance dependency generation ended");
         }
-        //System.out.println("Dependency generations ended");
+        System.out.println("  Dependency generation process ended");
     }
 
     private static void generateReleaseDep(Project project, AutotestSettings settings, Random random, ParamValues params, int type, int iterator, int featNo, int relNo) {
-        //System.out.println("Release dependency generations started");
-        
         int projNo = settings.getProjectNo();
         Integer depMin = (Integer)params.getMin();
         Integer depMax = (Integer)params.getMax();
@@ -349,7 +357,7 @@ public class DataGenerator {
                 randFeatNo = random.nextInt(featNo);
                 uniqueFeat = true;
 
-                for (int i = 0; i < d; i++) {
+                for (int i = 0; i < usedFeat.length; i++) {
                     if (usedFeat[i] == randFeatNo) {
                         uniqueFeat = uniqueFeat & false;
                     } else {
@@ -364,14 +372,12 @@ public class DataGenerator {
 
             if(dependencies.addReleaseDependency(randFeat, randRel, type, true, false) == null) {
                 d--;
+                System.out.println("      Failed to pass consumption test, generating new release dependency");
             }
         }
-        //System.out.println("Release dependency generations ended");
     }
 
     private static void generateOrderDep(Project project, AutotestSettings settings, Random random, ParamValues params, int type, int iterator, int featNo) {
-        //System.out.println("Order dependency generations started");
-        
         int projNo = settings.getProjectNo();
         Integer depMin = (Integer)params.getMin();
         Integer depMax = (Integer)params.getMax();
@@ -407,11 +413,9 @@ public class DataGenerator {
 
             dependencies.addOrderDependency(features.getFeature(randFeat1), features.getFeature(randFeat2), type);
         }
-        //System.out.println("Order dependency generations ended");
     }
 
     private static void generateExistanceDep(Project project, AutotestSettings settings, Random random, ParamValues params, int type, int iterator, int featNo) {
-        //System.out.println("Existance dependency generations started");
         int projNo = settings.getProjectNo();
         Integer depMin = (Integer)params.getMin();
         Integer depMax = (Integer)params.getMax();
@@ -448,7 +452,6 @@ public class DataGenerator {
 
             dependencies.addExistanceDependency(features.getFeature(randFeat1), features.getFeature(randFeat2), type);
         }
-        //System.out.println("Existance dependency generations ended");
     }
 
     public static String numberGenerator(int n, int amount) {
