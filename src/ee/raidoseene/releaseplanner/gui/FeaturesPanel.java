@@ -19,16 +19,22 @@ import ee.raidoseene.releaseplanner.datamodel.Resources;
 import ee.raidoseene.releaseplanner.gui.utils.ContentListLayout;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanel;
 import ee.raidoseene.releaseplanner.gui.utils.ContentPanelListener;
+import ee.raidoseene.releaseplanner.gui.utils.DependencyGraph;
 import ee.raidoseene.releaseplanner.gui.utils.ScrollablePanel;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.LayoutManager;
+import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -48,7 +54,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
-import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 
@@ -123,6 +128,7 @@ public final class FeaturesPanel extends JPanel {
         this.scrollable.contentUpdated();
         this.scrollable.scrollDown();
 
+        this.scrollable.updateGraph();
         panel.addContentPanelListener(content);
     }
 
@@ -142,12 +148,20 @@ public final class FeaturesPanel extends JPanel {
 
     private final class FPScrollable extends ScrollablePanel {
         
+        private DependencyGraph graphData;
         private boolean visibility;
 
         private FPScrollable() {
             this.setBorder(new EmptyBorder(10, 310, 10, 10));
             this.setLayout(new ContentListLayout(ContentPanel.class));
             this.visibility = true;
+            
+            try {
+                this.graphData = new DependencyGraph(ProjectManager.getCurrentProject());
+            } catch (Exception ex) {
+                this.graphData = null;
+                ex.printStackTrace();
+            }
         }
         
         private void setGraphicsVisible(boolean visible) {
@@ -156,15 +170,106 @@ public final class FeaturesPanel extends JPanel {
                 
                 if (this.visibility) {
                     this.setBorder(new EmptyBorder(10, 310, 10, 10));
+                    this.updateGraph();
                 } else {
                     this.setBorder(new EmptyBorder(10, 10, 10, 10));
                 }
             }
         }
+        
+        private void updateGraph() {
+            try {
+                this.graphData = new DependencyGraph(ProjectManager.getCurrentProject());
+            } catch (Exception ex) {
+                this.graphData = null;
+                ex.printStackTrace();
+            }
+            
+            Insets is = this.getInsets();
+            this.repaint(0, 0, is.left, this.getHeight());
+        }
 
         @Override
         protected void paintComponent(Graphics graphics) {
             super.paintComponent(graphics);
+            
+            DependencyGraph gdata = this.graphData;
+            if (this.visibility && gdata != null) {
+                Graphics2D g = (Graphics2D) graphics;
+                FontMetrics fmetrics = g.getFontMetrics();
+                g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int size = Math.max(fmetrics.getMaxAdvance(), fmetrics.getHeight()) + 10;
+                int arc = size >> 2;
+                int oval = arc << 1;
+                
+                Component[] comps = this.getComponents();
+                Rectangle rect = new Rectangle();
+                
+                int dcount = gdata.getDependencyCount();
+                for (int di = 0; di < dcount; di++) {
+                    DependencyGraph.Dependency dep = gdata.getDependency(di);
+                    if (dep.node1 < comps.length && dep.node2 < comps.length) {
+                        comps[dep.node1].getBounds(rect);
+                        int dheight = dep.getHeight() * size;
+                        int y = rect.y + (int) (rect.height * dep.getAnchor1());
+                        int x = rect.x;
+                        
+                        if (dep.distance > 0) {
+                            comps[dep.node2].getBounds(rect);
+                            int y2 = rect.y + (int) (rect.height * dep.getAnchor2());
+                            int x2 = rect.x;
+                            
+                            g.setColor(this.getForeground());
+                            g.drawLine(x, y, x - dheight + arc, y);
+                            g.drawLine(x2, y2, x2 - dheight + arc, y2);
+                            g.drawLine(x - dheight, y + arc, x2 - dheight, y2 - arc);
+                            g.drawArc(x - dheight, y2 - oval, oval, oval, 180, 90);
+                            g.drawArc(x - dheight, y, oval, oval, 90, 90);
+                        } else {
+                            g.drawLine(x, y, x - dheight, y);
+                        }
+                        
+                    }
+                }
+                
+                // Draw labels
+                for (int di = 0; di < dcount; di++) {
+                    DependencyGraph.Dependency dep = gdata.getDependency(di);
+                    int sh = fmetrics.getMaxAscent() + fmetrics.getMaxDescent();
+                    int fh = fmetrics.getHeight();
+                    
+                    if (dep.node1 < comps.length && dep.node2 < comps.length) {
+                        comps[dep.node1].getBounds(rect);
+                        int dheight = dep.getHeight() * size;
+                        int y = rect.y + (int) (rect.height * dep.getAnchor1());
+                        int x = rect.x;
+                        
+                        if (dep.distance > 0) {
+                            comps[dep.node2].getBounds(rect);
+                            int y2 = rect.y + (int) (rect.height * dep.getAnchor2());
+                            int sw = fmetrics.stringWidth(dep.text);
+                            
+                            g.setColor(Color.WHITE);
+                            g.fillRoundRect(x - dheight - (sw >> 1) - 2, (y + y2 - fh) >> 1, sw + 4, fh, arc, arc);
+                            
+                            g.setColor(this.getForeground());
+                            g.drawRoundRect(x - dheight - (sw >> 1) - 2, (y + y2 - fh) >> 1, sw + 4, fh, arc, arc);
+                            g.drawString(dep.text, x - dheight - (sw >> 1), (y + y2 + fmetrics.getAscent()) >> 1);
+                        } else {
+                            int sw = fmetrics.stringWidth(dep.text);
+                            
+                            g.setColor(Color.WHITE);
+                            g.fillRoundRect(x - dheight - sw - 2, y - (fh >> 1), sw + 4, fh, arc, arc);
+                            
+                            g.setColor(this.getForeground());
+                            g.drawRoundRect(x - dheight - sw - 2, y - (fh >> 1), sw + 4, fh, arc, arc);
+                            g.drawString(dep.text, x - dheight - sw, y + (fmetrics.getAscent() >> 1));
+                        }
+                        
+                    }
+                }
+                
+            }
         }
 
     }
@@ -759,6 +864,7 @@ public final class FeaturesPanel extends JPanel {
 
                 FeaturesPanel.this.scrollable.remove(source);
                 FeaturesPanel.this.scrollable.contentUpdated();
+                FeaturesPanel.this.scrollable.updateGraph();
             } catch (Exception ex) {
                 Messenger.showError(ex, null);
             }

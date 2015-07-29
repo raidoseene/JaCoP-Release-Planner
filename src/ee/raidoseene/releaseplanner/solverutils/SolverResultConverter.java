@@ -66,7 +66,9 @@ public class SolverResultConverter {
                             }
                         }
                     }
+                    s.consistant(true);
                 } else if(line.startsWith("=====UNSATISFIABLE=====")) {
+                    s.consistant(false);
                     break;
                 }
             }

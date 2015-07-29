@@ -34,4 +34,17 @@ public class ReleaseDependency extends Dependency implements Serializable {
     public int getType() {
         return this.type;
     }
+    
+    public static String getToken(ReleaseDependency dep, Project project) {
+        if (dep.type == Dependency.FIXED) {
+            return "=" + (project.getReleases().getReleaseIndex(dep.release) + 1);
+        } else if (dep.type == Dependency.EXCLUDED) {
+            return "!" + (project.getReleases().getReleaseIndex(dep.release) + 1);
+        } else if (dep.type == Dependency.EARLIER) {
+            return "<" + (project.getReleases().getReleaseIndex(dep.release) + 1);
+        } else if (dep.type == Dependency.LATER) {
+            return ">" + (project.getReleases().getReleaseIndex(dep.release) + 1);
+        }
+        return "?";
+    }
 }

@@ -225,12 +225,25 @@ public final class MainFrame extends JFrame {
         menu = new JMenu("Autotests");
         menubar.add(menu);
 
-        item = new JMenuItem("Test Project");
+        item = new JMenuItem("Generate Projects");
         item.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
-                    MainFrame.this.testProject();
+                    MainFrame.this.generateProjects();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        menu.add(item);
+        
+        item = new JMenuItem("Generate & Simulate Projects");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    MainFrame.this.generateAndSimulateProjects();
                 } catch (Throwable t) {
                     t.printStackTrace();
                 }
@@ -388,15 +401,34 @@ public final class MainFrame extends JFrame {
         }
         this.updateEnablity();
     }
-
-    private void testProject() {
+    
+    private void generateProjects() {
         try {
             AutotestManager am = new AutotestManager();
             AutotestSettings settings = am.getSettings();
-            //AutotestSettings ats = new AutotestSettings();
             if (AutotestDialog.showAutotestDialog(settings)) {
-                //DataGenerator.generateProject("name", ats);
-                am.startTesting();
+                //am.startTesting();
+                am.generateProjects(false);
+            }
+        } catch (Exception ex) {
+            Messenger.showError(ex, null);
+        }
+
+        if (ProjectManager.getCurrentProject() != null) {
+            this.setContentPane(new TabbedView());
+        } else {
+            this.setContentPane(new JPanel());
+        }
+        this.updateEnablity();
+    }
+
+    private void generateAndSimulateProjects() {
+        try {
+            AutotestManager am = new AutotestManager();
+            AutotestSettings settings = am.getSettings();
+            if (AutotestDialog.showAutotestDialog(settings)) {
+                //am.startTesting();
+                am.generateProjects(true);
             }
         } catch (Exception ex) {
             Messenger.showError(ex, null);

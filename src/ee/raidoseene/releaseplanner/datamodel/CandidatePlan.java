@@ -45,7 +45,7 @@ public class CandidatePlan extends ModifiableObject implements Serializable {
     }
 
     @Deprecated
-    private Release getAllocation(Feature f) {
+    public Release getAllocation(Feature f) {
         return this.featureAllocations.get(f);
     }
 

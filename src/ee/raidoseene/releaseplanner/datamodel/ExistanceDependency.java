@@ -33,4 +33,13 @@ public class ExistanceDependency extends Dependency implements Serializable {
     public Feature getSecondary() {
         return this.secondary;
     }
+
+    public static String getToken(ExistanceDependency dep) {
+        if (dep.type == Dependency.AND) {
+            return "&";
+        } else if (dep.type == Dependency.XOR) {
+            return "^";
+        }
+        return "?";
+    }
 }

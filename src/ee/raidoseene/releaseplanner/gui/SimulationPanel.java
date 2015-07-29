@@ -56,7 +56,7 @@ public final class SimulationPanel extends ScrollablePanel {
             for (int i = 0; i < count; i++) {
                 Simulation s = archive.getSimulation(i);
                 SimulationPanel.SPContent content = new SimulationPanel.SPContent(s);
-                int type = ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE;
+                int type = ContentPanel.TYPE_CLOSABLE | (s.isConsistan() ? ContentPanel.TYPE_EXPANDABLE : 0);
                 ContentPanel panel = new ContentPanel(content, type);
                 panel.addContentPanelListener(content);
                 this.scrollable.add(panel);
@@ -89,7 +89,7 @@ public final class SimulationPanel extends ScrollablePanel {
                 for (int i = 0; i < count; i++) {
                     Simulation s = archive.getSimulation(i);
                     SimulationPanel.SPContent content = new SimulationPanel.SPContent(s);
-                    int type = ContentPanel.TYPE_CLOSABLE | ContentPanel.TYPE_EXPANDABLE;
+                    int type = ContentPanel.TYPE_CLOSABLE | (s.isConsistan() ? ContentPanel.TYPE_EXPANDABLE : 0);
                     ContentPanel panel = new ContentPanel(content, type);
                     panel.addContentPanelListener(content);
                     this.scrollable.add(panel);
@@ -122,26 +122,31 @@ public final class SimulationPanel extends ScrollablePanel {
 
             SimulationArchive archive = ProjectManager.getCurrentProject().getSimulationArchive();
             int simNo = archive.getSimulationIndex(s) + 1;
-            cont1.add(BorderLayout.LINE_START, new JLabel("Simulation no " + simNo + ": " + s.getSimulationDate() + ", calculation duration: " + s.getSimulationDuration() + "ms"));
+            this.comment = new JTextField();
+            if (s.isConsistan()) {
+                cont1.add(BorderLayout.LINE_START, new JLabel("Simulation no " + simNo + ": " + s.getSimulationDate() + ", calculation duration: " + s.getSimulationDuration() + "ms"));
 
-            this.comment = new JTextField(s.getComment());
-            this.comment.addFocusListener(new FocusListener() {
-                @Override
-                public void focusGained(FocusEvent fe) {
-                }
-
-                @Override
-                public void focusLost(FocusEvent fe) {
-                    try {
-                        SimulationPanel.SPContent.this.simulation.setComment(SimulationPanel.SPContent.this.comment.getText());
-                    } catch (Exception ex) {
-                        Messenger.showError(ex, null);
+                this.comment.setText(s.getComment());
+                this.comment.addFocusListener(new FocusListener() {
+                    @Override
+                    public void focusGained(FocusEvent fe) {
                     }
-                    SimulationPanel.SPContent.this.comment.setText(SimulationPanel.SPContent.this.simulation.getComment());
-                }
-            });
-            cont1.add(BorderLayout.CENTER, this.comment);
 
+                    @Override
+                    public void focusLost(FocusEvent fe) {
+                        try {
+                            SimulationPanel.SPContent.this.simulation.setComment(SimulationPanel.SPContent.this.comment.getText());
+                        } catch (Exception ex) {
+                            Messenger.showError(ex, null);
+                        }
+                        SimulationPanel.SPContent.this.comment.setText(SimulationPanel.SPContent.this.simulation.getComment());
+                    }
+                });
+                cont1.add(BorderLayout.CENTER, this.comment);
+            } else {
+                cont1.add(BorderLayout.LINE_START, new JLabel("Simulation no " + simNo + ": " + s.getSimulationDate() + ". Inconsistent simulation. Project contains unsatisfiable dependencies!"));
+            }
+            
             this.scrollable = new ScrollablePanel();
             this.scroller = new JScrollPane(this.scrollable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             this.scrollable.setLayout(new ContentListLayout(ContentPanel.class));
@@ -212,27 +217,27 @@ public final class SimulationPanel extends ScrollablePanel {
                 cont1.add(BorderLayout.LINE_START, new JLabel("Candidate plan value: " + cp.getPlanValue()));
 
                 this.cont2 = new JPanel(new GridLayout(1, 2, 10, 10));
-                
+
 
                 DefaultTableModel dm = new DefaultTableModel();
                 dm.addColumn("Feature");
                 dm.addColumn("Release");
                 String[][] table = cp.getFeatureAllocationTable();
-                for(String[] row : table) {
+                for (String[] row : table) {
                     dm.addRow(row);
                 }
-                
+
                 JTable table1 = new JTable(dm);
                 cont2.add(table1);
-                
+
                 dm = new DefaultTableModel();
                 dm.addColumn("Release");
                 dm.addColumn("Features");
                 table = cp.getReleaseContentTable();
-                for(String[] row : table) {
+                for (String[] row : table) {
                     dm.addRow(row);
                 }
-                
+
                 JTable table2 = new JTable(dm);
                 cont2.add(table2);
             }

@@ -19,6 +19,7 @@ public class Simulation extends ModifiableObject implements Serializable {
     private final List<CandidatePlan> candidatePlanContainer;
     private long simulationDuraton;
     private String simulationDate;
+    private boolean consistant;
     private String comment;
     
     private final Features independentFeatures;
@@ -71,6 +72,14 @@ public class Simulation extends ModifiableObject implements Serializable {
     
     public long getSimulationDuration() {
         return this.simulationDuraton;
+    }
+    
+    public void consistant(boolean c) {
+        this.consistant = c;
+    }
+    
+    public boolean isConsistan() {
+        return this.consistant;
     }
     
     public void setComment(String comment) {

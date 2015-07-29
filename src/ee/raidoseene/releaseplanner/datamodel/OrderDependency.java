@@ -33,4 +33,24 @@ public class OrderDependency extends Dependency implements Serializable {
     public Feature getSecondary() {
         return this.secondary;
     }
+    
+    public static String getToken(OrderDependency dep, Project project) {
+        Features f = project.getFeatures();
+        if (dep.type == Dependency.SOFTPRECEDENCE) {
+            if(f.getFeatureIndex(dep.primary) < f.getFeatureIndex(dep.secondary)) {
+                return "<=";
+            }
+            return ">=";
+        } else if (dep.type == Dependency.HARDPRECEDENCE) {
+            if(f.getFeatureIndex(dep.primary) < f.getFeatureIndex(dep.secondary)) {
+                return "<";
+            }
+            return ">";
+        } else if (dep.type == Dependency.COUPLING) {
+            return "><";
+        } else if (dep.type == Dependency.SEPARATION) {
+            return "<>";
+        }
+        return "?";
+    }
 }
