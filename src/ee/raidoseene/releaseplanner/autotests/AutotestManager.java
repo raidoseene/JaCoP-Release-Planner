@@ -51,67 +51,30 @@ public class AutotestManager {
 
     private void startSimulation(Project project) {
         StringBuilder sbTimes = new StringBuilder();
+        StringBuilder sbProject = new StringBuilder();
+        StringBuilder sbResult = new StringBuilder();
         SolverResult sr = null;
+
+        sr = runSolver();
+
+        sbProject.append(project.getName() + " simulation result:\n");
+
+        sbResult.append(sbProject);
+        sbResult.append(sr.getResult() + "\n\n");
+        sbResult.append("\n\n********************************************\n\n");
+
+        sbTimes.append(sbProject);
+        sbTimes.append("Solver Time: " + sr.getTime() + "ms");
+        sbTimes.append("\n********************************************\n\n");
 
         try {
-            StringBuilder sbProject = new StringBuilder();
-            StringBuilder sbResult = new StringBuilder();
-            StringBuilder sbTime = new StringBuilder();
-
-            sr = runSolver();
-
-            sbProject.append(project.getName() + " simulation result:\n");
-            sbTime.append("Solver Time: " + sr.getTime() + "ms");
-
-            sbResult.append(sbProject);
-            sbResult.append(sr.getResult() + "\n\n");
-            sbResult.append("\n\n********************************************\n\n");
-
-            sbTimes.append(sbProject);
-            sbTimes.append(sbTime);
-            sbTimes.append("\n********************************************\n\n");
-
-            testingResultsFile(project, sbTimes.toString());
-            projectResultFile(project, sbResult.toString());
+            String dir = ResourceManager.createDirectoryFromFile(new File(ProjectManager.getCurrentProject().getStorage())).getAbsolutePath();
+            DataManager.fileOutput("result", sbResult.toString(), dir);
+            
+            dir = ResourceManager.getDirectory().toString();
+            DataManager.fileOutput("results", sbTimes.toString(), dir);
         } catch (Exception ex) {
             Messenger.showError(ex, null);
-        }
-    }
-
-    @Deprecated
-    public void startTesting() {
-        Project project;
-        StringBuilder sbTimes = new StringBuilder();
-        int projNo = this.settings.getProjectNo();
-        SolverResult sr = null;
-
-        for (int i = 0; i < projNo; i++) {
-            try {
-                String projName = "Project " + DataGenerator.numberGenerator(i, projNo);
-                project = DataGenerator.generateProject(projName, this.settings, i);
-                StringBuilder sbProject = new StringBuilder();
-                StringBuilder sbResult = new StringBuilder();
-                StringBuilder sbTime = new StringBuilder();
-
-                saveProject(project);
-                sr = runSolver();
-
-                sbProject.append(projName + " simulation result:\n");
-                sbTime.append("Solver Time: " + sr.getTime() + "ms");
-
-                sbResult.append(sbProject);
-                sbResult.append(sr.getResult() + "\n\n");
-                sbResult.append("\n\n********************************************\n\n");
-
-                sbTimes.append(sbProject);
-                sbTimes.append(sbTime);
-                sbTimes.append("\n********************************************\n\n");
-
-                testingResultsFile(project, sbTimes.toString());
-                projectResultFile(project, sbResult.toString());
-            } catch (Exception ex) {
-                Messenger.showError(ex, null);
-            }
         }
     }
 
@@ -150,15 +113,5 @@ public class AutotestManager {
         }
 
         return sr;
-    }
-
-    private void testingResultsFile(Project project, String output) throws Exception {
-        String dir = ResourceManager.getDirectory().toString();
-        DataManager.fileOutput(project, output, dir);
-    }
-
-    private void projectResultFile(Project project, String output) throws Exception {
-        String dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage())).getAbsolutePath();
-        DataManager.fileOutput(project, output, dir);
     }
 }

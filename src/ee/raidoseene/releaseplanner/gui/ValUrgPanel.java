@@ -6,6 +6,8 @@
 package ee.raidoseene.releaseplanner.gui;
 
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.datamodel.Criterium;
+import ee.raidoseene.releaseplanner.datamodel.Criteria;
 import ee.raidoseene.releaseplanner.datamodel.Dependencies;
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
@@ -51,6 +53,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -58,11 +61,11 @@ import javax.swing.event.ChangeListener;
  *
  * @author Raido Seene
  */
-public final class UrgValPanel extends JPanel {
+public final class ValUrgPanel extends JPanel {
 
     public static final String TITLE_STRING = "Feature urgency & value";
 
-    public UrgValPanel() {
+    public ValUrgPanel() {
         this.setLayout(new GridLayout(1, 1));
         this.setBorder(new EmptyBorder(10, 10, 10, 10));
         JTabbedPane tabs = new JTabbedPane();
@@ -287,10 +290,8 @@ public final class UrgValPanel extends JPanel {
             private final class UVSFContent extends JPanel implements ContentPanelListener {
 
                 private final Feature feature;
-                private final JPanel cont1;
+                private final JPanel cont1, cont2;
                 private final JSpinner value;
-                private final UVTab.UrgencyPanel cont2;
-                private final UVTab.ChangePanel cont3;
 
                 private UVSFContent(Feature f) {
                     this.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -324,8 +325,10 @@ public final class UrgValPanel extends JPanel {
                     c.add(BorderLayout.LINE_START, this.value);
                     c.add(BorderLayout.CENTER, new JLabel("Value to stakeholder"));
 
-                    this.cont2 = new UVTab.UrgencyPanel(UVSContent.this.stakeholder, this.feature);
-                    this.cont3 = new UVTab.ChangePanel(UVSContent.this.stakeholder, this.feature);
+                    this.cont2 = new JPanel(new BorderLayout(10, 10));
+                    this.cont2.add(BorderLayout.PAGE_START, new UVTab.UrgencyPanel(UVSContent.this.stakeholder, this.feature));
+                    this.cont2.add(BorderLayout.CENTER, new UVTab.ChangePanel(UVSContent.this.stakeholder, this.feature));
+                    this.cont2.add(BorderLayout.PAGE_END, new UVTab.CriteriaPanel(UVSContent.this.stakeholder, this.feature));
                 }
 
                 @Override
@@ -336,10 +339,8 @@ public final class UrgValPanel extends JPanel {
                 public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
                     if (expanded && this.getComponentCount() == 1) {
                         this.add(BorderLayout.CENTER, this.cont2);
-                        this.add(BorderLayout.PAGE_END, this.cont3);
                     } else if (!expanded && this.getComponentCount() > 1) {
                         this.remove(this.cont2);
-                        this.remove(this.cont3);
                     }
                     UVTab.this.scrollable.contentUpdated();
                 }
@@ -414,10 +415,8 @@ public final class UrgValPanel extends JPanel {
             private final class UVFSContent extends JPanel implements ContentPanelListener {
 
                 private final Stakeholder stakeholder;
-                private final JPanel cont1;
+                private final JPanel cont1, cont2;
                 private final JSpinner value;
-                private final UVTab.UrgencyPanel cont2;
-                private final UVTab.ChangePanel cont3;
 
                 private UVFSContent(Stakeholder s) {
                     this.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -450,9 +449,11 @@ public final class UrgValPanel extends JPanel {
                     });
                     c.add(BorderLayout.LINE_START, this.value);
                     c.add(BorderLayout.CENTER, new JLabel("Value to stakeholder"));
-
-                    this.cont2 = new UVTab.UrgencyPanel(this.stakeholder, UVFContent.this.feature);
-                    this.cont3 = new UVTab.ChangePanel(this.stakeholder, UVFContent.this.feature);
+                    
+                    this.cont2 = new JPanel(new BorderLayout(10, 10));
+                    this.cont2.add(BorderLayout.PAGE_START, new UVTab.UrgencyPanel(this.stakeholder, UVFContent.this.feature));
+                    this.cont2.add(BorderLayout.CENTER, new UVTab.ChangePanel(this.stakeholder, UVFContent.this.feature));
+                    this.cont2.add(BorderLayout.PAGE_END, new UVTab.CriteriaPanel(this.stakeholder, UVFContent.this.feature));
                 }
 
                 @Override
@@ -463,10 +464,8 @@ public final class UrgValPanel extends JPanel {
                 public void contentPanelExpansionChanged(ContentPanel source, boolean expanded) {
                     if (expanded && this.getComponentCount() == 1) {
                         this.add(BorderLayout.CENTER, this.cont2);
-                        this.add(BorderLayout.PAGE_END, this.cont3);
                     } else if (!expanded && this.getComponentCount() > 1) {
                         this.remove(this.cont2);
-                        this.remove(this.cont3);
                     }
                     UVTab.this.scrollable.contentUpdated();
                 }
@@ -514,7 +513,6 @@ public final class UrgValPanel extends JPanel {
                 c2.add(BorderLayout.CENTER, new JLabel("Urgency"));
                 c2.add(BorderLayout.LINE_END, this.urgency = new JSpinner(new SpinnerNumberModel(vus.getUrgency(s, f), 0, 9, 1)));
                 this.urgency.addChangeListener(new ChangeListener() {
-
                     @Override
                     public void stateChanged(ChangeEvent ce) {
                         Stakeholder s = UrgencyPanel.this.stakeholder;
@@ -557,7 +555,6 @@ public final class UrgValPanel extends JPanel {
                 }
 
                 this.release.addActionListener(new ActionListener() {
-
                     @Override
                     public void actionPerformed(ActionEvent ae) {
                         try {
@@ -582,7 +579,6 @@ public final class UrgValPanel extends JPanel {
                             UrgencyPanel.this.graph.setUrgency(null);
                         }
                     }
-
                 });
 
                 Container grid = new Container();
@@ -592,7 +588,6 @@ public final class UrgValPanel extends JPanel {
                 ButtonGroup curve = new ButtonGroup();
 
                 ActionListener alistener = new ActionListener() {
-
                     @Override
                     public void actionPerformed(ActionEvent ae) {
                         try {
@@ -615,7 +610,6 @@ public final class UrgValPanel extends JPanel {
                             UrgencyPanel.this.graph.setUrgency(null);
                         }
                     }
-
                 };
 
                 this.exact = new JRadioButton("exact", (vus.getDeadlineCurve(s, f) & Urgency.DEADLINE_MASK) == Urgency.EXACT);
@@ -648,7 +642,6 @@ public final class UrgValPanel extends JPanel {
                 this.graph = new UVTab.UrgencyGraph(vus.getUrgencyObject(s, f));
                 content.add(this.graph);
             }
-
         }
 
         private final class UrgencyGraph extends JPanel {
@@ -743,7 +736,6 @@ public final class UrgValPanel extends JPanel {
                     ex.printStackTrace();
                 }
             }
-
         }
 
         private final class ChangePanel extends JPanel {
@@ -1026,7 +1018,6 @@ public final class UrgValPanel extends JPanel {
                     c2.add(BorderLayout.CENTER, new JLabel("Urgency"));
                     c2.add(BorderLayout.LINE_END, this.urgency = new JSpinner(new SpinnerNumberModel(urg.getUrgency(), 0, 9, 1)));
                     this.urgency.addChangeListener(new ChangeListener() {
-
                         @Override
                         public void stateChanged(ChangeEvent ce) {
                             try {
@@ -1067,7 +1058,6 @@ public final class UrgValPanel extends JPanel {
                     }
 
                     this.release.addActionListener(new ActionListener() {
-
                         @Override
                         public void actionPerformed(ActionEvent ae) {
                             try {
@@ -1091,7 +1081,6 @@ public final class UrgValPanel extends JPanel {
                                 CPUContent.this.graph.setUrgency(null);
                             }
                         }
-
                     });
 
                     Container grid = new Container();
@@ -1101,7 +1090,6 @@ public final class UrgValPanel extends JPanel {
                     ButtonGroup curve = new ButtonGroup();
 
                     ActionListener alistener = new ActionListener() {
-
                         @Override
                         public void actionPerformed(ActionEvent ae) {
                             try {
@@ -1121,7 +1109,6 @@ public final class UrgValPanel extends JPanel {
                                 CPUContent.this.graph.setUrgency(null);
                             }
                         }
-
                     };
 
                     this.exact = new JRadioButton("exact", (urg.getDeadlineCurve() & Urgency.DEADLINE_MASK) == Urgency.EXACT);
@@ -1188,6 +1175,66 @@ public final class UrgValPanel extends JPanel {
 
                 @Override
                 public void contentPanelSelectionChanged(ContentPanel source, boolean selected) {
+                }
+            }
+        }
+
+        private final class CriteriaPanel extends JPanel {
+            
+            private final JSpinner[] criteria;
+            private final Stakeholder stakeholder;
+            private final Feature feature;
+            
+            private CriteriaPanel(Stakeholder stk, Feature f) {
+                this.setLayout(new GridLayout(1, 2));
+                this.stakeholder = stk;
+                this.feature = f;
+                
+                Criteria cs = ProjectManager.getCurrentProject().getCriteria();
+                int count = cs.getCriteriumCount();
+
+                JPanel grid = new JPanel(new GridLayout(count, 1, 5, 5));
+                grid.setBorder(new TitledBorder("Custom criteria"));
+                this.add(grid);
+                
+                this.add(new JLabel());
+                
+                this.criteria = new JSpinner[count];
+                for (int i = 0; i < count; i++) {
+                    Criterium crt = cs.getCriterium(i);
+
+                    Container c = new Container();
+                    c.setLayout(new BorderLayout(5, 5));
+                    c.add(BorderLayout.CENTER, new JLabel(crt.getName()));
+                    int value = cs.getCriteriumValue(crt, this.stakeholder, this.feature);
+                    c.add(BorderLayout.LINE_END, this.criteria[i] = new JSpinner(new SpinnerNumberModel(value, 0, 9, 1)));
+                    this.criteria[i].addChangeListener(new ChangeListener() {
+                        @Override
+                        public void stateChanged(ChangeEvent ce) {
+                            Criteria criteria = ProjectManager.getCurrentProject().getCriteria();
+                            JSpinner spinner = (JSpinner) ce.getSource();
+                            Criterium crt = null;
+                                    
+                            for (int i = 0; i < CriteriaPanel.this.criteria.length; i++) {
+                                if (spinner == CriteriaPanel.this.criteria[i]) {
+                                    crt = criteria.getCriterium(i);
+                                }
+                            }
+                            
+                            try {
+                                int val = (Integer) spinner.getValue();
+                                criteria.setCriteriumValue(crt, CriteriaPanel.this.stakeholder, CriteriaPanel.this.feature, val);
+                            } catch (Exception ex) {
+                                Messenger.showError(ex, null);
+                                try {
+                                    criteria.getCriteriumValue(crt, CriteriaPanel.this.stakeholder, CriteriaPanel.this.feature);
+                                } catch (Exception ex2) {
+                                    Messenger.showError(ex2, null);
+                                }
+                            }
+                        }
+                    });
+                    grid.add(c);
                 }
             }
         }

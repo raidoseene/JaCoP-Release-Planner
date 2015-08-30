@@ -90,7 +90,7 @@ public class Solver {
         //String[] solverInput = new String[]{"-v", "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn"};
        //String[] solverInput = new String[]{"D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn"};
         //String[] solverInput = new String[]{"D:/University/UT/Magistritöö/UI/Test/Kuchcinski.fzn"};
-        String[] solverInput = new String[]{outputFile};
+        String[] solverInput = new String[]{"-t", "60", outputFile};
         //String[] solverInput = new String[]{"D:/University/UT/Magistritöö/UI/TestInitialTestAddons.fzn"};
         //String[] solverInput = new String[]{"-t", "15", "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn"};
         //String[] solverInput = new String[]{"-h"};

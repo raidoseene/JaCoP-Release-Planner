@@ -32,9 +32,13 @@ public class TabbedView extends JPanel {
 
         StakeholdersPanel stakp = new StakeholdersPanel();
         tb.add(StakeholdersPanel.TITLE_STRING, stakp);
+        
+        CriteriaPanel critp = new CriteriaPanel();
+        tb.add(CriteriaPanel.TITLE_STRING, critp);
 
-        UrgValPanel urgvp = new UrgValPanel();
-        tb.add(UrgValPanel.TITLE_STRING, urgvp);
+
+        ValUrgPanel urgvp = new ValUrgPanel();
+        tb.add(ValUrgPanel.TITLE_STRING, urgvp);
         
         SimulationPanel simp = new SimulationPanel();
         tb.add(SimulationPanel.TITLE_STRING, simp);

@@ -96,7 +96,7 @@ public class ValueAndUrgency extends ModifiableObject implements Serializable {
         if (valUrg != null) {
             return valUrg.urgency;
         }
-        System.out.println("Urgency is null!");
+        //System.out.println("Urgency is null!");
         return null;
     }
 

@@ -21,6 +21,7 @@ public class Project extends NamedObject implements Serializable {
     private final Resources resources;
     private final Releases releases;
     private final Stakeholders stakeholders;
+    private final Criteria criteria;
     private final SimulationArchive simulationArchive;
 
     public Project(String name) {
@@ -34,6 +35,7 @@ public class Project extends NamedObject implements Serializable {
         this.resources = new Resources(this);
         this.releases = new Releases(this);
         this.stakeholders = new Stakeholders(this);
+        this.criteria = new Criteria(this);
         this.simulationArchive = new SimulationArchive(this);
     }
     
@@ -69,6 +71,10 @@ public class Project extends NamedObject implements Serializable {
         return this.stakeholders;
     }
     
+    public Criteria getCriteria() {
+        return this.criteria;
+    }
+    
     public Dependencies getDependencies() {
         return this.dependencies;
     }
@@ -102,6 +108,10 @@ public class Project extends NamedObject implements Serializable {
         // TODO
     }
     
+    void criteriaRemoved(Criterium c) {
+        // TODO
+    }
+    
     @Override
     public boolean isModified() {
         if(super.isModified()) {
@@ -114,6 +124,7 @@ public class Project extends NamedObject implements Serializable {
             modified = modified || resources.isModified();
             modified = modified || releases.isModified();
             modified = modified || stakeholders.isModified();
+            modified = modified || criteria.isModified();
             modified = modified || simulationArchive.isModified();
             
             return modified;
@@ -130,6 +141,7 @@ public class Project extends NamedObject implements Serializable {
         resources.resetModification();
         releases.resetModification();
         stakeholders.resetModification();
+        criteria.resetModification();
         simulationArchive.resetModification();
     }
 }

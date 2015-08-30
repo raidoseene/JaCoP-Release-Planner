@@ -66,10 +66,12 @@ public final class Settings implements Serializable {
         return this.resourceShifting;
     }
     
+    @Deprecated
     public void setPostponedUrgency(boolean postponedUrgency) {
         this.postponedUrgency = postponedUrgency;
     }
     
+    @Deprecated
     public boolean getPostponedUrgency() {
         return this.postponedUrgency;
     }
