@@ -19,7 +19,10 @@ import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.datamodel.Stakeholder;
 import ee.raidoseene.releaseplanner.datamodel.Stakeholders;
 import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.List;
 
@@ -61,10 +64,19 @@ public final class DataManager {
     }
 
     public static void fileOutput(String name, String content, String dir) throws Exception {
+        /*
         File file = new File(dir, name + ".txt");
 
         try (PrintWriter pw = new PrintWriter(file)) {
             pw.append(content);
+        }
+        */
+        String file = dir + "\\" + name + ".txt";
+         
+        try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file, true)))) {
+            out.println(content);
+        } catch (IOException e) {
+            //exception handling left as an exercise for the reader
         }
     }
 
@@ -282,7 +294,7 @@ public final class DataManager {
         } else {
             feature = independentFeatures.getFeature(f - originalFeatCount);
         }
-        
+
         if (index == 0) {
             criteriumValue = valueAndUrgency.getValue(stakeholders.getStakeholder(s),
                     (f < originalFeatCount ? features.getFeature(f)
@@ -312,7 +324,7 @@ public final class DataManager {
                     sumOfCriteriaWeights += crit.getWeight();
                 }
             }
-            
+
             // Think, if urgecny is 0 (by the curve) then do we have only 1 criterium (Value) or still 2 criteria
 
             return (float) criteria.getCriterium(index).getWeight() / (float) sumOfCriteriaWeights;
@@ -382,14 +394,14 @@ public final class DataManager {
                                 //criteriaNormImportance[1] * // Normalized criteria (Value) weight
                                 getNormalizedCriteriaWeight(criteria, 1, s, f, urgencies, rel) * // Normalized criteria (Value) weight
                                 (float) urgencies[(s * featureCount) + f][rel]; // (Urgecy) value
-                        
-                        
+
+
                         System.out.println("Stakeholder: " + stakeholders.getStakeholder(s).getName());
                         System.out.println("Feature: " + features.getFeature(f).getName());
                         System.out.println("Value normalized weight: " + getNormalizedCriteriaWeight(criteria, 0, s, f, urgencies, rel));
                         System.out.println("Urgency normalized weight: " + getNormalizedCriteriaWeight(criteria, 1, s, f, urgencies, rel));
                         System.out.println("*** *** ***");
-                        
+
                         for (int c = 2; c < criteria.getCriteriumCount(); c++) {
                             temp += getNormalizedStkWeight(s, f, null, rel) * // Normalizes stk weight
                                     getNormalizedCriteriaWeight(criteria, c, s, f, urgencies, rel) * // Normalized criteria (c) weight

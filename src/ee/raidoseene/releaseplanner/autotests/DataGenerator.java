@@ -95,7 +95,7 @@ public class DataGenerator {
         Random random = new Random();
 
         if (featMax != null && featMax > featMin) {
-            float step = (float) (featMax - featMin) / (float) projNo;
+            float step = (float) (featMax - featMin) / (float) (projNo - 1);
             featNo = featMin + Math.round(step * (float) iterator);
         } else {
             featNo = featMin;

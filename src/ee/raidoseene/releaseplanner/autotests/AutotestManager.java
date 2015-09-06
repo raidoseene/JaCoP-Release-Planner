@@ -34,7 +34,7 @@ public class AutotestManager {
     public void generateProjects(boolean simulate) {
         Project project;
         int projNo = this.settings.getProjectNo();
-
+        
         for (int i = 0; i < projNo; i++) {
             try {
                 String projName = "Project " + DataGenerator.numberGenerator(i, projNo);
@@ -49,7 +49,7 @@ public class AutotestManager {
         }
     }
 
-    private void startSimulation(Project project) {
+    private String startSimulation(Project project) {
         StringBuilder sbTimes = new StringBuilder();
         StringBuilder sbProject = new StringBuilder();
         StringBuilder sbResult = new StringBuilder();
@@ -76,6 +76,7 @@ public class AutotestManager {
         } catch (Exception ex) {
             Messenger.showError(ex, null);
         }
+        return sbTimes.toString();
     }
 
     private void saveProject(Project project) {

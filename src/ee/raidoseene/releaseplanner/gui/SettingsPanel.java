@@ -18,6 +18,8 @@ import java.awt.Container;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.io.File;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -92,7 +94,7 @@ public final class SettingsPanel extends JPanel {
         solv.add(BorderLayout.LINE_START, c);
 
         e = new Container();
-        e.setLayout(new GridLayout(5, 1, 10, 10));
+        e.setLayout(new GridLayout(6, 1, 10, 10));
         c.add(BorderLayout.CENTER, e);
 
         this.paths = new JLabel[2];
@@ -102,9 +104,26 @@ public final class SettingsPanel extends JPanel {
         this.setPath(SettingsManager.getCurrentSettings().getJaCoPPath(), 1);
         this.paths[0].setToolTipText("Path to MiniZinc");
         this.paths[1].setToolTipText("Path to JaCoP");
+        
+        final JTextField solverTimeLimit = new JTextField();
+        solverTimeLimit.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {}
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if(isInt(solverTimeLimit.getText())) {
+                    settings.setSolverTimeLimit(Integer.parseInt(solverTimeLimit.getText()));
+                } else {
+                    solverTimeLimit.setText("");
+                    settings.setSolverTimeLimit(null);
+                }
+            }
+        });
+        e.add(solverTimeLimit);
 
         e = new Container();
-        e.setLayout(new GridLayout(5, 1, 10, 10));
+        e.setLayout(new GridLayout(6, 1, 10, 10));
         c.add(BorderLayout.LINE_END, e);
 
         btn = new JButton("Modify");
@@ -133,9 +152,42 @@ public final class SettingsPanel extends JPanel {
         });
         e.add(btn);
 
+        final JCheckBox limitSolverTime = new JCheckBox("Limit solver time (seconds)");
         final JCheckBox codeOutput = new JCheckBox("Create and use project specific solver code");
         final JCheckBox resourceShifting = new JCheckBox("Allow using unused resources in next releases");
         final JCheckBox normalizedImportances = new JCheckBox("Allow using normalized importances");
+        
+        if(!settings.getLimitSolverTime()) {
+            solverTimeLimit.setEditable(false);
+        } else {
+            if(settings.getSolverTimeLimit() != null) {
+                solverTimeLimit.setText(settings.getSolverTimeLimit().toString());
+            }
+        }
+        
+        limitSolverTime.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    if (limitSolverTime.isSelected()) {
+                        settings.setLimitSolverTime(true);
+                        solverTimeLimit.setEditable(true);
+                        if(settings.getSolverTimeLimit() != null) {
+                            solverTimeLimit.setText(settings.getSolverTimeLimit().toString());
+                        }
+                    } else {
+                        settings.setLimitSolverTime(false);
+                        solverTimeLimit.setEditable(false);
+                        solverTimeLimit.setText("");
+                        settings.setSolverTimeLimit(null);
+                    }
+
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        e.add(limitSolverTime);
         
         if (settings.getCodeOutput()) {
             codeOutput.setSelected(true);
@@ -276,5 +328,14 @@ public final class SettingsPanel extends JPanel {
         }
 
         project.setStorage(storage);
+    }
+    
+    private boolean isInt(String s) {
+        try {
+            Integer.parseInt(s);
+        } catch (Exception ex) {
+            return false;
+        }
+        return true;
     }
 }

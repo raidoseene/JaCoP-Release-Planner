@@ -61,10 +61,6 @@ public class DependencyManager {
         initializeData();
     }
 
-    public Project getModDep() {
-        return this.modDep;
-    }
-    
     private void initializeData() {
         this.deps = this.project.getDependencies();
         this.modDeps = this.modDep.getDependencies();
@@ -93,8 +89,82 @@ public class DependencyManager {
     }
     //}
     
-    public Project getModeDepProject() {
+    public Project getModDep() {
         return this.modDep;
+    }
+    
+    public ReleaseDependency[] getReleaseDS(int type) {
+        if(type == Dependency.FIXED) {
+            return this.FixedDS;
+        } else if(type == Dependency.EXCLUDED) {
+            return this.ExcludedDS;
+        } else if(type == Dependency.EARLIER) {
+            return this.EarlierDS;
+        } else if(type == Dependency.LATER) {
+            return this.LaterDS;
+        } else {
+            return null;
+        }
+    }
+    
+    public OrderDependency[] getOrderDS(int type) {
+        if(type == Dependency.SOFTPRECEDENCE) {
+            /*
+            int len = this.SoftPrecedenceDS.length;
+            int mLen = this.MSoftPrecedenceDS.length;
+            OrderDependency[] temp = new OrderDependency[len + mLen];
+            System.arraycopy(this.SoftPrecedenceDS, 0, temp, 0, len);
+            System.arraycopy(this.MSoftPrecedenceDS, 0, temp, len, mLen);
+            return temp;
+            */
+            return this.SoftPrecedenceDS;
+        } else if(type == Dependency.HARDPRECEDENCE) {
+            /*
+            int len = this.HardPrecedenceDS.length;
+            int mLen = this.MHardPrecedenceDS.length;
+            OrderDependency[] temp = new OrderDependency[len + mLen];
+            System.arraycopy(this.HardPrecedenceDS, 0, temp, 0, len);
+            System.arraycopy(this.MHardPrecedenceDS, 0, temp, len, mLen);
+            return temp;
+            */
+            return this.HardPrecedenceDS;
+        } else if(type == Dependency.COUPLING) {
+            return this.CouplingDS;
+        } else if(type == Dependency.SEPARATION) {
+            return this.SeparationDS;
+        } else {
+            return null;
+        }
+    }
+    
+    public ExistanceDependency[] getExistanceDS(int type) {
+        if(type == Dependency.AND) {
+            return this.AndDS;
+        } else if(type == Dependency.XOR) {
+            /*
+            int len = this.XorDS.length;
+            int mLen = this.MXorDS.length;
+            ExistanceDependency[] temp = new ExistanceDependency[len + mLen];
+            System.arraycopy(this.XorDS, 0, temp, 0, len);
+            System.arraycopy(this.MXorDS, 0, temp, len, mLen);
+            return temp;
+            */
+            return this.XorDS;
+        } else {
+            return null;
+        }
+    }
+    
+    public GroupDependency[] getGroupDS(int type) {
+        if(type == Dependency.ATLEAST) {
+            return this.AtLeastDS;
+        } else if(type == Dependency.EXACTLY) {
+            return this.ExactlyDS;
+        } else if(type == Dependency.ATMOST) {
+            return this.AtLeastDS;
+        } else {
+            return null;
+        }
     }
 
     public String getDependenciesData(boolean codeOutput) {

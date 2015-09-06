@@ -6,6 +6,8 @@ package ee.raidoseene.releaseplanner.solverutils;
 
 import ee.raidoseene.releaseplanner.backend.InputListener;
 import ee.raidoseene.releaseplanner.backend.InputReader;
+import ee.raidoseene.releaseplanner.backend.Settings;
+import ee.raidoseene.releaseplanner.backend.SettingsManager;
 import ee.raidoseene.releaseplanner.datamodel.Project;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import ee.raidoseene.releaseplanner.dataoutput.DependencyManager;
@@ -48,6 +50,8 @@ public class Solver {
     }
 
     public static SolverResult runSolver(Project project, DependencyManager dm, File[] files, boolean codeOutput, boolean saveOutput) throws IOException {
+        Settings settings = SettingsManager.getCurrentSettings();
+        
         String minizincLocation = "C:/Program Files (x86)/MiniZinc 1.6/bin/mzn2fzn.bat";
         String outputFile = "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn";
         String solverCode;
@@ -88,12 +92,20 @@ public class Solver {
 
         minizincInput.add(dataFile);
         //String[] solverInput = new String[]{"-v", "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn"};
-       //String[] solverInput = new String[]{"D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn"};
+        //String[] solverInput = new String[]{"D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn"};
         //String[] solverInput = new String[]{"D:/University/UT/Magistritöö/UI/Test/Kuchcinski.fzn"};
-        String[] solverInput = new String[]{"-t", "60", outputFile};
+        //String[] solverInput = new String[]{"-t", "60", outputFile};
         //String[] solverInput = new String[]{"D:/University/UT/Magistritöö/UI/TestInitialTestAddons.fzn"};
         //String[] solverInput = new String[]{"-t", "15", "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn"};
         //String[] solverInput = new String[]{"-h"};
+        
+        String[] solverInput;
+        
+        if(settings.getLimitSolverTime() && settings.getSolverTimeLimit() > 0) {
+            solverInput = new String[]{"-t", settings.getSolverTimeLimit().toString(), outputFile};
+        } else {
+            solverInput = new String[]{outputFile};
+        }
         
         System.out.println("\n*** *** *** MiniZinc Started *** *** ***\n");
         Process process = Runtime.getRuntime().exec(minizincInput.toArray(new String[minizincInput.size()]));

@@ -44,4 +44,8 @@ public class Resources extends ProjectElement implements Serializable {
     public int getResourceCount() {
         return this.resourceContainer.size();
     }
+    
+    public int getResourceIndex(Resource resource) {
+        return this.resourceContainer.indexOf(resource);
+    }
 }

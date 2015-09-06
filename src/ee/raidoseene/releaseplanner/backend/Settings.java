@@ -15,7 +15,8 @@ public final class Settings implements Serializable {
     
     private static final long serialVersionUID = 1;
     private String pathMiniZinc, pathJaCoP;
-    private boolean codeOutput, resourceShifting, postponedUrgency, normalizedImportances;
+    private Integer solverTimeLimit;
+    private boolean codeOutput, resourceShifting, postponedUrgency, normalizedImportances, limitSolverTime;
     
     Settings() {
         this.pathMiniZinc = null;
@@ -24,6 +25,8 @@ public final class Settings implements Serializable {
         this.resourceShifting = false;
         this.postponedUrgency = true;
         this.normalizedImportances = true;
+        this.limitSolverTime = false;
+        this.solverTimeLimit = null;
     }
     
     public void setMiniZincPath(String path) throws Exception {
@@ -82,5 +85,21 @@ public final class Settings implements Serializable {
     
     public boolean getNormalizedImportances() {
         return this.normalizedImportances;
+    }
+    
+    public void setLimitSolverTime(boolean limit) {
+        this.limitSolverTime = limit;
+    }
+    
+    public boolean getLimitSolverTime() {
+        return this.limitSolverTime;
+    }
+    
+    public void setSolverTimeLimit(Integer time) {
+        this.solverTimeLimit = time;
+    }
+    
+    public Integer getSolverTimeLimit() {
+        return this.solverTimeLimit;
     }
 }

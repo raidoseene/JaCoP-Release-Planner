@@ -45,6 +45,10 @@ public class Stakeholders extends ProjectElement implements Serializable {
         return this.stakeholderContainer.size();
     }
     
+    public int getStakeholderIndex(Stakeholder stakeholder) {
+        return this.stakeholderContainer.indexOf(stakeholder);
+    }
+    
     @Override
     public boolean isModified() {
         if(super.isModified()) {

@@ -6,6 +6,8 @@
 package ee.raidoseene.releaseplanner.gui;
 
 import ee.raidoseene.releaseplanner.autotests.AutotestSettings;
+import ee.raidoseene.releaseplanner.backend.Settings;
+import ee.raidoseene.releaseplanner.backend.SettingsManager;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -14,7 +16,10 @@ import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -30,12 +35,15 @@ import javax.swing.event.CaretListener;
 public final class AutotestDialog extends JDialog {
 
     private final AutotestSettings settings;
+    private final Settings projectSettings;
     private final JTextField numTProjs;
     private final JTextField[] numFs, numRC, numRss, numRls, numSs, resTness, fixNo, exNo, earNo, latNo, SPNo, HPNo, coupNo, sepNo, andNo, xorNo;
     private final JButton test;
     private boolean state = false;
 
     private AutotestDialog(AutotestSettings settings) {
+        projectSettings = SettingsManager.getCurrentSettings();
+        
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         Dimension size = new Dimension(500, 600);
 
@@ -66,9 +74,106 @@ public final class AutotestDialog extends JDialog {
         cont.add(BorderLayout.PAGE_START, c);
 
         Container grid = new Container();
-        grid.setLayout(new GridLayout(1, 2, 10, 10));
+        grid.setLayout(new GridLayout(4, 2, 10, 10));
         c.add(grid);
 
+        final JTextField solverTimeLimit = new JTextField();
+        solverTimeLimit.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {}
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                if(isInt(solverTimeLimit.getText())) {
+                    projectSettings.setSolverTimeLimit(Integer.parseInt(solverTimeLimit.getText()));
+                } else {
+                    solverTimeLimit.setText("");
+                    projectSettings.setSolverTimeLimit(null);
+                }
+            }
+        });
+        
+        final JCheckBox resourceShifting = new JCheckBox("Carry over unused resources");
+        final JCheckBox normalizedImportances = new JCheckBox("Use normalized importances");
+        
+        grid.add(solverTimeLimit);
+        final JCheckBox limitSolverTime = new JCheckBox("Limit solver time (seconds)");
+        if(!projectSettings.getLimitSolverTime()) {
+            solverTimeLimit.setEditable(false);
+        } else {
+            if(projectSettings.getSolverTimeLimit() != null) {
+                solverTimeLimit.setText(projectSettings.getSolverTimeLimit().toString());
+            }
+        }
+        
+        limitSolverTime.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    if (limitSolverTime.isSelected()) {
+                        projectSettings.setLimitSolverTime(true);
+                        solverTimeLimit.setEditable(true);
+                        if(projectSettings.getSolverTimeLimit() != null) {
+                            solverTimeLimit.setText(projectSettings.getSolverTimeLimit().toString());
+                        }
+                    } else {
+                        projectSettings.setLimitSolverTime(false);
+                        solverTimeLimit.setEditable(false);
+                        solverTimeLimit.setText("");
+                        projectSettings.setSolverTimeLimit(null);
+                    }
+
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        grid.add(limitSolverTime);
+        grid.add(new JLabel(""));
+        if (projectSettings.getResourceShifting()) {
+            resourceShifting.setSelected(true);
+        }
+        if (!projectSettings.getCodeOutput()) {
+            resourceShifting.setEnabled(false);
+        }
+        resourceShifting.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    if (resourceShifting.isSelected()) {
+                        projectSettings.setResourceShifting(true);
+                    } else {
+                        projectSettings.setResourceShifting(false);
+                    }
+
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        grid.add(resourceShifting);
+        grid.add(new JLabel(""));
+        if (projectSettings.getNormalizedImportances()) {
+            normalizedImportances.setSelected(true);
+        }
+        
+        normalizedImportances.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    if (normalizedImportances.isSelected()) {
+                        projectSettings.setNormalizedImportances(true);
+                    } else {
+                        projectSettings.setNormalizedImportances(false);
+                    }
+
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        grid.add(normalizedImportances);
+        
         grid.add(new JLabel("Number of test projects"));
         this.numTProjs = new JTextField();
         this.numTProjs.addCaretListener(listener);
@@ -216,7 +321,7 @@ public final class AutotestDialog extends JDialog {
         this.xorNo[1] = new JTextField();
         grid.add(this.xorNo[0]);
         grid.add(this.xorNo[1]);
-
+        
         c = new Container();
         c.setLayout(new FlowLayout(FlowLayout.CENTER));
         cont.add(BorderLayout.PAGE_END, c);

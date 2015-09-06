@@ -1193,14 +1193,14 @@ public final class ValUrgPanel extends JPanel {
                 Criteria cs = ProjectManager.getCurrentProject().getCriteria();
                 int count = cs.getCriteriumCount();
 
-                JPanel grid = new JPanel(new GridLayout(count, 1, 5, 5));
+                JPanel grid = new JPanel(new GridLayout(count - 2, 1, 5, 5));
                 grid.setBorder(new TitledBorder("Custom criteria"));
                 this.add(grid);
                 
                 this.add(new JLabel());
                 
                 this.criteria = new JSpinner[count];
-                for (int i = 0; i < count; i++) {
+                for (int i = 2; i < count; i++) {
                     Criterium crt = cs.getCriterium(i);
 
                     Container c = new Container();

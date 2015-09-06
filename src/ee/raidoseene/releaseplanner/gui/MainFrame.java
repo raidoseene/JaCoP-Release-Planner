@@ -8,6 +8,7 @@ import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.backend.Settings;
 import ee.raidoseene.releaseplanner.backend.SettingsManager;
 import ee.raidoseene.releaseplanner.backend.UnsavedException;
+import ee.raidoseene.releaseplanner.dataimport.ExportManager;
 import ee.raidoseene.releaseplanner.dataimport.ImportManager;
 import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import ee.raidoseene.releaseplanner.solverutils.Solver;
@@ -204,6 +205,24 @@ public final class MainFrame extends JFrame {
             }
         });
         menu.add(this.saveas);
+        
+        //Export menu
+        JMenu menu3 = new JMenu("Export");
+        menu3.setMnemonic(KeyEvent.VK_X);
+        menu.add(menu3);
+
+        item = new JMenuItem("Export Project");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    MainFrame.this.exportProject();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        menu3.add(item);
 
         menu.addSeparator();
 
@@ -399,6 +418,34 @@ public final class MainFrame extends JFrame {
         } else {
             this.setContentPane(new JPanel());
         }
+        this.updateEnablity();
+    }
+    
+    private void exportProject() {
+        /*
+        try {
+            FileDialog fd = new FileDialog(this, "Import Project", FileDialog.LOAD);
+            fd.setVisible(true);
+
+            String dir = fd.getDirectory();
+            String fil = fd.getFile();
+
+            if (dir != null && fil != null) {
+                File file = new File(dir, fil);
+                ProjectManager.createNewProject("");
+                ImportManager.importProject(ProjectManager.getCurrentProject(), file);
+            }
+        } catch (Exception ex) {
+            Messenger.showError(ex, null);
+        }
+        */
+
+        try {
+            ExportManager.dependencies(ProjectManager.getCurrentProject(), null);
+        } catch (Exception ex) {
+            Messenger.showError(ex, null);
+        }
+        
         this.updateEnablity();
     }
     

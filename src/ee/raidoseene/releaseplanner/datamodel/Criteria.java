@@ -56,6 +56,15 @@ public class Criteria extends ProjectElement implements Serializable {
         return this.list.get(Index);
     }
     
+    public Criterium getCriterium(String name) {
+        for(int c = 0; c < this.list.size(); c++) {
+            if(this.list.get(c).getName().toLowerCase().equals(name)) {
+                return this.list.get(c);
+            }
+        }
+        return null;
+    }
+    
     public int getCriteriumCount() {
         return this.list.size();
     }
