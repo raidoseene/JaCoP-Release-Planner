@@ -102,9 +102,9 @@ public class Solver {
         String[] solverInput;
         
         if(settings.getLimitSolverTime() && settings.getSolverTimeLimit() > 0) {
-            solverInput = new String[]{"-t", settings.getSolverTimeLimit().toString(), outputFile};
+            solverInput = new String[]{"-t", settings.getSolverTimeLimit().toString(), "-a", outputFile};
         } else {
-            solverInput = new String[]{outputFile};
+            solverInput = new String[]{"-a", outputFile};
         }
         
         System.out.println("\n*** *** *** MiniZinc Started *** *** ***\n");

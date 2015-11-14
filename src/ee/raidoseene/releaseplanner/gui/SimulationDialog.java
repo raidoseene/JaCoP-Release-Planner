@@ -5,13 +5,17 @@
 package ee.raidoseene.releaseplanner.gui;
 
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.backend.ResourceManager;
 import ee.raidoseene.releaseplanner.backend.Settings;
 import ee.raidoseene.releaseplanner.backend.SettingsManager;
+import ee.raidoseene.releaseplanner.datamodel.Project;
+import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import ee.raidoseene.releaseplanner.solverutils.Solver;
 import ee.raidoseene.releaseplanner.solverutils.SolverResult;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.io.File;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -92,6 +96,14 @@ public class SimulationDialog extends JDialog {
 
         @Override
         public void run() {
+            Project project = ProjectManager.getCurrentProject();
+            
+            StringBuilder sbTimes = new StringBuilder();
+            StringBuilder sbProject = new StringBuilder();
+            StringBuilder sbResult = new StringBuilder();
+
+            SolverResult sr = null;
+
             //this.saveCurrentProject(false);
             try {
                 if (ProjectManager.getCurrentProject().getStorage() == null) {
@@ -101,10 +113,30 @@ public class SimulationDialog extends JDialog {
 
                 //Solver.runSolver();
                 Settings settings = SettingsManager.getCurrentSettings();
-                SolverResult r = Solver.executeSimulation(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency(), settings.getNormalizedImportances(), false);
-                this.dialog.finalizeSimulation(r, null);
+                sr = Solver.executeSimulation(ProjectManager.getCurrentProject(), settings.getCodeOutput(), settings.getPostponedUrgency(), settings.getNormalizedImportances(), false);
+                this.dialog.finalizeSimulation(sr, null);
             } catch (Throwable t) {
                 this.dialog.finalizeSimulation(null, t);
+            }
+
+            sbProject.append(project.getName() + " simulation result:\n");
+
+            sbResult.append(sbProject);
+            sbResult.append(sr.getResult() + "\n\n");
+            sbResult.append("\n\n********************************************\n\n");
+
+            sbTimes.append(sbProject);
+            sbTimes.append("Solver Time: " + sr.getTime() + "ms");
+            sbTimes.append("\n********************************************\n\n");
+
+            try {
+                String dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage())).getAbsolutePath();
+                DataManager.fileOutput("result", sbResult.toString(), dir);
+
+                dir = ResourceManager.getDirectory().toString();
+                DataManager.fileOutput("results", sbTimes.toString(), dir);
+            } catch (Exception ex) {
+                Messenger.showError(ex, null);
             }
         }
     }

@@ -34,10 +34,13 @@ public class AutotestManager {
     public void generateProjects(boolean simulate) {
         Project project;
         int projNo = this.settings.getProjectNo();
+        int repNo = this.settings.getRepetitionNo();
         
         for (int i = 0; i < projNo; i++) {
+            for(int rep = 0; rep < repNo; rep++) {
             try {
-                String projName = "Project " + DataGenerator.numberGenerator(i, projNo);
+                //String projName = "Project " + DataGenerator.numberGenerator(i, projNo);
+                String projName = "Project " + DataGenerator.numberGenerator((i * 10) + rep, projNo * 10);
                 project = DataGenerator.generateProject(projName, this.settings, i);
                 saveProject(project);
                 if (simulate) {
@@ -45,6 +48,7 @@ public class AutotestManager {
                 }
             } catch (Exception ex) {
                 Messenger.showError(ex, null);
+            }
             }
         }
     }

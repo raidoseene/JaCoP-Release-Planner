@@ -36,7 +36,7 @@ public final class AutotestDialog extends JDialog {
 
     private final AutotestSettings settings;
     private final Settings projectSettings;
-    private final JTextField numTProjs;
+    private final JTextField numTProjs, numRep, numCriteria;
     private final JTextField[] numFs, numRC, numRss, numRls, numSs, resTness, fixNo, exNo, earNo, latNo, SPNo, HPNo, coupNo, sepNo, andNo, xorNo;
     private final JButton test;
     private boolean state = false;
@@ -45,7 +45,7 @@ public final class AutotestDialog extends JDialog {
         projectSettings = SettingsManager.getCurrentSettings();
         
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-        Dimension size = new Dimension(500, 600);
+        Dimension size = new Dimension(500, 650);
 
         this.setLocation((screen.width - size.width) >> 1, (screen.height - size.height) >> 1);
         this.setSize(size);
@@ -74,7 +74,7 @@ public final class AutotestDialog extends JDialog {
         cont.add(BorderLayout.PAGE_START, c);
 
         Container grid = new Container();
-        grid.setLayout(new GridLayout(4, 2, 10, 10));
+        grid.setLayout(new GridLayout(6, 2, 10, 2));
         c.add(grid);
 
         final JTextField solverTimeLimit = new JTextField();
@@ -174,10 +174,21 @@ public final class AutotestDialog extends JDialog {
         });
         grid.add(normalizedImportances);
         
-        grid.add(new JLabel("Number of test projects"));
+        grid.add(new JLabel("Number of data sets"));
         this.numTProjs = new JTextField();
         this.numTProjs.addCaretListener(listener);
         grid.add(this.numTProjs);
+        
+        grid.add(new JLabel("Number of repetitions per set"));
+        this.numRep = new JTextField();
+        this.numRep.setText("1");
+        this.numRep.addCaretListener(listener);
+        grid.add(this.numRep);
+        
+        grid.add(new JLabel("Number of additional criteria"));
+        this.numCriteria = new JTextField();
+        this.numCriteria.addCaretListener(listener);
+        grid.add(this.numCriteria);
 
         c = new Container();
         Container wrap = new Container();
@@ -399,6 +410,21 @@ public final class AutotestDialog extends JDialog {
     private void fillSettings() {
         if (isInt(this.numTProjs.getText())) {
             this.settings.setProjectNo(Integer.parseInt(this.numTProjs.getText()));
+        }
+        
+        if (isInt(this.numRep.getText())) {
+            int rep = Integer.parseInt(this.numRep.getText());
+            if (rep > 0) {
+                this.settings.setRepetitionNo(rep);
+            } else {
+                this.settings.setRepetitionNo(1);
+            }
+        } else {
+            this.settings.setRepetitionNo(1);
+        }
+        
+        if (isInt(this.numCriteria.getText())) {
+            this.settings.setCriteriaNo(Integer.parseInt(this.numCriteria.getText()));
         }
 
         if (isInt(this.numFs[0].getText())) {

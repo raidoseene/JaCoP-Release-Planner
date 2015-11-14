@@ -339,10 +339,10 @@ public final class DataManager {
 
         int stkNo = stakeholders.getStakeholderCount();
         Criteria criteria = ProjectManager.getCurrentProject().getCriteria();
-        int criteriaNo = criteria.getCriteriumCount();
+        //int criteriaNo = criteria.getCriteriumCount();
 
         //float[] stkNormImportance = new float[stkNo];
-        float[] criteriaNormImportance = new float[criteriaNo];
+        //float[] criteriaNormImportance = new float[criteriaNo];
 
         int criteriaImpSum = 0;
 
@@ -359,8 +359,8 @@ public final class DataManager {
          }
          */
         //for(int c = 0; c < stkNo; c++) {
-        criteriaNormImportance[0] = 0.5f;
-        criteriaNormImportance[1] = 0.5f;
+        //criteriaNormImportance[0] = 0.5f;
+        //criteriaNormImportance[1] = 0.5f;
         //}
 
         printWriter.print("WAS = [");
@@ -371,27 +371,28 @@ public final class DataManager {
                 float temp = 0.0f;
                 for (int s = 0; s < project.getStakeholders().getStakeholderCount(); s++) {
                     if (!normalizedImportances) {
-                        temp += project.getStakeholders().getStakeholder(s).getImportance()
-                                * (f < originalFeatCount
-                                ? project.getValueAndUrgency().getValue(
-                                project.getStakeholders().getStakeholder(s),
-                                project.getFeatures().getFeature(f))
-                                : modDep.getValueAndUrgency().getValue(
-                                project.getStakeholders().getStakeholder(s),
-                                independentFeatures.getFeature(f - originalFeatCount)))
-                                * urgencies[(s * featureCount) + f][rel];
+                        temp += project.getStakeholders().getStakeholder(s).getImportance() *
+                                criteria.getCriterium(0).getWeight() *
+                                valueAndUrgency.getValue(
+                                stakeholders.getStakeholder(s),
+                                (f < originalFeatCount ? features.getFeature(f)
+                                : independentFeatures.getFeature(f - originalFeatCount)));
+                        temp += project.getStakeholders().getStakeholder(s).getImportance() *
+                                criteria.getCriterium(1).getWeight() *
+                                urgencies[(s * featureCount) + f][rel];
+                        for (int c = 2; c < criteria.getCriteriumCount(); c++) {
+                            temp += project.getStakeholders().getStakeholder(s).getImportance() *
+                                    criteria.getCriterium(c).getWeight() *
+                                    criteria.getCriteriumValue(criteria.getCriterium(c), stakeholders.getStakeholder(s), features.getFeature(f)); // (c) value
+                        }
                     } else {
-                        temp += //stkNormImportance[s] *
-                                getNormalizedStkWeight(s, f, null, rel) * // Normalizes stk weight
-                                //criteriaNormImportance[0] * // Normalized criteria (Value) weight
+                        temp += getNormalizedStkWeight(s, f, null, rel) * // Normalizes stk weight
                                 getNormalizedCriteriaWeight(criteria, 0, s, f, urgencies, rel) * // Normalized criteria (Value) weight
                                 (float) valueAndUrgency.getValue( // (Value) value
                                 stakeholders.getStakeholder(s),
                                 (f < originalFeatCount ? features.getFeature(f)
                                 : independentFeatures.getFeature(f - originalFeatCount)));
-                        temp += //stkNormImportance[s] *
-                                getNormalizedStkWeight(s, f, urgencies, rel) * // Normalizes stk weight
-                                //criteriaNormImportance[1] * // Normalized criteria (Value) weight
+                        temp += getNormalizedStkWeight(s, f, urgencies, rel) * // Normalizes stk weight
                                 getNormalizedCriteriaWeight(criteria, 1, s, f, urgencies, rel) * // Normalized criteria (Value) weight
                                 (float) urgencies[(s * featureCount) + f][rel]; // (Urgecy) value
 
@@ -405,20 +406,12 @@ public final class DataManager {
                         for (int c = 2; c < criteria.getCriteriumCount(); c++) {
                             temp += getNormalizedStkWeight(s, f, null, rel) * // Normalizes stk weight
                                     getNormalizedCriteriaWeight(criteria, c, s, f, urgencies, rel) * // Normalized criteria (c) weight
-                                    //getNormalizedCriteriaWeight(criteria, c, s, f, urgencies, rel) * // Normalized criteria (c) weight
                                     criteria.getCriteriumValue(criteria.getCriterium(c), stakeholders.getStakeholder(s), features.getFeature(f)); // (c) value
                         }
                     }
                 }
-                /*
-                 if (rel == project.getReleases().getReleaseCount()) {
-                 if(postponedUrgency) {
-                 printWriter.print(Math.round(project.getReleases().getRelease(rel - 1).getImportance() * temp) + ", \n");
-                 }
-                 } else {
-                 */
                 printWriter.print(Math.round(project.getReleases().getRelease(rel).getImportance() * temp) + ", ");
-                //}
+                //printWriter.print(Math.round(project.getReleases().getRelease(rel).getImportance() * (temp * 1000)) + ", ");
             }
         }
 

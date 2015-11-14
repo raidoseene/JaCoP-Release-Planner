@@ -6,6 +6,8 @@ package ee.raidoseene.releaseplanner.autotests;
 
 import ee.raidoseene.releaseplanner.autotests.AutotestSettings.ParamValues;
 import ee.raidoseene.releaseplanner.backend.ProjectManager;
+import ee.raidoseene.releaseplanner.datamodel.Criteria;
+import ee.raidoseene.releaseplanner.datamodel.Criterium;
 import ee.raidoseene.releaseplanner.datamodel.Dependencies;
 import ee.raidoseene.releaseplanner.datamodel.Dependency;
 import ee.raidoseene.releaseplanner.datamodel.Feature;
@@ -45,6 +47,7 @@ public class DataGenerator {
         int featNo = generateFeatures(project, settings, iterator, resNo);
         int relNo = generateReleases(project, settings, iterator, resNo);
         int stkNo = generateStakeholders(project, settings, iterator);
+        generateCriterias(project, settings);
         generateValueAndUrgency(project, stkNo, featNo, relNo);
         generateDependencies(project, settings, iterator, featNo, relNo);
 
@@ -213,6 +216,21 @@ public class DataGenerator {
         return stkNo;
     }
 
+    private static void generateCriterias(Project project, AutotestSettings settings) {
+        Criteria criteria = project.getCriteria();
+        int criteriaNo = settings.getCriteriaNo();
+        Random random = new Random();
+        
+        criteria.getCriterium(0).setWeight(random.nextInt(9) + 1);
+        criteria.getCriterium(1).setWeight(random.nextInt(9) + 1);
+        
+        for(int i = 0; i < criteriaNo; i++) {
+            Criterium criterium = criteria.addCriterium();
+            criterium.setWeight(random.nextInt(9) + 1);
+            criterium.setName("Criteria" + numberGenerator(i, criteriaNo));
+        }
+    }
+    
     private static void generateValueAndUrgency(Project project, int stkNo, int featNo, int relNo) {
         Random random = new Random();
 
@@ -237,6 +255,7 @@ public class DataGenerator {
         Stakeholders stakeholders = project.getStakeholders();
         Features features = project.getFeatures();
         Releases releases = project.getReleases();
+        Criteria criteria = project.getCriteria();
 
         Random random = new Random();
         Stakeholder stk;
@@ -255,6 +274,11 @@ public class DataGenerator {
         urg.setUrgency(randUrg);
         urg.setRelease(releases.getRelease(randRel));
         urg.setDeadlineCurve(urgCurve[randUrgCurve]);
+        
+        for (int c = 2; c < criteria.getCriteriumCount(); c++) {
+            randVal = random.nextInt(9) + 1;
+            criteria.setCriteriumValue(criteria.getCriterium(c), stk, feat, randVal);
+        }
     }
 
     private static void generateDependencies(Project project, AutotestSettings settings, int iterator, int featNo, int relNo) {
