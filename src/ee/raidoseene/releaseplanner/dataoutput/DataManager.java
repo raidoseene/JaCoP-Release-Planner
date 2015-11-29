@@ -49,16 +49,21 @@ public final class DataManager {
     public static File[] initiateDataOutput(Project project, DependencyManager dm, boolean codeOutput, boolean postponedUrgency, boolean normalizedImportances) throws Exception {
         //DependencyManager dm = new DependencyManager(project);
 
-        File[] files = new File[2];
+        File[] files = new File[3];
+        
+        File dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage()));
+        File solverCode = new File(dir, "CompiledSolverInput.dzn");
+        files[0] = solverCode;
+        
         File data = saveDataFile(project, dm, codeOutput, postponedUrgency, normalizedImportances);
-        files[0] = data;
+        files[1] = data;
         if (codeOutput) {
             // export solver code file with dependencies
             int group = project.getDependencies().getTypedDependancyCount(GroupDependency.class, Dependency.GROUP);
             Settings settings = SettingsManager.getCurrentSettings();
             File code = SolverCodeManager.saveSolverCodeFile(project, dm, settings.getResourceShifting(),
                     group > 0 ? true : false);
-            files[1] = code;
+            files[2] = code;
         }
         return files;
     }
@@ -84,7 +89,7 @@ public final class DataManager {
         //Project modDep = depMan.getModDep();
 
         File dir = ResourceManager.createDirectoryFromFile(new File(project.getStorage()));
-        File file = new File(dir, "data.dzn");
+        File file = new File(dir, "Data.dzn");
 
         try (PrintWriter pw = new PrintWriter(file)) { // try with resource: printwriter closes automatically!
             DataManager dm = new DataManager(project, depMan.getModDep(), pw);

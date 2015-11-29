@@ -269,6 +269,19 @@ public final class MainFrame extends JFrame {
             }
         });
         menu.add(item);
+        
+        item = new JMenuItem("Import Simulation Instructions");
+        item.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                try {
+                    MainFrame.this.importSimulationInstructions();
+                } catch (Throwable t) {
+                    t.printStackTrace();
+                }
+            }
+        });
+        menu.add(item);
     }
 
     private void createNewProject(boolean def) {
@@ -476,6 +489,32 @@ public final class MainFrame extends JFrame {
             if (AutotestDialog.showAutotestDialog(settings)) {
                 //am.startTesting();
                 am.generateProjects(true);
+            }
+        } catch (Exception ex) {
+            Messenger.showError(ex, null);
+        }
+
+        if (ProjectManager.getCurrentProject() != null) {
+            this.setContentPane(new TabbedView());
+        } else {
+            this.setContentPane(new JPanel());
+        }
+        this.updateEnablity();
+    }
+    
+    private void importSimulationInstructions() {
+        try {
+            FileDialog fd = new FileDialog(this, "Import instructions", FileDialog.LOAD);
+            fd.setVisible(true);
+
+            String dir = fd.getDirectory();
+            String fil = fd.getFile();
+
+            if (dir != null && fil != null) {
+                File file = new File(dir, fil);
+                
+                AutotestManager am = new AutotestManager();
+                am.generateProjects(file, true);
             }
         } catch (Exception ex) {
             Messenger.showError(ex, null);

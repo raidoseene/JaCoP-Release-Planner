@@ -447,7 +447,6 @@ public class DataGenerator {
         
         int randFeat1;
         int randFeat2 = 0;
-        int randFeatNo = 0;
         
         Dependencies dependencies = project.getDependencies();
         Features features = project.getFeatures();
@@ -467,7 +466,7 @@ public class DataGenerator {
                 randFeat2 = random.nextInt(featNo);
                 uniqueFeat = true;
 
-                if (randFeat1 == randFeatNo) {
+                if (randFeat1 == randFeat2) {
                     uniqueFeat = uniqueFeat & false;
                 } else {
                     uniqueFeat = uniqueFeat & true;

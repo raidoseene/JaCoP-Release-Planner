@@ -22,7 +22,6 @@ import ee.raidoseene.releaseplanner.datamodel.Stakeholders;
 import ee.raidoseene.releaseplanner.datamodel.Urgency;
 import ee.raidoseene.releaseplanner.datamodel.Value;
 import ee.raidoseene.releaseplanner.datamodel.ValueAndUrgency;
-import ee.raidoseene.releaseplanner.dataoutput.UrgencyManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -38,8 +37,6 @@ import org.w3c.dom.NodeList;
  * @author Raido Seene
  */
 public class ImportManager {
-
-    private static ValueAndUrgency ValueAndUrgency;
 
     public static void importProject(Project project, File file) throws Exception {
         Document doc;

@@ -53,15 +53,16 @@ public class Solver {
         Settings settings = SettingsManager.getCurrentSettings();
         
         String minizincLocation = "C:/Program Files (x86)/MiniZinc 1.6/bin/mzn2fzn.bat";
-        String outputFile = "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn";
-        String solverCode;
+        String outputFile; // = "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn";
         String dataFile;
+        String solverCode;
+        
+        outputFile = files[0].getAbsolutePath();
+        dataFile = files[1].getAbsolutePath();
         if(codeOutput) {
-            solverCode = files[1].getAbsolutePath();
-            dataFile = files[0].getAbsolutePath();
+            solverCode = files[2].getAbsolutePath();
         } else {
             solverCode = "D:/University/UT/Magistritöö/UI/Test/SolverCode.mzn";
-            dataFile = files[0].getAbsolutePath();
         }
         //String outputFile = "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn";
         //String outputFile = "D:/University/UT/Magistritöö/UI/Test/Kuchcinski.fzn";

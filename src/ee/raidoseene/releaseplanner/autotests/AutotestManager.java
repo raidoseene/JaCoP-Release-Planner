@@ -13,7 +13,11 @@ import ee.raidoseene.releaseplanner.dataoutput.DataManager;
 import ee.raidoseene.releaseplanner.gui.Messenger;
 import ee.raidoseene.releaseplanner.solverutils.Solver;
 import ee.raidoseene.releaseplanner.solverutils.SolverResult;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  *
@@ -30,25 +34,67 @@ public class AutotestManager {
     public AutotestSettings getSettings() {
         return this.settings;
     }
+    
+    private void resetSettings() {
+        this.settings = new AutotestSettings();
+    }
 
     public void generateProjects(boolean simulate) {
         Project project;
         int projNo = this.settings.getProjectNo();
         int repNo = this.settings.getRepetitionNo();
-        
-        for (int i = 0; i < projNo; i++) {
-            for(int rep = 0; rep < repNo; rep++) {
-            try {
-                //String projName = "Project " + DataGenerator.numberGenerator(i, projNo);
-                String projName = "Project " + DataGenerator.numberGenerator((i * 10) + rep, projNo * 10);
-                project = DataGenerator.generateProject(projName, this.settings, i);
-                saveProject(project);
-                if (simulate) {
-                    this.startSimulation(project);
+
+        for (int pro = 0; pro < projNo; pro++) {
+            for (int rep = 0; rep < repNo; rep++) {
+                try {
+                    //String projName = "Project " + DataGenerator.numberGenerator(i, projNo);
+                    String projName = "Project " + DataGenerator.numberGenerator((pro * repNo) + rep, projNo * repNo);
+                    project = DataGenerator.generateProject(projName, this.settings, pro);
+                    saveProject(project);
+                    if (simulate) {
+                        this.startSimulation(project);
+                    }
+                } catch (Exception ex) {
+                    Messenger.showError(ex, null);
                 }
-            } catch (Exception ex) {
-                Messenger.showError(ex, null);
             }
+        }
+    }
+
+    public void generateProjects(File file, boolean simulate) throws IOException {
+        Project project;
+        String line;
+        int projNo, repNo;
+        String ID;
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            while ((line = br.readLine()) != null) {
+                ID = InstructionReader.readSettings(this.settings, line);
+                System.out.println("No. of repetitions from settings after coming out of reading: " + settings.getRepetitionNo());
+                
+                if (ID != null) {
+                    projNo = this.settings.getProjectNo();
+                    repNo = this.settings.getRepetitionNo();
+                    
+                    System.out.println("No. of projects: " + projNo + ", No. of repetitions: " + repNo);
+                    
+                    for (int pro = 0; pro < projNo; pro++) {
+                        for (int rep = 0; rep < repNo; rep++) {
+                            try {
+                                String projName = ID + "_Project " + DataGenerator.numberGenerator((pro * repNo) + rep, projNo * repNo);
+                                project = DataGenerator.generateProject(projName, this.settings, pro);
+                                saveProject(project);
+                                if (simulate) {
+                                    this.startSimulation(project);
+                                }
+                            } catch (Exception ex) {
+                                Messenger.showError(ex, null);
+                            }
+                        }
+                    }
+                    
+                    this.resetSettings();
+                }
             }
         }
     }
@@ -74,7 +120,7 @@ public class AutotestManager {
         try {
             String dir = ResourceManager.createDirectoryFromFile(new File(ProjectManager.getCurrentProject().getStorage())).getAbsolutePath();
             DataManager.fileOutput("result", sbResult.toString(), dir);
-            
+
             dir = ResourceManager.getDirectory().toString();
             DataManager.fileOutput("results", sbTimes.toString(), dir);
         } catch (Exception ex) {
