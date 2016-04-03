@@ -52,7 +52,8 @@ public class Solver {
     public static SolverResult runSolver(Project project, DependencyManager dm, File[] files, boolean codeOutput, boolean saveOutput) throws IOException {
         Settings settings = SettingsManager.getCurrentSettings();
         
-        String minizincLocation = "C:/Program Files (x86)/MiniZinc 1.6/bin/mzn2fzn.bat";
+        String minizincLocation = "C:/Program Files (x86)/MiniZinc 2/bin/mzn2fzn.exe";
+        //String minizincLocation = "C:/Program Files (x86)/MiniZinc 1.6/bin/mzn2fzn.bat";
         String outputFile; // = "D:/University/UT/Magistritöö/UI/Test/SolverCode.fzn";
         String dataFile;
         String solverCode;
